@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zach.gasTrade.dao.DeliveryLocationHistoryDao">
+	
+	 <!-- 查询sql结果与java model映射-->
+	 <resultMap id="DeliveryLocationHistoryResultMap" type="com.zach.gasTrade.vo.DeliveryLocationHistoryVo">
+         <result property="id" column="id"/>
+         <result property="deliveryUserId" column="delivery_user_id"/>
+         <result property="longitude" column="longitude"/>
+         <result property="latitude" column="latitude"/>
+         <result property="location" column="location"/>
+         <result property="createTime" column="create_time"/>
+     </resultMap>
+
+     
+    <!-- 公用查询sql-->
+    <sql id="DeliveryLocationHistoryQuery">
+	    id ,delivery_user_id ,longitude ,latitude ,location ,create_time 
+	</sql>
+	
+	
+   <!--查询记录数-->
+   <select id="getDeliveryLocationHistoryCount" parameterType="com.zach.gasTrade.vo.DeliveryLocationHistoryVo" resultType="java.lang.Integer" >                                             
+     	<![CDATA[
+	    select count(1)
+	    from delivery_location_history
+	    ]]>
+        <where>
+	    	   <if  test="id !=null ">
+		            and id = #{id}
+		       </if>
+	    	   <if  test="deliveryUserId !=null ">
+		            and delivery_user_id = #{deliveryUserId}
+		       </if>
+	    	   <if  test="longitude !=null ">
+		            and longitude = #{longitude}
+		       </if>
+	    	   <if  test="latitude !=null ">
+		            and latitude = #{latitude}
+		       </if>
+	    	   <if  test="location !=null ">
+		            and location = #{location}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    </where>	
+   </select> 
+   
+   <select id="getDeliveryLocationHistoryList"  parameterType="com.zach.gasTrade.vo.DeliveryLocationHistoryVo" resultMap="DeliveryLocationHistoryResultMap">   
+          select                                             
+	      <include refid="DeliveryLocationHistoryQuery" />
+	      from delivery_location_history
+	      <where>
+	    	   <if  test="id !=null ">
+		            and id = #{id}
+		       </if>
+	    	   <if  test="deliveryUserId !=null ">
+		            and delivery_user_id = #{deliveryUserId}
+		       </if>
+	    	   <if  test="longitude !=null ">
+		            and longitude = #{longitude}
+		       </if>
+	    	   <if  test="latitude !=null ">
+		            and latitude = #{latitude}
+		       </if>
+	    	   <if  test="location !=null ">
+		            and location = #{location}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    </where>
+     </select>
+   
+     <select id="getDeliveryLocationHistoryPage"  parameterType="com.zach.gasTrade.vo.DeliveryLocationHistoryVo" resultMap="DeliveryLocationHistoryResultMap">   
+          select                                             
+	      <include refid="DeliveryLocationHistoryQuery" />
+	      from delivery_location_history
+	      <where>
+	    	   <if  test="id !=null ">
+		            and id = #{id}
+		       </if>
+	    	   <if  test="deliveryUserId !=null ">
+		            and delivery_user_id = #{deliveryUserId}
+		       </if>
+	    	   <if  test="longitude !=null ">
+		            and longitude = #{longitude}
+		       </if>
+	    	   <if  test="latitude !=null ">
+		            and latitude = #{latitude}
+		       </if>
+	    	   <if  test="location !=null ">
+		            and location = #{location}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    </where>
+	    order by update_time
+	    limit #{startIndex},#{pageSize}
+     </select>
+     
+     <select id="getDeliveryLocationHistoryBySelective"  parameterType="com.zach.gasTrade.vo.DeliveryLocationHistoryVo" resultMap="DeliveryLocationHistoryResultMap">   
+          select                                             
+	      <include refid="DeliveryLocationHistoryQuery" />
+	      from delivery_location_history
+	      <where>
+	    	   <if  test="id !=null ">
+		            and id = #{id}
+		       </if>
+	    	   <if  test="deliveryUserId !=null ">
+		            and delivery_user_id = #{deliveryUserId}
+		       </if>
+	    	   <if  test="longitude !=null ">
+		            and longitude = #{longitude}
+		       </if>
+	    	   <if  test="latitude !=null ">
+		            and latitude = #{latitude}
+		       </if>
+	    	   <if  test="location !=null ">
+		            and location = #{location}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    </where>
+     </select>
+     
+    <!-- 删除 -->
+    <delete id="delete" parameterType="com.zach.gasTrade.vo.DeliveryLocationHistoryVo">
+    	<![CDATA[
+	        DELETE FROM delivery_location_history WHERE
+		        id = #{id}    
+    	]]>
+    </delete>
+    
+     <!-- 修改 -->
+    <update id="update"  parameterType="com.zach.gasTrade.vo.DeliveryLocationHistoryVo">
+        UPDATE delivery_location_history SET
+        	<if test="deliveryUserId !=null "> 
+        	delivery_user_id = #{deliveryUserId} ,
+        	</if> 
+        	<if test="longitude !=null "> 
+        	longitude = #{longitude} ,
+        	</if> 
+        	<if test="latitude !=null "> 
+        	latitude = #{latitude} ,
+        	</if> 
+        	<if test="location !=null "> 
+        	location = #{location} ,
+        	</if> 
+        	<if test="createTime !=null "> 
+        	create_time = #{createTime} 
+        	</if> 
+        WHERE 
+        	id = #{id} 
+    </update>
+    
+    <!-- 保存 -->
+     <insert id="save" parameterType="com.zach.gasTrade.vo.DeliveryLocationHistoryVo" >
+        INSERT INTO delivery_location_history (
+	        <if test="id !=null ">
+	        	id ,
+	        </if>	
+	        <if test="deliveryUserId !=null ">
+	        	delivery_user_id ,
+	        </if>	
+	        <if test="longitude !=null ">
+	        	longitude ,
+	        </if>	
+	        <if test="latitude !=null ">
+	        	latitude ,
+	        </if>	
+	        <if test="location !=null ">
+	        	location ,
+	        </if>	
+	        <if test="createTime !=null ">
+	        	create_time 
+	        </if>	
+        ) VALUES (
+	        <if test="id !=null ">
+	        	#{id} ,
+	        </if>	
+	        <if test="deliveryUserId !=null ">
+	        	#{deliveryUserId} ,
+	        </if>	
+	        <if test="longitude !=null ">
+	        	#{longitude} ,
+	        </if>	
+	        <if test="latitude !=null ">
+	        	#{latitude} ,
+	        </if>	
+	        <if test="location !=null ">
+	        	#{location} ,
+	        </if>	
+	        <if test="createTime !=null ">
+	        	#{createTime} 
+	        </if>	
+        )
+   </insert>
+</mapper>
+

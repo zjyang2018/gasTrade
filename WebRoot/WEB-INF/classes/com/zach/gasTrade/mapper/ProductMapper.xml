@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zach.gasTrade.dao.ProductDao">
+	
+	 <!-- 查询sql结果与java model映射-->
+	 <resultMap id="ProductResultMap" type="com.zach.gasTrade.vo.ProductVo">
+         <result property="productId" column="product_id"/>
+         <result property="productName" column="product_name"/>
+         <result property="amount" column="amount"/>
+         <result property="spec" column="spec"/>
+         <result property="productDesc" column="product_desc"/>
+         <result property="imagePath" column="image_path"/>
+         <result property="stockQty" column="stock_qty"/>
+         <result property="status" column="status"/>
+         <result property="updateTime" column="update_time"/>
+         <result property="updateUserId" column="update_user_id"/>
+         <result property="createTime" column="create_time"/>
+         <result property="createUserId" column="create_user_id"/>
+     </resultMap>
+
+     
+    <!-- 公用查询sql-->
+    <sql id="ProductQuery">
+	    product_id ,product_name ,amount ,spec ,product_desc ,image_path ,stock_qty ,status ,update_time ,update_user_id ,create_time ,create_user_id 
+	</sql>
+	
+	
+   <!--查询记录数-->
+   <select id="getProductCount" parameterType="com.zach.gasTrade.vo.ProductVo" resultType="java.lang.Integer" >                                             
+     	<![CDATA[
+	    select count(1)
+	    from product
+	    ]]>
+        <where>
+	    	   <if  test="productId !=null ">
+		            and product_id = #{productId}
+		       </if>
+	    	   <if  test="productName !=null ">
+		            and product_name = #{productName}
+		       </if>
+	    	   <if  test="amount !=null ">
+		            and amount = #{amount}
+		       </if>
+	    	   <if  test="spec !=null ">
+		            and spec = #{spec}
+		       </if>
+	    	   <if  test="productDesc !=null ">
+		            and product_desc = #{productDesc}
+		       </if>
+	    	   <if  test="imagePath !=null ">
+		            and image_path = #{imagePath}
+		       </if>
+	    	   <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
+		       </if>
+	    	   <if  test="status !=null ">
+		            and status = #{status}
+		       </if>
+	    	   <if  test="updateTime !=null ">
+		            and update_time = #{updateTime}
+		       </if>
+	    	   <if  test="updateUserId !=null ">
+		            and update_user_id = #{updateUserId}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    	   <if  test="createUserId !=null ">
+		            and create_user_id = #{createUserId}
+		       </if>
+	    </where>	
+   </select> 
+   
+   <select id="getProductList"  parameterType="com.zach.gasTrade.vo.ProductVo" resultMap="ProductResultMap">   
+          select                                             
+	      <include refid="ProductQuery" />
+	      from product
+	      <where>
+	    	   <if  test="productId !=null ">
+		            and product_id = #{productId}
+		       </if>
+	    	   <if  test="productName !=null ">
+		            and product_name = #{productName}
+		       </if>
+	    	   <if  test="amount !=null ">
+		            and amount = #{amount}
+		       </if>
+	    	   <if  test="spec !=null ">
+		            and spec = #{spec}
+		       </if>
+	    	   <if  test="productDesc !=null ">
+		            and product_desc = #{productDesc}
+		       </if>
+	    	   <if  test="imagePath !=null ">
+		            and image_path = #{imagePath}
+		       </if>
+	    	   <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
+		       </if>
+	    	   <if  test="status !=null ">
+		            and status = #{status}
+		       </if>
+	    	   <if  test="updateTime !=null ">
+		            and update_time = #{updateTime}
+		       </if>
+	    	   <if  test="updateUserId !=null ">
+		            and update_user_id = #{updateUserId}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    	   <if  test="createUserId !=null ">
+		            and create_user_id = #{createUserId}
+		       </if>
+	    </where>
+     </select>
+   
+     <select id="getProductPage"  parameterType="com.zach.gasTrade.vo.ProductVo" resultMap="ProductResultMap">   
+          select                                             
+	      <include refid="ProductQuery" />
+	      from product
+	      <where>
+	    	   <if  test="productId !=null ">
+		            and product_id = #{productId}
+		       </if>
+	    	   <if  test="productName !=null ">
+		            and product_name = #{productName}
+		       </if>
+	    	   <if  test="amount !=null ">
+		            and amount = #{amount}
+		       </if>
+	    	   <if  test="spec !=null ">
+		            and spec = #{spec}
+		       </if>
+	    	   <if  test="productDesc !=null ">
+		            and product_desc = #{productDesc}
+		       </if>
+	    	   <if  test="imagePath !=null ">
+		            and image_path = #{imagePath}
+		       </if>
+	    	   <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
+		       </if>
+	    	   <if  test="status !=null ">
+		            and status = #{status}
+		       </if>
+	    	   <if  test="updateTime !=null ">
+		            and update_time = #{updateTime}
+		       </if>
+	    	   <if  test="updateUserId !=null ">
+		            and update_user_id = #{updateUserId}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    	   <if  test="createUserId !=null ">
+		            and create_user_id = #{createUserId}
+		       </if>
+	    </where>
+	    order by update_time
+	    limit #{startIndex},#{pageSize}
+     </select>
+     
+     <select id="getProductBySelective"  parameterType="com.zach.gasTrade.vo.ProductVo" resultMap="ProductResultMap">   
+          select                                             
+	      <include refid="ProductQuery" />
+	      from product
+	      <where>
+	    	   <if  test="productId !=null ">
+		            and product_id = #{productId}
+		       </if>
+	    	   <if  test="productName !=null ">
+		            and product_name = #{productName}
+		       </if>
+	    	   <if  test="amount !=null ">
+		            and amount = #{amount}
+		       </if>
+	    	   <if  test="spec !=null ">
+		            and spec = #{spec}
+		       </if>
+	    	   <if  test="productDesc !=null ">
+		            and product_desc = #{productDesc}
+		       </if>
+	    	   <if  test="imagePath !=null ">
+		            and image_path = #{imagePath}
+		       </if>
+	    	   <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
+		       </if>
+	    	   <if  test="status !=null ">
+		            and status = #{status}
+		       </if>
+	    	   <if  test="updateTime !=null ">
+		            and update_time = #{updateTime}
+		       </if>
+	    	   <if  test="updateUserId !=null ">
+		            and update_user_id = #{updateUserId}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    	   <if  test="createUserId !=null ">
+		            and create_user_id = #{createUserId}
+		       </if>
+	    </where>
+     </select>
+     
+    <!-- 删除 -->
+    <delete id="delete" parameterType="com.zach.gasTrade.vo.ProductVo">
+    	<![CDATA[
+	        DELETE FROM product WHERE
+		        product_id = #{productId}    
+    	]]>
+    </delete>
+    
+     <!-- 修改 -->
+    <update id="update"  parameterType="com.zach.gasTrade.vo.ProductVo">
+        UPDATE product SET
+        	<if test="productName !=null "> 
+        	product_name = #{productName} ,
+        	</if> 
+        	<if test="amount !=null "> 
+        	amount = #{amount} ,
+        	</if> 
+        	<if test="spec !=null "> 
+        	spec = #{spec} ,
+        	</if> 
+        	<if test="productDesc !=null "> 
+        	product_desc = #{productDesc} ,
+        	</if> 
+        	<if test="imagePath !=null "> 
+        	image_path = #{imagePath} ,
+        	</if> 
+        	<if test="stockQty !=null "> 
+        	stock_qty = #{stockQty} ,
+        	</if> 
+        	<if test="status !=null "> 
+        	status = #{status} ,
+        	</if> 
+        	<if test="updateTime !=null "> 
+        	update_time = #{updateTime} ,
+        	</if> 
+        	<if test="updateUserId !=null "> 
+        	update_user_id = #{updateUserId} ,
+        	</if> 
+        	<if test="createTime !=null "> 
+        	create_time = #{createTime} ,
+        	</if> 
+        	<if test="createUserId !=null "> 
+        	create_user_id = #{createUserId} 
+        	</if> 
+        WHERE 
+        	product_id = #{productId} 
+    </update>
+    
+    <!-- 保存 -->
+     <insert id="save" parameterType="com.zach.gasTrade.vo.ProductVo" >
+        INSERT INTO product (
+	        <if test="productId !=null ">
+	        	product_id ,
+	        </if>	
+	        <if test="productName !=null ">
+	        	product_name ,
+	        </if>	
+	        <if test="amount !=null ">
+	        	amount ,
+	        </if>	
+	        <if test="spec !=null ">
+	        	spec ,
+	        </if>	
+	        <if test="productDesc !=null ">
+	        	product_desc ,
+	        </if>	
+	        <if test="imagePath !=null ">
+	        	image_path ,
+	        </if>	
+	        <if test="stockQty !=null ">
+	        	stock_qty ,
+	        </if>	
+	        <if test="status !=null ">
+	        	status ,
+	        </if>	
+	        <if test="updateTime !=null ">
+	        	update_time ,
+	        </if>	
+	        <if test="updateUserId !=null ">
+	        	update_user_id ,
+	        </if>	
+	        <if test="createTime !=null ">
+	        	create_time ,
+	        </if>	
+	        <if test="createUserId !=null ">
+	        	create_user_id 
+	        </if>	
+        ) VALUES (
+	        <if test="productId !=null ">
+	        	#{productId} ,
+	        </if>	
+	        <if test="productName !=null ">
+	        	#{productName} ,
+	        </if>	
+	        <if test="amount !=null ">
+	        	#{amount} ,
+	        </if>	
+	        <if test="spec !=null ">
+	        	#{spec} ,
+	        </if>	
+	        <if test="productDesc !=null ">
+	        	#{productDesc} ,
+	        </if>	
+	        <if test="imagePath !=null ">
+	        	#{imagePath} ,
+	        </if>	
+	        <if test="stockQty !=null ">
+	        	#{stockQty} ,
+	        </if>	
+	        <if test="status !=null ">
+	        	#{status} ,
+	        </if>	
+	        <if test="updateTime !=null ">
+	        	#{updateTime} ,
+	        </if>	
+	        <if test="updateUserId !=null ">
+	        	#{updateUserId} ,
+	        </if>	
+	        <if test="createTime !=null ">
+	        	#{createTime} ,
+	        </if>	
+	        <if test="createUserId !=null ">
+	        	#{createUserId} 
+	        </if>	
+        )
+   </insert>
+</mapper>
+

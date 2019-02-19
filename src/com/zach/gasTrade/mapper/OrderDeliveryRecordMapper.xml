@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zach.gasTrade.dao.OrderDeliveryRecordDao">
+	
+	 <!-- 查询sql结果与java model映射-->
+	 <resultMap id="OrderDeliveryRecordResultMap" type="com.zach.gasTrade.vo.OrderDeliveryRecordVo">
+         <result property="id" column="id"/>
+         <result property="orderId" column="order_id"/>
+         <result property="allotTime" column="allot_time"/>
+         <result property="allotDesc" column="allot_desc"/>
+         <result property="acceptTime" column="accept_time"/>
+         <result property="acceptDesc" column="accept_desc"/>
+         <result property="deliveryTime" column="delivery_time"/>
+         <result property="deliveryDesc" column="delivery_desc"/>
+         <result property="completeTime" column="complete_time"/>
+         <result property="completeDesc" column="complete_desc"/>
+         <result property="startLocation" column="start_location"/>
+         <result property="endLocation" column="end_location"/>
+         <result property="moveLocation" column="move_location"/>
+         <result property="createTime" column="create_time"/>
+     </resultMap>
+
+     
+    <!-- 公用查询sql-->
+    <sql id="OrderDeliveryRecordQuery">
+	    id ,order_id ,allot_time ,allot_desc ,accept_time ,accept_desc ,delivery_time ,delivery_desc ,complete_time ,complete_desc ,start_location ,end_location ,move_location ,create_time 
+	</sql>
+	
+	
+   <!--查询记录数-->
+   <select id="getOrderDeliveryRecordCount" parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" resultType="java.lang.Integer" >                                             
+     	<![CDATA[
+	    select count(1)
+	    from order_delivery_record
+	    ]]>
+        <where>
+	    	   <if  test="id !=null ">
+		            and id = #{id}
+		       </if>
+	    	   <if  test="orderId !=null ">
+		            and order_id = #{orderId}
+		       </if>
+	    	   <if  test="allotTime !=null ">
+		            and allot_time = #{allotTime}
+		       </if>
+	    	   <if  test="allotDesc !=null ">
+		            and allot_desc = #{allotDesc}
+		       </if>
+	    	   <if  test="acceptTime !=null ">
+		            and accept_time = #{acceptTime}
+		       </if>
+	    	   <if  test="acceptDesc !=null ">
+		            and accept_desc = #{acceptDesc}
+		       </if>
+	    	   <if  test="deliveryTime !=null ">
+		            and delivery_time = #{deliveryTime}
+		       </if>
+	    	   <if  test="deliveryDesc !=null ">
+		            and delivery_desc = #{deliveryDesc}
+		       </if>
+	    	   <if  test="completeTime !=null ">
+		            and complete_time = #{completeTime}
+		       </if>
+	    	   <if  test="completeDesc !=null ">
+		            and complete_desc = #{completeDesc}
+		       </if>
+	    	   <if  test="startLocation !=null ">
+		            and start_location = #{startLocation}
+		       </if>
+	    	   <if  test="endLocation !=null ">
+		            and end_location = #{endLocation}
+		       </if>
+	    	   <if  test="moveLocation !=null ">
+		            and move_location = #{moveLocation}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    </where>	
+   </select> 
+   
+   <select id="getOrderDeliveryRecordList"  parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" resultMap="OrderDeliveryRecordResultMap">   
+          select                                             
+	      <include refid="OrderDeliveryRecordQuery" />
+	      from order_delivery_record
+	      <where>
+	    	   <if  test="id !=null ">
+		            and id = #{id}
+		       </if>
+	    	   <if  test="orderId !=null ">
+		            and order_id = #{orderId}
+		       </if>
+	    	   <if  test="allotTime !=null ">
+		            and allot_time = #{allotTime}
+		       </if>
+	    	   <if  test="allotDesc !=null ">
+		            and allot_desc = #{allotDesc}
+		       </if>
+	    	   <if  test="acceptTime !=null ">
+		            and accept_time = #{acceptTime}
+		       </if>
+	    	   <if  test="acceptDesc !=null ">
+		            and accept_desc = #{acceptDesc}
+		       </if>
+	    	   <if  test="deliveryTime !=null ">
+		            and delivery_time = #{deliveryTime}
+		       </if>
+	    	   <if  test="deliveryDesc !=null ">
+		            and delivery_desc = #{deliveryDesc}
+		       </if>
+	    	   <if  test="completeTime !=null ">
+		            and complete_time = #{completeTime}
+		       </if>
+	    	   <if  test="completeDesc !=null ">
+		            and complete_desc = #{completeDesc}
+		       </if>
+	    	   <if  test="startLocation !=null ">
+		            and start_location = #{startLocation}
+		       </if>
+	    	   <if  test="endLocation !=null ">
+		            and end_location = #{endLocation}
+		       </if>
+	    	   <if  test="moveLocation !=null ">
+		            and move_location = #{moveLocation}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    </where>
+     </select>
+   
+     <select id="getOrderDeliveryRecordPage"  parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" resultMap="OrderDeliveryRecordResultMap">   
+          select                                             
+	      <include refid="OrderDeliveryRecordQuery" />
+	      from order_delivery_record
+	      <where>
+	    	   <if  test="id !=null ">
+		            and id = #{id}
+		       </if>
+	    	   <if  test="orderId !=null ">
+		            and order_id = #{orderId}
+		       </if>
+	    	   <if  test="allotTime !=null ">
+		            and allot_time = #{allotTime}
+		       </if>
+	    	   <if  test="allotDesc !=null ">
+		            and allot_desc = #{allotDesc}
+		       </if>
+	    	   <if  test="acceptTime !=null ">
+		            and accept_time = #{acceptTime}
+		       </if>
+	    	   <if  test="acceptDesc !=null ">
+		            and accept_desc = #{acceptDesc}
+		       </if>
+	    	   <if  test="deliveryTime !=null ">
+		            and delivery_time = #{deliveryTime}
+		       </if>
+	    	   <if  test="deliveryDesc !=null ">
+		            and delivery_desc = #{deliveryDesc}
+		       </if>
+	    	   <if  test="completeTime !=null ">
+		            and complete_time = #{completeTime}
+		       </if>
+	    	   <if  test="completeDesc !=null ">
+		            and complete_desc = #{completeDesc}
+		       </if>
+	    	   <if  test="startLocation !=null ">
+		            and start_location = #{startLocation}
+		       </if>
+	    	   <if  test="endLocation !=null ">
+		            and end_location = #{endLocation}
+		       </if>
+	    	   <if  test="moveLocation !=null ">
+		            and move_location = #{moveLocation}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    </where>
+	    order by update_time
+	    limit #{startIndex},#{pageSize}
+     </select>
+     
+     <select id="getOrderDeliveryRecordBySelective"  parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" resultMap="OrderDeliveryRecordResultMap">   
+          select                                             
+	      <include refid="OrderDeliveryRecordQuery" />
+	      from order_delivery_record
+	      <where>
+	    	   <if  test="id !=null ">
+		            and id = #{id}
+		       </if>
+	    	   <if  test="orderId !=null ">
+		            and order_id = #{orderId}
+		       </if>
+	    	   <if  test="allotTime !=null ">
+		            and allot_time = #{allotTime}
+		       </if>
+	    	   <if  test="allotDesc !=null ">
+		            and allot_desc = #{allotDesc}
+		       </if>
+	    	   <if  test="acceptTime !=null ">
+		            and accept_time = #{acceptTime}
+		       </if>
+	    	   <if  test="acceptDesc !=null ">
+		            and accept_desc = #{acceptDesc}
+		       </if>
+	    	   <if  test="deliveryTime !=null ">
+		            and delivery_time = #{deliveryTime}
+		       </if>
+	    	   <if  test="deliveryDesc !=null ">
+		            and delivery_desc = #{deliveryDesc}
+		       </if>
+	    	   <if  test="completeTime !=null ">
+		            and complete_time = #{completeTime}
+		       </if>
+	    	   <if  test="completeDesc !=null ">
+		            and complete_desc = #{completeDesc}
+		       </if>
+	    	   <if  test="startLocation !=null ">
+		            and start_location = #{startLocation}
+		       </if>
+	    	   <if  test="endLocation !=null ">
+		            and end_location = #{endLocation}
+		       </if>
+	    	   <if  test="moveLocation !=null ">
+		            and move_location = #{moveLocation}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    </where>
+     </select>
+     
+    <!-- 删除 -->
+    <delete id="delete" parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo">
+    	<![CDATA[
+	        DELETE FROM order_delivery_record WHERE
+		        id = #{id}    
+    	]]>
+    </delete>
+    
+     <!-- 修改 -->
+    <update id="update"  parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo">
+        UPDATE order_delivery_record SET
+        	<if test="orderId !=null "> 
+        	order_id = #{orderId} ,
+        	</if> 
+        	<if test="allotTime !=null "> 
+        	allot_time = #{allotTime} ,
+        	</if> 
+        	<if test="allotDesc !=null "> 
+        	allot_desc = #{allotDesc} ,
+        	</if> 
+        	<if test="acceptTime !=null "> 
+        	accept_time = #{acceptTime} ,
+        	</if> 
+        	<if test="acceptDesc !=null "> 
+        	accept_desc = #{acceptDesc} ,
+        	</if> 
+        	<if test="deliveryTime !=null "> 
+        	delivery_time = #{deliveryTime} ,
+        	</if> 
+        	<if test="deliveryDesc !=null "> 
+        	delivery_desc = #{deliveryDesc} ,
+        	</if> 
+        	<if test="completeTime !=null "> 
+        	complete_time = #{completeTime} ,
+        	</if> 
+        	<if test="completeDesc !=null "> 
+        	complete_desc = #{completeDesc} ,
+        	</if> 
+        	<if test="startLocation !=null "> 
+        	start_location = #{startLocation} ,
+        	</if> 
+        	<if test="endLocation !=null "> 
+        	end_location = #{endLocation} ,
+        	</if> 
+        	<if test="moveLocation !=null "> 
+        	move_location = #{moveLocation} ,
+        	</if> 
+        	<if test="createTime !=null "> 
+        	create_time = #{createTime} 
+        	</if> 
+        WHERE 
+        	id = #{id} 
+    </update>
+    
+    <!-- 保存 -->
+     <insert id="save" parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" >
+        INSERT INTO order_delivery_record (
+	        <if test="id !=null ">
+	        	id ,
+	        </if>	
+	        <if test="orderId !=null ">
+	        	order_id ,
+	        </if>	
+	        <if test="allotTime !=null ">
+	        	allot_time ,
+	        </if>	
+	        <if test="allotDesc !=null ">
+	        	allot_desc ,
+	        </if>	
+	        <if test="acceptTime !=null ">
+	        	accept_time ,
+	        </if>	
+	        <if test="acceptDesc !=null ">
+	        	accept_desc ,
+	        </if>	
+	        <if test="deliveryTime !=null ">
+	        	delivery_time ,
+	        </if>	
+	        <if test="deliveryDesc !=null ">
+	        	delivery_desc ,
+	        </if>	
+	        <if test="completeTime !=null ">
+	        	complete_time ,
+	        </if>	
+	        <if test="completeDesc !=null ">
+	        	complete_desc ,
+	        </if>	
+	        <if test="startLocation !=null ">
+	        	start_location ,
+	        </if>	
+	        <if test="endLocation !=null ">
+	        	end_location ,
+	        </if>	
+	        <if test="moveLocation !=null ">
+	        	move_location ,
+	        </if>	
+	        <if test="createTime !=null ">
+	        	create_time 
+	        </if>	
+        ) VALUES (
+	        <if test="id !=null ">
+	        	#{id} ,
+	        </if>	
+	        <if test="orderId !=null ">
+	        	#{orderId} ,
+	        </if>	
+	        <if test="allotTime !=null ">
+	        	#{allotTime} ,
+	        </if>	
+	        <if test="allotDesc !=null ">
+	        	#{allotDesc} ,
+	        </if>	
+	        <if test="acceptTime !=null ">
+	        	#{acceptTime} ,
+	        </if>	
+	        <if test="acceptDesc !=null ">
+	        	#{acceptDesc} ,
+	        </if>	
+	        <if test="deliveryTime !=null ">
+	        	#{deliveryTime} ,
+	        </if>	
+	        <if test="deliveryDesc !=null ">
+	        	#{deliveryDesc} ,
+	        </if>	
+	        <if test="completeTime !=null ">
+	        	#{completeTime} ,
+	        </if>	
+	        <if test="completeDesc !=null ">
+	        	#{completeDesc} ,
+	        </if>	
+	        <if test="startLocation !=null ">
+	        	#{startLocation} ,
+	        </if>	
+	        <if test="endLocation !=null ">
+	        	#{endLocation} ,
+	        </if>	
+	        <if test="moveLocation !=null ">
+	        	#{moveLocation} ,
+	        </if>	
+	        <if test="createTime !=null ">
+	        	#{createTime} 
+	        </if>	
+        )
+   </insert>
+</mapper>
+

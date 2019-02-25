@@ -69,6 +69,9 @@ public class CustomerUserServiceImpl implements CustomerUserService{
     	Date nowTime = new Date();
     	customerUserVo.setId(id);
     	// TODO wx_open_id、longitude、latitude
+    	customerUserVo.setWxOpenId("");
+    	customerUserVo.setLongitude("");
+    	customerUserVo.setLatitude("");
     	customerUserVo.setCreateTime(nowTime);
     	customerUserVo.setUpdateTime(nowTime);
     	

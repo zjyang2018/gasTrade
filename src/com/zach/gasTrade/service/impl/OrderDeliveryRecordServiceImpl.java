@@ -7,17 +7,18 @@
 package com.zach.gasTrade.service.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
+import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.dao.OrderDeliveryRecordDao;
+import com.zach.gasTrade.dto.DeliveryMonitorDto;
+import com.zach.gasTrade.dto.OrderDeliveryCountDto;
 import com.zach.gasTrade.service.OrderDeliveryRecordService;
+import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
 
 
 @Service("orderDeliveryRecordService")
@@ -26,32 +27,23 @@ public class OrderDeliveryRecordServiceImpl implements OrderDeliveryRecordServic
 	@Autowired
 	private OrderDeliveryRecordDao orderDeliveryRecordDao;
 	
-	 /**
-     * 总数
+	/**
+     * 派送监控总数
      * @param orderDeliveryRecordVo
      * @return
      */
-    public int getOrderDeliveryRecordCount(OrderDeliveryRecordVo orderDeliveryRecordVo){
-    	return orderDeliveryRecordDao.getOrderDeliveryRecordCount(orderDeliveryRecordVo);
-    }
-    
-    /**
-     * 分页列表
-     * @param orderDeliveryRecordVo
-     * @return
-     */
-	 public List<OrderDeliveryRecordVo> getOrderDeliveryRecordPage(OrderDeliveryRecordVo orderDeliveryRecordVo){
-		 return orderDeliveryRecordDao.getOrderDeliveryRecordPage(orderDeliveryRecordVo);
+	 public int getDeliveryMonitorCount(OrderDeliveryRecordVo orderDeliveryRecordVo) {
+		 return orderDeliveryRecordDao.getDeliveryMonitorCount(orderDeliveryRecordVo);
 	 }
-
-    /**
-     * 列表
+	 	 
+	 /**
+     * 派送监控分页列表
      * @param orderDeliveryRecordVo
      * @return
      */
-    public List<OrderDeliveryRecordVo> getOrderDeliveryRecordList(OrderDeliveryRecordVo orderDeliveryRecordVo){
-    	return orderDeliveryRecordDao.getOrderDeliveryRecordList(orderDeliveryRecordVo);
-    }
+	 public List<DeliveryMonitorDto> getDeliveryMonitorPage(OrderDeliveryRecordVo orderDeliveryRecordVo) {
+		 return orderDeliveryRecordDao.getDeliveryMonitorPage(orderDeliveryRecordVo);
+	 }
     
     /**
      * 根据条件查询一条信息
@@ -67,6 +59,17 @@ public class OrderDeliveryRecordServiceImpl implements OrderDeliveryRecordServic
 	 * @param orderDeliveryRecordVo
 	 */
     public int save(OrderDeliveryRecordVo orderDeliveryRecordVo){
+    	String id = SerialGenerator.getUUID();
+    	Date nowTime = new Date();
+    	orderDeliveryRecordVo.setId(id);
+    	orderDeliveryRecordVo.setAcceptTime(null);
+    	orderDeliveryRecordVo.setAcceptDesc("");
+    	orderDeliveryRecordVo.setDeliveryTime(null);
+    	orderDeliveryRecordVo.setDeliveryDesc("");
+    	orderDeliveryRecordVo.setCompleteTime(null);
+    	orderDeliveryRecordVo.setCompleteDesc("");
+    	orderDeliveryRecordVo.setEndLocation("");
+    	orderDeliveryRecordVo.setCreateTime(nowTime);
     	
     	return orderDeliveryRecordDao.save(orderDeliveryRecordVo);
     }
@@ -86,6 +89,24 @@ public class OrderDeliveryRecordServiceImpl implements OrderDeliveryRecordServic
     public int delete(OrderDeliveryRecordVo orderDeliveryRecordVo){
     	return orderDeliveryRecordDao.delete(orderDeliveryRecordVo);
     }
+    
+    /**
+     * 派送统计总数
+     * @param map
+     * @return
+     */
+	 public int getDeliveryUserCount(Map<String, Object> map) {
+		 return orderDeliveryRecordDao.getDeliveryUserCount(map);
+	 }
+	 
+	 /**
+     * 派送统计分页列表
+     * @param map
+     * @return
+     */
+	 public List<OrderDeliveryCountDto> getOrderDeliveryPage(Map<String, Object> map) {
+		 return orderDeliveryRecordDao.getOrderDeliveryPage(map);
+	 }
 	
 	
 }

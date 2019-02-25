@@ -6,144 +6,95 @@
 
 package com.zach.gasTrade.controller;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONObject;
-import com.zach.gasTrade.vo.OrderFinanceStatisticsVo;
+import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.PageResult;
+import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.OrderFinanceStatisticsService;
+import com.zach.gasTrade.vo.OrderFinanceStatisticsVo;
 
 
 @Controller
 public class OrderFinanceStatisticsController {
+private Logger logger = Logger.getLogger(getClass());
+	
 	@Autowired
 	private OrderFinanceStatisticsService orderFinanceStatisticsService;
-	
-	
+		
 	/**
-	 * 进入主页面
+	 * 分页列表  + 搜索
+	 * @param request
 	 * @param filterMask
-	 * @param model
-	 * @param request
-	 * @param response
-	 * @return
+	 * @return PageResult
 	 */
-	@RequestMapping(value = "/orderFinanceStatistics/main", method = RequestMethod.GET)
-	String mainPage(OrderFinanceStatisticsVo filterMask,Model model,HttpServletRequest request, HttpServletResponse response)
-	{ 
-		model.addAttribute("filterMask", filterMask);
-		return "OrderFinanceStatistics/main";
-	}
-	
-	/**
-	 * table 列表
-	 * @param request
-	 * @param response
-	 * @param OrderFinanceStatisticsVo
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/orderFinanceStatistics/query")
-    public void getJsonDataGrid(HttpServletRequest request,
-	    HttpServletResponse response,OrderFinanceStatisticsVo filterMask) throws Exception {
-	List<OrderFinanceStatisticsVo> list = new ArrayList<OrderFinanceStatisticsVo>();
-	int total = orderFinanceStatisticsService.getOrderFinanceStatisticsCount(filterMask);
-	list = orderFinanceStatisticsService.getOrderFinanceStatisticsList(filterMask);
-	PrintWriter write = response.getWriter();
-	
-	Map map=new HashMap();
-	map.put("total", total);
-	map.put("rows",  list);
-
-	write.write(JSONObject.toJSONString(map));
-	write.flush();
-	write.close();
+	@RequestMapping(value = "/orderFinanceStatistics/query_page",method = RequestMethod.POST)
+	@ResponseBody
+    public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String,String> param, OrderFinanceStatisticsVo filterMask) {
+		PageResult result=PageResult.initResult();
+		
+		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+		String searchDate = param.get("searchDate");
+		String date = searchDate + "%";
+		filterMask.setDate(date);
+		filterMask.setPage(pageNum);
+		filterMask.setPageSize(pageSize);
+		try{
+			int total = orderFinanceStatisticsService.getOrderFinanceStatisticsCount(filterMask);
+			List<OrderFinanceStatisticsVo> list = orderFinanceStatisticsService.getOrderFinanceStatisticsPage(filterMask);
+			
+			result.setAllCount(total);
+			result.setPageNum(pageNum);
+			result.setPageSize(pageSize);
+			result.setData(list);
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
     }
-
-	/**
-	 * 进入新增页面
-	 * @param filterMask
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/orderFinanceStatistics/newPage", method = RequestMethod.POST)
-	String NewPage(OrderFinanceStatisticsVo filterMask,Model model)
-	{
-		model.addAttribute("filterMask", filterMask);
-		return "OrderFinanceStatistics/new";
-	}
 	
 	/**
 	 * 新增
-	 * @param country
-	 * @param result
-	 * @return
-	 */
-	@RequestMapping(value = "/orderFinanceStatistics/save")
-	@Transactional
-	public String save(HttpServletRequest request,Model model,
-			    HttpServletResponse response,OrderFinanceStatisticsVo filterMask) throws Exception {
-			//保存
-		    orderFinanceStatisticsService.save(filterMask);
-		    model.addAttribute("filterMask", new OrderFinanceStatisticsVo());
-			return "OrderFinanceStatistics/main";
-
-	}
-	
-	/**
-	 * 进入修改页面
+	 * @param request
 	 * @param filterMask
-	 * @param model
-	 * @return
+	 * @return Result
 	 */
-	@RequestMapping(value = "/orderFinanceStatistics/editPage", method = RequestMethod.POST)	
-    public String  editPage(OrderFinanceStatisticsVo filterMask,Model model) throws Exception{
-	model.addAttribute("filterMask", filterMask);
-	return "OrderFinanceStatistics/edit";
-    }
-	
-	
-	/**
-	 * 修改
-	 * @param country
-	 * @param result
-	 * @return
-	 */
-	 @RequestMapping(value = "/orderFinanceStatistics/edit")
-	    @Transactional
-	    public String edit(HttpServletRequest request,Model model,
-		    HttpServletResponse response,OrderFinanceStatisticsVo filterMask) throws Exception {
-		
-		 orderFinanceStatisticsService.update(filterMask);
-		 model.addAttribute("filterMask", new OrderFinanceStatisticsVo());
-		 return "OrderFinanceStatistics/main";
-	    }
-	
-	 
-	/**
-	 * 删除
-	 * @return
-	 */
-	@RequestMapping(value = "/orderFinanceStatistics/delete")
-	@Transactional
-	public void delete(OrderFinanceStatisticsVo filterMask,HttpServletRequest request, HttpServletResponse response)throws Exception
-	{
-		orderFinanceStatisticsService.delete(filterMask);
-		PrintWriter write = response.getWriter();
-		write.write("SUCC");
-		write.flush();
-		write.close();
+	@RequestMapping(value = "/orderFinanceStatistics/save",method = RequestMethod.POST)
+	@ResponseBody
+	public Result save(HttpServletRequest request,@RequestBody OrderFinanceStatisticsVo filterMask) {
+		Result result = Result.initResult();
+				
+		try{			
+			orderFinanceStatisticsService.save(filterMask);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
 	}
+
 }

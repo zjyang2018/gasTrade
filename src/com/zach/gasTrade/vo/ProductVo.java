@@ -6,10 +6,10 @@
 
 package com.zach.gasTrade.vo;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
-import javax.persistence.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.zach.gasTrade.common.PaginatedHelper;
 
 
@@ -42,6 +42,10 @@ public class ProductVo extends PaginatedHelper implements java.io.Serializable{
 	     * imagePath 
 	     */ 
 		private java.lang.String imagePath;
+		/**
+	     * image
+	     */ 
+		private MultipartFile image;
 	    /**
 	     * 库存数量 
 	     */ 
@@ -67,12 +71,20 @@ public class ProductVo extends PaginatedHelper implements java.io.Serializable{
 	     */ 
 		private java.lang.String createUserId;
 	
-	//getter setter方法
+	//getter setter方法	
 		
 	public java.lang.String getProductId() {
 		return this.productId;
 	}
 	
+	public MultipartFile getImage() {
+		return image;
+	}
+
+	public void setImage(MultipartFile image) {
+		this.image = image;
+	}
+
 	public void setProductId(java.lang.String value) {
 		this.productId = value;
 	}

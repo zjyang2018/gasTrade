@@ -6,9 +6,10 @@
 
 package com.zach.gasTrade.service;
 
-import com.zach.gasTrade.common.Result;
-import com.zach.gasTrade.vo.AdminUserVo;
 import java.util.List;
+
+import com.zach.gasTrade.dto.AdminUserDto;
+import com.zach.gasTrade.vo.AdminUserVo;
 
 public interface AdminUserService{
 	/**
@@ -43,7 +44,7 @@ public interface AdminUserService{
 	 * 保存
 	 * @param adminUserVo
 	 */
-    public int save(AdminUserVo adminUserVo);
+    public int save(AdminUserDto adminUserDto);
     
     /**
 	 * 更新

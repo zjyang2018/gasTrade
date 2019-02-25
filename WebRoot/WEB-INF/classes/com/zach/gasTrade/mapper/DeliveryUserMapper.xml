@@ -39,10 +39,10 @@
 		            and id = #{id}
 		       </if>
 	    	   <if  test="name !=null ">
-		            and name = #{name}
+		            and name like #{name}
 		       </if>
 	    	   <if  test="phoneNumber !=null ">
-		            and phone_number = #{phoneNumber}
+		            and phone_number like #{phoneNumber}
 		       </if>
 	    	   <if  test="loginName !=null ">
 		            and login_name = #{loginName}
@@ -139,10 +139,10 @@
 		            and id = #{id}
 		       </if>
 	    	   <if  test="name !=null ">
-		            and name = #{name}
+		            and name like #{name}
 		       </if>
 	    	   <if  test="phoneNumber !=null ">
-		            and phone_number = #{phoneNumber}
+		            and phone_number like #{phoneNumber}
 		       </if>
 	    	   <if  test="loginName !=null ">
 		            and login_name = #{loginName}
@@ -287,7 +287,7 @@
     </update>
     
     <!-- 保存 -->
-     <insert id="save" parameterType="com.zach.gasTrade.vo.DeliveryUserVo" >
+     <insert id="save" parameterType="com.zach.gasTrade.dto.DeliveryUserDto" >
         INSERT INTO delivery_user (
 	        <if test="id !=null ">
 	        	id ,

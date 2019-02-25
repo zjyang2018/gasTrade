@@ -6,144 +6,274 @@
 
 package com.zach.gasTrade.controller;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONObject;
-import com.zach.gasTrade.vo.OrderInfoVo;
+import com.common.utils.DateTimeUtils;
+import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.DataResult;
+import com.zach.gasTrade.common.PageResult;
+import com.zach.gasTrade.common.Result;
+import com.zach.gasTrade.dto.DeliveryMonitorDto;
+import com.zach.gasTrade.dto.OrderInfoDto;
+import com.zach.gasTrade.dto.OrderListDto;
+import com.zach.gasTrade.service.CustomerUserService;
+import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.service.OrderInfoService;
+import com.zach.gasTrade.vo.CustomerUserVo;
+import com.zach.gasTrade.vo.DeliveryUserVo;
+import com.zach.gasTrade.vo.OrderInfoVo;
 
 
 @Controller
 public class OrderInfoController {
+	private Logger logger = Logger.getLogger(getClass());
+	
 	@Autowired
 	private OrderInfoService orderInfoService;
 	
+	@Autowired
+	private CustomerUserService customerUserService;
+	
+	@Autowired
+	private DeliveryUserService deliveryUserService;
+	
 	
 	/**
-	 * 进入主页面
+	 * 分页列表 + 搜索 + 高级搜索
+	 * @param request
 	 * @param filterMask
-	 * @param model
-	 * @param request
-	 * @param response
-	 * @return
+	 * @return PageResult
 	 */
-	@RequestMapping(value = "/orderInfo/main", method = RequestMethod.GET)
-	String mainPage(OrderInfoVo filterMask,Model model,HttpServletRequest request, HttpServletResponse response)
-	{ 
-		model.addAttribute("filterMask", filterMask);
-		return "OrderInfo/main";
-	}
-	
-	/**
-	 * table 列表
-	 * @param request
-	 * @param response
-	 * @param OrderInfoVo
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/orderInfo/query")
-    public void getJsonDataGrid(HttpServletRequest request,
-	    HttpServletResponse response,OrderInfoVo filterMask) throws Exception {
-	List<OrderInfoVo> list = new ArrayList<OrderInfoVo>();
-	int total = orderInfoService.getOrderInfoCount(filterMask);
-	list = orderInfoService.getOrderInfoList(filterMask);
-	PrintWriter write = response.getWriter();
-	
-	Map map=new HashMap();
-	map.put("total", total);
-	map.put("rows",  list);
-
-	write.write(JSONObject.toJSONString(map));
-	write.flush();
-	write.close();
+	@RequestMapping(value = "/orderInfo/query_page",method = RequestMethod.POST)
+	@ResponseBody
+    public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String,String> param, OrderListDto filterMask) {
+		PageResult result=PageResult.initResult();
+		
+		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+		String orderId = param.get("orderId");
+		String id = orderId.trim() + "%";
+		String payStatus = param.get("payStatus");
+		String searchCustomerParam = param.get("searchCustomerParam");
+		String selectCustomerParam = searchCustomerParam.trim() + "%";
+		// selectCustomerParam以"1"开头则按手机号搜索
+		if(selectCustomerParam.startsWith("1")) {
+			filterMask.setCustomerPhoneNumber(selectCustomerParam);
+		}else {
+			filterMask.setCustomerName(selectCustomerParam);
+		}
+		String searchDeliveryParam = param.get("searchDeliveryParam");
+		String selectDeliveryParam = searchDeliveryParam.trim() + "%";
+		// selectDeliveryParam以"1"开头则按手机号搜索
+		if(selectDeliveryParam.startsWith("1")) {
+			filterMask.setDeliveryPhoneNumber(selectDeliveryParam);
+		}else {
+			filterMask.setDeliveryName(selectDeliveryParam);
+		}
+		String allotStatus = param.get("allotStatus");
+		String orderStatus = param.get("orderStatus");
+		String payTime = param.get("payTime");
+		Date payTimeToDate = DateTimeUtils.stringToDate(payTime, new Date().toString());
+		filterMask.setOrderId(id);
+		filterMask.setPayStatus(payStatus);
+		filterMask.setAllotStatus(allotStatus);
+		filterMask.setOrderStatus(orderStatus);
+		filterMask.setPayTime(payTimeToDate);
+		filterMask.setPage(pageNum);
+		filterMask.setPageSize(pageSize);
+		try{
+			int total = orderInfoService.getOrderInfoCount(filterMask);
+			List<OrderListDto> list = orderInfoService.getOrderInfoPage(filterMask);
+			
+			result.setAllCount(total);
+			result.setPageNum(pageNum);
+			result.setPageSize(pageSize);
+			result.setData(list);
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
     }
-
+	
 	/**
-	 * 进入新增页面
+	 * 派送监控——分页列表 + 搜索 
+	 * @param request
 	 * @param filterMask
-	 * @param model
-	 * @return
+	 * @return PageResult
 	 */
-	@RequestMapping(value = "/orderInfo/newPage", method = RequestMethod.POST)
-	String NewPage(OrderInfoVo filterMask,Model model)
-	{
-		model.addAttribute("filterMask", filterMask);
-		return "OrderInfo/new";
-	}
+	@RequestMapping(value = "/orderInfo/orderMonitorList",method = RequestMethod.POST)
+	@ResponseBody
+    public PageResult getOrderMonitorList(HttpServletRequest request, @RequestBody Map<String,String> param) {
+		PageResult result=PageResult.initResult();
+		
+		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+		String id = param.get("orderId");
+		String orderId = id.trim() + "%";
+		String startTime = param.get("startTime");
+		String endTime = param.get("endTime");
+		
+		Date startDate = DateTimeUtils.stringToDate(startTime, new Date().toString());
+		Date endDate = DateTimeUtils.stringToDate(endTime, new Date().toString());
+		int startIndex = (pageNum - 1) * pageSize;
+		Map<String, Object> map = new HashMap<>();
+		map.put("startIndex", startIndex);
+		map.put("pageSize", pageSize);
+		map.put("orderId", orderId);
+		map.put("startDate", startDate);
+		map.put("endDate", endDate);
+		
+		try{
+			int total = orderInfoService.getDeliveryMonitorCount(map);
+			List<DeliveryMonitorDto> list = orderInfoService.getDeliveryMonitorPage(map);
+			
+			result.setAllCount(total);
+			result.setPageNum(pageNum);
+			result.setPageSize(pageSize);
+			result.setData(list);
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
+    }
 	
 	/**
 	 * 新增
-	 * @param country
-	 * @param result
-	 * @return
+	 * @param request
+	 * @param filterMask
+	 * @return Result
 	 */
-	@RequestMapping(value = "/orderInfo/save")
-	@Transactional
-	public String save(HttpServletRequest request,Model model,
-			    HttpServletResponse response,OrderInfoVo filterMask) throws Exception {
-			//保存
-		    orderInfoService.save(filterMask);
-		    model.addAttribute("filterMask", new OrderInfoVo());
-			return "OrderInfo/main";
-
+	@RequestMapping(value = "/orderInfo/save",method = RequestMethod.POST)
+	@ResponseBody
+	public Result save(HttpServletRequest request,@RequestBody OrderInfoVo filterMask) {
+		Result result = Result.initResult();
+				
+		try{
+			orderInfoService.save(filterMask);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
 	}
 	
 	/**
-	 * 进入修改页面
-	 * @param filterMask
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/orderInfo/editPage", method = RequestMethod.POST)	
-    public String  editPage(OrderInfoVo filterMask,Model model) throws Exception{
-	model.addAttribute("filterMask", filterMask);
-	return "OrderInfo/edit";
-    }
-	
-	
-	/**
 	 * 修改
-	 * @param country
-	 * @param result
-	 * @return
+	 * @param request
+	 * @param filterMask
+	 * @return Result
 	 */
-	 @RequestMapping(value = "/orderInfo/edit")
-	    @Transactional
-	    public String edit(HttpServletRequest request,Model model,
-		    HttpServletResponse response,OrderInfoVo filterMask) throws Exception {
+	@RequestMapping(value = "/orderInfo/edit",method = RequestMethod.POST)
+	@ResponseBody
+	public Result edit(HttpServletRequest request,@RequestBody Map<String,String> param) {
+		Result result = Result.initResult();
+		String orderId = param.get("orderId");
+		String deliveryName = param.get("deliveryName");
+		String editReason = param.get("editReason");
 		
-		 orderInfoService.update(filterMask);
-		 model.addAttribute("filterMask", new OrderInfoVo());
-		 return "OrderInfo/main";
-	    }
+		OrderInfoVo orderInfoVo = new OrderInfoVo();
+		orderInfoVo.setOrderId(orderId);
+		orderInfoVo.setEditReason(editReason);
+		
+		DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+		deliveryUserVo.setName(deliveryName);
+		DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+		
+		orderInfoVo.setAllotDeliveryId(deliveryUser.getId());
+				
+		try{
+			orderInfoService.update(orderInfoVo);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
+	}
 	
-	 
 	/**
-	 * 删除
-	 * @return
+	 * 详情
+	 * @param request
+	 * @param filterMask
+	 * @return Result
 	 */
-	@RequestMapping(value = "/orderInfo/delete")
-	@Transactional
-	public void delete(OrderInfoVo filterMask,HttpServletRequest request, HttpServletResponse response)throws Exception
-	{
-		orderInfoService.delete(filterMask);
-		PrintWriter write = response.getWriter();
-		write.write("SUCC");
-		write.flush();
-		write.close();
+	@RequestMapping(value = "/orderInfo/info",method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult info(HttpServletRequest request,@RequestBody OrderInfoVo filterMask) {
+		DataResult result = DataResult.initResult();
+			
+		try{
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
+			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			
+			OrderInfoDto orderInfoDto = new OrderInfoDto();
+			orderInfoDto.setOrderId(orderInfo.getOrderId());
+			orderInfoDto.setAmount(orderInfo.getAmount());
+			orderInfoDto.setPayStatus(orderInfo.getPayStatus());
+			orderInfoDto.setPayTime(orderInfo.getPayTime());
+			orderInfoDto.setAllotStatus(orderInfo.getAllotStatus());
+			orderInfoDto.setAllotTime(orderInfo.getAllotTime());
+			orderInfoDto.setAllotDeliveryName(deliveryUser.getName());
+			orderInfoDto.setAllotDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
+			orderInfoDto.setCustomerUserName(customerUser.getName());
+			orderInfoDto.setCustomerAddress(customerUser.getAddress());
+			orderInfoDto.setOrderStatus(orderInfo.getOrderStatus());
+			orderInfoDto.setRemark(orderInfo.getRemark());
+			orderInfoDto.setEditReason(orderInfo.getEditReason());
+			orderInfoDto.setUpdateTime(orderInfo.getUpdateTime());
+			
+			result.setData(orderInfoDto);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
 	}
 }

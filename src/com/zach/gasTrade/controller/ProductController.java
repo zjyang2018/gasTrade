@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.controller;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
@@ -83,8 +85,34 @@ public class ProductController {
 	@ResponseBody
 	public Result save(HttpServletRequest request,@RequestBody ProductVo filterMask) {
 		Result result = Result.initResult();
+		//保存数据库的路径
+		  String sqlPath = null; 
+		  //定义文件保存的本地路径
+			String realUploadPath=request.getServletContext().getRealPath("/")+"images";
+			File file = new File(realUploadPath);
+			if(!file.exists()){
+				file.mkdirs();
+			}	
+	      //定义 文件名
+	      String filename=null;  
+	      try{
+	      if(!filterMask.getImage().isEmpty()){  
+	          //生成uuid作为文件名称  
+	          String uuid = SerialGenerator.getUUID(); 
+	          //获得文件类型（可以判断如果不是图片，禁止上传）  
+	          String contentType=filterMask.getImage().getContentType();  
+	          //获得文件后缀名 
+	          String suffixName=contentType.substring(contentType.indexOf("/")+1);
+	          //得到 文件名
+	          filename=uuid+"."+suffixName; 
+	          //文件保存路径
+	          filterMask.getImage().transferTo(new File(realUploadPath+filename));
+	      }
+	      //把图片的相对路径保存至数据库
+	      // sqlPath = "/images/"+filename;
+	      sqlPath = realUploadPath + "/"+filename;
+	      filterMask.setImagePath(sqlPath);
 				
-		try{
 			productService.save(filterMask);
 			
 		}catch (RuntimeException e){
@@ -110,7 +138,33 @@ public class ProductController {
 	public Result edit(HttpServletRequest request,@RequestBody ProductVo filterMask) {
 		Result result = Result.initResult();
 				
-		try{
+		//保存数据库的路径
+		  String sqlPath = null; 
+		  //定义文件保存的本地路径
+			String realUploadPath=request.getServletContext().getRealPath("/")+"images";
+			File file = new File(realUploadPath);
+			if(!file.exists()){
+				file.mkdirs();
+			}	
+	      //定义 文件名
+	      String filename=null;  
+	      try{
+	      if(!filterMask.getImage().isEmpty()){  
+	          //生成uuid作为文件名称  
+	          String uuid = SerialGenerator.getUUID(); 
+	          //获得文件类型（可以判断如果不是图片，禁止上传）  
+	          String contentType=filterMask.getImage().getContentType();  
+	          //获得文件后缀名 
+	          String suffixName=contentType.substring(contentType.indexOf("/")+1);
+	          //得到 文件名
+	          filename=uuid+"."+suffixName; 
+	          //文件保存路径
+	          filterMask.getImage().transferTo(new File(realUploadPath+filename));
+	      }
+	      //把图片的相对路径保存至数据库
+	      // sqlPath = "/images/"+filename;
+	      sqlPath = realUploadPath + "/"+filename;
+	      filterMask.setImagePath(sqlPath);
 			productService.update(filterMask);
 			
 		}catch (RuntimeException e){

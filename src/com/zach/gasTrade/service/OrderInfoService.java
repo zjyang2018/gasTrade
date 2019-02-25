@@ -6,23 +6,28 @@
 
 package com.zach.gasTrade.service;
 
-import com.zach.gasTrade.vo.OrderInfoVo;
 import java.util.List;
+import java.util.Map;
+
+import com.zach.gasTrade.dto.DeliveryMonitorDto;
+import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
+import com.zach.gasTrade.dto.OrderListDto;
+import com.zach.gasTrade.vo.OrderInfoVo;
 
 public interface OrderInfoService{
 	/**
      * 总数
-     * @param orderInfoVo
+     * @param orderListDto
      * @return
      */
-	 public int getOrderInfoCount(OrderInfoVo orderInfoVo);
-	 
+	 public int getOrderInfoCount(OrderListDto orderListDto);
+	 	 
 	 /**
      * 分页列表
-     * @param orderInfoVo
+     * @param orderListDto
      * @return
      */
-	 public List<OrderInfoVo> getOrderInfoPage(OrderInfoVo orderInfoVo);
+	 public List<OrderListDto> getOrderInfoPage(OrderListDto orderListDto);
 	 
 	 /**
      * 列表
@@ -56,6 +61,24 @@ public interface OrderInfoService{
 	 */
     public int delete(OrderInfoVo orderInfoVo);
     
-
+    /**
+     * 监控总数
+     * @param map
+     * @return
+     */
+	 public int getDeliveryMonitorCount(Map<String, Object> map);
+	 
+	 /**
+	     * 监控分页列表
+	     * @param map
+	     * @return
+	     */
+		 public List<DeliveryMonitorDto> getDeliveryMonitorPage(Map<String, Object> map);
+    
+		 /**
+	      	 * 每日订单数量统计
+	      	 */
+	          public OrderFinanceStatisticsDto getOrderDayCount();
+    
 }
 

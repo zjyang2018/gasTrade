@@ -85,13 +85,13 @@
 		            and id = #{id}
 		       </if>
 	    	   <if  test="name !=null ">
-		            and name like #{name}
+		            and name = #{name}
 		       </if>
 	    	   <if  test="sex !=null ">
 		            and sex = #{sex}
 		       </if>
 	    	   <if  test="phoneNumber !=null ">
-		            and phone_number like #{phoneNumber}
+		            and phone_number = #{phoneNumber}
 		       </if>
 	    	   <if  test="loginName !=null ">
 		            and login_name = #{loginName}
@@ -271,7 +271,7 @@
     </update>
     
     <!-- 保存 -->
-     <insert id="save" parameterType="com.zach.gasTrade.vo.AdminUserVo" >
+     <insert id="save" parameterType="com.zach.gasTrade.dto.AdminUserDto" >
         INSERT INTO admin_user (
 	        <if test="id !=null ">
 	        	id ,

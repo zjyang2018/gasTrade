@@ -85,7 +85,7 @@
 		            and id = #{id}
 		       </if>
 	    	   <if  test="name !=null ">
-		            and name like #{name}
+		            and name = #{name}
 		       </if>
 	    	   <if  test="wxName !=null ">
 		            and wx_name = #{wxName}
@@ -97,7 +97,7 @@
 		            and sex = #{sex}
 		       </if>
 	    	   <if  test="phoneNumber !=null ">
-		            and phone_number like #{phoneNumber}
+		            and phone_number = #{phoneNumber}
 		       </if>
 	    	   <if  test="address !=null ">
 		            and address = #{address}

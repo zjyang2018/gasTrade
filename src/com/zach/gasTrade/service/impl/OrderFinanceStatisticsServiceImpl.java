@@ -7,17 +7,17 @@
 package com.zach.gasTrade.service.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-import com.zach.gasTrade.vo.OrderFinanceStatisticsVo;
+import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.dao.OrderFinanceStatisticsDao;
+import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
 import com.zach.gasTrade.service.OrderFinanceStatisticsService;
+import com.zach.gasTrade.service.OrderInfoService;
+import com.zach.gasTrade.vo.OrderFinanceStatisticsVo;
 
 
 @Service("orderFinanceStatisticsService")
@@ -25,6 +25,9 @@ public class OrderFinanceStatisticsServiceImpl implements OrderFinanceStatistics
 	
 	@Autowired
 	private OrderFinanceStatisticsDao orderFinanceStatisticsDao;
+	
+	@Autowired
+	private OrderInfoService orderInfoService;
 	
 	 /**
      * 总数
@@ -67,6 +70,17 @@ public class OrderFinanceStatisticsServiceImpl implements OrderFinanceStatistics
 	 * @param orderFinanceStatisticsVo
 	 */
     public int save(OrderFinanceStatisticsVo orderFinanceStatisticsVo){
+    	OrderFinanceStatisticsDto orderFinanceStatisticsDto = orderInfoService.getOrderDayCount();
+    	String id = SerialGenerator.getUUID();
+    	Date nowTime = new Date();
+    	orderFinanceStatisticsVo.setId(id);
+    	orderFinanceStatisticsVo.setDate(nowTime.toString());
+    	orderFinanceStatisticsVo.setCreateTime(nowTime);
+    	orderFinanceStatisticsVo.setAvgAmount(orderFinanceStatisticsDto.getAvgAmount());
+    	orderFinanceStatisticsVo.setBuyerCount(orderFinanceStatisticsDto.getBuyerCount());
+    	orderFinanceStatisticsVo.setDeliveryOrderCount(orderFinanceStatisticsDto.getDeliveryOrderCount());
+    	orderFinanceStatisticsVo.setOrderAmount(orderFinanceStatisticsDto.getOrderAmount());
+    	orderFinanceStatisticsVo.setOrderCount(orderFinanceStatisticsDto.getOrderCount());    	
     	
     	return orderFinanceStatisticsDao.save(orderFinanceStatisticsVo);
     }

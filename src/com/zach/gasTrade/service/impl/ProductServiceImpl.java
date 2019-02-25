@@ -65,7 +65,7 @@ public class ProductServiceImpl implements ProductService{
 	 * @param productVo
 	 */
     public int save(ProductVo productVo){
-    	String product_id = SerialGenerator.getSerialNum();
+    	String product_id = SerialGenerator.getUUID();
     	Date nowTime = new Date();
     	productVo.setProductId(product_id);
     	productVo.setStatus("10");

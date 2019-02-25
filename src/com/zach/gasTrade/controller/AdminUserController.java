@@ -24,6 +24,7 @@ import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
+import com.zach.gasTrade.dto.AdminUserDto;
 import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.vo.AdminUserVo;
 
@@ -71,7 +72,7 @@ public class AdminUserController {
 	}
 	
 	/**
-	 * 分页列表
+	 * 分页列表  + 搜索
 	 * @param request
 	 * @param filterMask
 	 * @return PageResult
@@ -90,8 +91,9 @@ public class AdminUserController {
 		// searchParam以"1"开头则按手机号搜索
 		if(selectParam.startsWith("1")) {
 			filterMask.setPhoneNumber(selectParam);
+		}else {
+			filterMask.setName(selectParam);
 		}
-		filterMask.setName(selectParam);
 		filterMask.setWorkStatus(workStatus);
 		filterMask.setAccountStatus(accountStatus);
 		filterMask.setPage(pageNum);
@@ -125,8 +127,18 @@ public class AdminUserController {
 	 */
 	@RequestMapping(value = "/adminUser/save",method = RequestMethod.POST)
 	@ResponseBody
-	public Result save(HttpServletRequest request,@RequestBody AdminUserVo filterMask) {
+	public Result save(HttpServletRequest request,@RequestBody AdminUserDto filterMask) {
 		Result result = Result.initResult();
+		
+		String initialPassword = filterMask.getInitialPassword();
+		String confirmPassword = filterMask.getComfirmPassword();
+		if(!initialPassword.equals(confirmPassword)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("确认密码输入不正确");
+			return result;
+		}
+		
+		filterMask.setPassword(initialPassword);
 				
 		try{
 			adminUserService.save(filterMask);

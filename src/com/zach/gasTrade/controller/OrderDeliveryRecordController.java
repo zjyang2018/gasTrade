@@ -6,144 +6,198 @@
 
 package com.zach.gasTrade.controller;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONObject;
-import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
+import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.DataResult;
+import com.zach.gasTrade.common.PageResult;
+import com.zach.gasTrade.common.Result;
+import com.zach.gasTrade.dto.OrderDeliveryCountDto;
+import com.zach.gasTrade.dto.OrderDeliveryProgressDto;
+import com.zach.gasTrade.service.CustomerUserService;
+import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.service.OrderDeliveryRecordService;
+import com.zach.gasTrade.service.OrderInfoService;
+import com.zach.gasTrade.vo.DeliveryUserVo;
+import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
+import com.zach.gasTrade.vo.OrderInfoVo;
 
 
 @Controller
 public class OrderDeliveryRecordController {
+	private Logger logger = Logger.getLogger(getClass());
+	
 	@Autowired
 	private OrderDeliveryRecordService orderDeliveryRecordService;
 	
+	@Autowired
+	private OrderInfoService orderInfoService;
 	
+	@Autowired
+	private CustomerUserService customerUserService;
+	
+	@Autowired
+	private DeliveryUserService deliveryUserService;
+		
 	/**
-	 * 进入主页面
+	 * 派送统计分页列表
+	 * @param request
 	 * @param filterMask
-	 * @param model
-	 * @param request
-	 * @param response
-	 * @return
+	 * @return PageResult
 	 */
-	@RequestMapping(value = "/orderDeliveryRecord/main", method = RequestMethod.GET)
-	String mainPage(OrderDeliveryRecordVo filterMask,Model model,HttpServletRequest request, HttpServletResponse response)
-	{ 
-		model.addAttribute("filterMask", filterMask);
-		return "OrderDeliveryRecord/main";
-	}
-	
-	/**
-	 * table 列表
-	 * @param request
-	 * @param response
-	 * @param OrderDeliveryRecordVo
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/orderDeliveryRecord/query")
-    public void getJsonDataGrid(HttpServletRequest request,
-	    HttpServletResponse response,OrderDeliveryRecordVo filterMask) throws Exception {
-	List<OrderDeliveryRecordVo> list = new ArrayList<OrderDeliveryRecordVo>();
-	int total = orderDeliveryRecordService.getOrderDeliveryRecordCount(filterMask);
-	list = orderDeliveryRecordService.getOrderDeliveryRecordList(filterMask);
-	PrintWriter write = response.getWriter();
-	
-	Map map=new HashMap();
-	map.put("total", total);
-	map.put("rows",  list);
+	@RequestMapping(value = "/orderDeliveryRecord/deliveryCountList",method = RequestMethod.POST)
+	@ResponseBody
+    public PageResult getDeliveryCountList(HttpServletRequest request, @RequestBody Map<String,String> param) {
+		PageResult result=PageResult.initResult();
+		
+		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+		int startIndex = (pageNum - 1) * pageSize;
+		String name = param.get("deliveryName");
+		String deliveryName = name + "%";
 
-	write.write(JSONObject.toJSONString(map));
-	write.flush();
-	write.close();
+		Map<String, Object> map = new HashMap<>();
+		map.put("deliveryName", deliveryName);
+		map.put("startIndex", startIndex);
+		map.put("pageSize", pageSize);
+		try{
+			int total = orderDeliveryRecordService.getDeliveryUserCount(map);
+			List<OrderDeliveryCountDto> list = orderDeliveryRecordService.getOrderDeliveryPage(map);
+			
+			result.setAllCount(total);
+			result.setPageNum(pageNum);
+			result.setPageSize(pageSize);
+			result.setData(list);
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
     }
-
-	/**
-	 * 进入新增页面
-	 * @param filterMask
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/orderDeliveryRecord/newPage", method = RequestMethod.POST)
-	String NewPage(OrderDeliveryRecordVo filterMask,Model model)
-	{
-		model.addAttribute("filterMask", filterMask);
-		return "OrderDeliveryRecord/new";
-	}
 	
 	/**
 	 * 新增
-	 * @param country
-	 * @param result
-	 * @return
-	 */
-	@RequestMapping(value = "/orderDeliveryRecord/save")
-	@Transactional
-	public String save(HttpServletRequest request,Model model,
-			    HttpServletResponse response,OrderDeliveryRecordVo filterMask) throws Exception {
-			//保存
-		    orderDeliveryRecordService.save(filterMask);
-		    model.addAttribute("filterMask", new OrderDeliveryRecordVo());
-			return "OrderDeliveryRecord/main";
-
-	}
-	
-	/**
-	 * 进入修改页面
+	 * @param request
 	 * @param filterMask
-	 * @param model
-	 * @return
+	 * @return Result
 	 */
-	@RequestMapping(value = "/orderDeliveryRecord/editPage", method = RequestMethod.POST)	
-    public String  editPage(OrderDeliveryRecordVo filterMask,Model model) throws Exception{
-	model.addAttribute("filterMask", filterMask);
-	return "OrderDeliveryRecord/edit";
-    }
-	
+	@RequestMapping(value = "/orderDeliveryRecord/save",method = RequestMethod.POST)
+	@ResponseBody
+	public Result save(HttpServletRequest request,@RequestBody OrderDeliveryRecordVo filterMask) {
+		Result result = Result.initResult();
+		
+		try{
+							
+			orderDeliveryRecordService.save(filterMask);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
+	}
+
 	
 	/**
 	 * 修改
-	 * @param country
-	 * @param result
-	 * @return
+	 * @param request
+	 * @param filterMask
+	 * @return Result
 	 */
-	 @RequestMapping(value = "/orderDeliveryRecord/edit")
-	    @Transactional
-	    public String edit(HttpServletRequest request,Model model,
-		    HttpServletResponse response,OrderDeliveryRecordVo filterMask) throws Exception {
+	@RequestMapping(value = "/orderDeliveryRecord/edit",method = RequestMethod.POST)
+	@ResponseBody
+	public Result edit(HttpServletRequest request,@RequestBody Map<String,String> param) {
+		Result result = Result.initResult();
+		String orderId = param.get("orderId");
+		String deliveryName = param.get("deliveryName");
 		
-		 orderDeliveryRecordService.update(filterMask);
-		 model.addAttribute("filterMask", new OrderDeliveryRecordVo());
-		 return "OrderDeliveryRecord/main";
-	    }
+		OrderInfoVo orderInfoVo = new OrderInfoVo();
+		orderInfoVo.setOrderId(orderId);
+		
+		DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+		deliveryUserVo.setName(deliveryName);
+		DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+		
+		orderInfoVo.setAllotDeliveryId(deliveryUser.getId());
+				
+		try{
+			orderInfoService.update(orderInfoVo);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
+	}
 	
-	 
 	/**
-	 * 删除
-	 * @return
+	 * 进度查询
+	 * @param request
+	 * @param filterMask
+	 * @return Result
 	 */
-	@RequestMapping(value = "/orderDeliveryRecord/delete")
-	@Transactional
-	public void delete(OrderDeliveryRecordVo filterMask,HttpServletRequest request, HttpServletResponse response)throws Exception
-	{
-		orderDeliveryRecordService.delete(filterMask);
-		PrintWriter write = response.getWriter();
-		write.write("SUCC");
-		write.flush();
-		write.close();
+	@RequestMapping(value = "/orderDeliveryRecord/query_delivery_progress",method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult info(HttpServletRequest request,@RequestBody OrderInfoVo filterMask) {
+		DataResult result = DataResult.initResult();
+			
+		try{
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
+			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			OrderDeliveryRecordVo orderDeliveryRecord = new OrderDeliveryRecordVo();
+			
+			OrderDeliveryProgressDto orderDeliveryProgressDto = new OrderDeliveryProgressDto();
+			orderDeliveryProgressDto.setOrderId(orderInfo.getOrderId());
+			orderDeliveryProgressDto.setDeliveryName(deliveryUser.getName());
+			orderDeliveryProgressDto.setDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
+			orderDeliveryProgressDto.setAcceptTime(orderDeliveryRecord.getAcceptTime());
+			orderDeliveryProgressDto.setAllotTime(orderDeliveryRecord.getAllotTime());
+			orderDeliveryProgressDto.setCompleteTime(orderDeliveryRecord.getCompleteTime());
+			orderDeliveryProgressDto.setDeliveryTime(orderDeliveryRecord.getDeliveryTime());
+			orderDeliveryProgressDto.setEndLocation(orderDeliveryRecord.getEndLocation());
+			orderDeliveryProgressDto.setMoveLocation(orderDeliveryRecord.getMoveLocation());
+			orderDeliveryProgressDto.setStartLocation(orderDeliveryRecord.getStartLocation());
+			
+			result.setData(orderDeliveryProgressDto);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
 	}
 }

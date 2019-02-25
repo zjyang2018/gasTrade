@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.zach.gasTrade.dto.DeliveryUserDto;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 
 @Repository("deliveryUserDao")
@@ -46,7 +47,7 @@ public interface DeliveryUserDao {
 	 * 保存
 	 * @param deliveryUserVo
 	 */
-    public int save(DeliveryUserVo deliveryUserVo);
+    public int save(DeliveryUserDto deliveryUserDto);
     
     /**
 	 * 更新

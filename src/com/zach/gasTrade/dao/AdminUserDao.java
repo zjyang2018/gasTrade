@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.zach.gasTrade.dto.AdminUserDto;
 import com.zach.gasTrade.vo.AdminUserVo;
 
 @Repository("adminUserDao")
@@ -46,7 +47,7 @@ public interface AdminUserDao {
 	 * 保存
 	 * @param adminUserVo
 	 */
-    public int save(AdminUserVo adminUserVo);
+    public int save(AdminUserDto adminUserDto);
     
     /**
 	 * 更新

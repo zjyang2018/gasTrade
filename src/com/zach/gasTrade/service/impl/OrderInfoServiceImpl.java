@@ -7,17 +7,18 @@
 package com.zach.gasTrade.service.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-import com.zach.gasTrade.vo.OrderInfoVo;
 import com.zach.gasTrade.dao.OrderInfoDao;
+import com.zach.gasTrade.dto.DeliveryMonitorDto;
+import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
+import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.service.OrderInfoService;
+import com.zach.gasTrade.vo.OrderInfoVo;
 
 
 @Service("orderInfoService")
@@ -28,20 +29,38 @@ public class OrderInfoServiceImpl implements OrderInfoService{
 	
 	 /**
      * 总数
-     * @param orderInfoVo
+     * @param orderListDto
      * @return
      */
-    public int getOrderInfoCount(OrderInfoVo orderInfoVo){
-    	return orderInfoDao.getOrderInfoCount(orderInfoVo);
+    public int getOrderInfoCount(OrderListDto orderListDto){
+    	return orderInfoDao.getOrderInfoCount(orderListDto);
     }
     
     /**
-     * 分页列表
-     * @param orderInfoVo
+     * 监控总数
+     * @param map
      * @return
      */
-	 public List<OrderInfoVo> getOrderInfoPage(OrderInfoVo orderInfoVo){
-		 return orderInfoDao.getOrderInfoPage(orderInfoVo);
+	 public int getDeliveryMonitorCount(Map<String, Object> map) {
+		 return orderInfoDao.getDeliveryMonitorCount(map);
+	 }
+	 
+	 /**
+	     * 监控分页列表
+	     * @param map
+	     * @return
+	     */
+		 public List<DeliveryMonitorDto> getDeliveryMonitorPage(Map<String, Object> map) {
+			 return orderInfoDao.getDeliveryMonitorPage(map);
+		 }
+    
+    /**
+     * 分页列表
+     * @param orderInfoModel
+     * @return
+     */
+	 public List<OrderListDto> getOrderInfoPage(OrderListDto orderListDto){
+		 return orderInfoDao.getOrderInfoPage(orderListDto);
 	 }
 
     /**
@@ -76,6 +95,9 @@ public class OrderInfoServiceImpl implements OrderInfoService{
 	 * @param orderInfoVo
 	 */
     public int update(OrderInfoVo orderInfoVo){
+    	Date nowTime = new Date();
+    	orderInfoVo.setUpdateTime(nowTime);
+    	
     	return orderInfoDao.update(orderInfoVo);
     }
     
@@ -86,6 +108,13 @@ public class OrderInfoServiceImpl implements OrderInfoService{
     public int delete(OrderInfoVo orderInfoVo){
     	return orderInfoDao.delete(orderInfoVo);
     }
+    
+    /**
+  	 * 每日订单数量统计
+  	 */
+      public OrderFinanceStatisticsDto getOrderDayCount() {
+    	  return orderInfoDao.getOrderDayCount();
+      }
 	
 	
 }

@@ -7,17 +7,16 @@
 package com.zach.gasTrade.service.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-import com.zach.gasTrade.vo.DeliveryUserVo;
+import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.dao.DeliveryUserDao;
+import com.zach.gasTrade.dto.DeliveryUserDto;
 import com.zach.gasTrade.service.DeliveryUserService;
+import com.zach.gasTrade.vo.DeliveryUserVo;
 
 
 @Service("deliveryUserService")
@@ -66,9 +65,18 @@ public class DeliveryUserServiceImpl implements DeliveryUserService{
 	 * 保存
 	 * @param deliveryUserVo
 	 */
-    public int save(DeliveryUserVo deliveryUserVo){
+    public int save(DeliveryUserDto deliveryUserDto){
+    	String id = SerialGenerator.getUUID();
+    	Date nowTime = new Date();
+    	deliveryUserDto.setId(id);
+    	deliveryUserDto.setEquipNo("");
+    	deliveryUserDto.setAccountStatus("10");
+    	deliveryUserDto.setWorkStatus("20");
+    	deliveryUserDto.setFrozenReason("");
+    	deliveryUserDto.setCreateTime(nowTime);
+    	deliveryUserDto.setUpdateTime(nowTime);
     	
-    	return deliveryUserDao.save(deliveryUserVo);
+    	return deliveryUserDao.save(deliveryUserDto);
     }
     
     /**
@@ -76,6 +84,9 @@ public class DeliveryUserServiceImpl implements DeliveryUserService{
 	 * @param deliveryUserVo
 	 */
     public int update(DeliveryUserVo deliveryUserVo){
+    	Date nowTime = new Date();
+    	deliveryUserVo.setUpdateTime(nowTime);
+    	
     	return deliveryUserDao.update(deliveryUserVo);
     }
     

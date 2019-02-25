@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.dao.AdminUserDao;
+import com.zach.gasTrade.dto.AdminUserDto;
 import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.vo.AdminUserVo;
 
@@ -61,17 +62,17 @@ public class AdminUserServiceImpl implements AdminUserService{
 	
     /**
 	 * 保存
-	 * @param adminUserVo
+	 * @param adminUserDto
 	 */
-    public int save(AdminUserVo adminUserVo){
+    public int save(AdminUserDto adminUserDto){
     	String id = SerialGenerator.getUUID();
     	Date nowTime = new Date();
-    	adminUserVo.setId(id);
-    	adminUserVo.setAccountStatus("10");
-    	adminUserVo.setCreateTime(nowTime);
-    	adminUserVo.setUpdateTime(nowTime);
+    	adminUserDto.setId(id);
+    	adminUserDto.setAccountStatus("10");
+    	adminUserDto.setCreateTime(nowTime);
+    	adminUserDto.setUpdateTime(nowTime);
     	
-    	return adminUserDao.save(adminUserVo);
+    	return adminUserDao.save(adminUserDto);
     }
     
     /**

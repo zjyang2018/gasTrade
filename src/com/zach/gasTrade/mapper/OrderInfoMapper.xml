@@ -27,7 +27,57 @@
          <result property="createTime" column="create_time"/>
          <result property="updateTime" column="update_time"/>
      </resultMap>
-
+     
+	  <!-- 自定义查询sql结果与java model映射-->
+	 <resultMap id="OrderListDtoResultMap" type="com.zach.gasTrade.dto.OrderListDto">
+         <result property="orderId" column="order_id"/>
+         <result property="amount" column="amount"/>
+         <result property="amountAmount" column="total_amount"/>
+         <result property="payStatus" column="pay_status"/>
+         <result property="customerName" column="customer_name"/>
+         <result property="customerPhoneNumber" column="customer_phone_number"/>
+         <result property="allotStatus" column="allot_status"/>
+         <result property="deliveryName" column="delivery_name"/>
+         <result property="deliveryPhoneNumber" column="delivery_phone_number"/>
+         <result property="orderStatus" column="order_status"/>
+         <result property="payTime" column="pay_time"/>
+     </resultMap>
+     
+	 <!-- 自定义查询sql结果与java model映射-->
+	 <resultMap id="DeliveryMonitorDtoResultMap" type="com.zach.gasTrade.dto.DeliveryMonitorDto">
+         <result property="orderId" column="order_id"/>
+         <result property="customerName" column="customer_name"/>
+         <result property="customerPhoneNumber" column="customer_phone_number"/>
+         <result property="deliveryName" column="delivery_name"/>
+         <result property="deliveryPhoneNumber" column="delivery_phone_number"/>
+         <result property="deliveryOrderTime" column="delivery_order_time"/>
+     </resultMap>
+     
+	 <!-- 查询sql结果与java model映射-->
+	 <resultMap id="OrderFinanceStatisticsResultMap" type="com.zach.gasTrade.dto.OrderFinanceStatisticsDto">
+         <result property="buyerCount" column="buyer_count"/>
+         <result property="orderCount" column="order_count"/>
+         <result property="payOrderCount" column="pay_order_count"/>
+         <result property="deliveryOrderCount" column="delivery_order_count"/>
+         <result property="avgAmount" column="avg_amount"/>
+         <result property="orderAmount" column="order_amount"/>
+     </resultMap>
+     
+	 <!--每日订单统计数据-->
+    <select id="getOrderDayCount" resultMap="OrderFinanceStatisticsResultMap">   
+	    select temp_table1.buyerCount as buyer_count,temp_table1.orderCount as order_count,temp_table2.payOrderCount as pay_order_count,temp_table3.deliveryOrderCount,temp_table2.avgAmount as avg_amount,temp_table2.orderAmount as order_amount
+	    from 
+        (select ifnull(count(distinct customer_user_id),0) as buyerCount,ifnull(count(orderId),0) as orderCount
+	    from order_info 
+	    where datediff(day, create_time ,getdate()) = 0) as temp_table1,
+	    (select ifnull(count(orderId),0) as payOrderCount,ifnull(sum(amount),0) as orderAmount,ifnull(avg(amount),0) as avgAmount
+	    from order_info
+	    where datediff(day, pay_time ,getdate()) = 0) as temp_table2,
+	    (select ifnull(count(orderId),0)  as deliveryOrderCount
+	    from order_info
+	    where datediff(day, delivery_complete_time ,getdate()) = 0) as temp_table3
+	    
+     </select>
      
     <!-- 公用查询sql-->
     <sql id="OrderInfoQuery">
@@ -39,26 +89,16 @@
    <select id="getOrderInfoCount" parameterType="com.zach.gasTrade.vo.OrderInfoVo" resultType="java.lang.Integer" >                                             
      	<![CDATA[
 	    select count(1)
-	    from order_info
+	    from order_info AS o
+        left join customer_user AS c on c.id=o.customer_user_id
+        left join delivery_user AS d on o.allot_delivery_id=d.id
 	    ]]>
         <where>
 	    	   <if  test="orderId !=null ">
-		            and order_id = #{orderId}
-		       </if>
-	    	   <if  test="productId !=null ">
-		            and product_id = #{productId}
-		       </if>
-	    	   <if  test="productName !=null ">
-		            and product_name = #{productName}
-		       </if>
-	    	   <if  test="amount !=null ">
-		            and amount = #{amount}
+		            and o.order_id like #{orderId}
 		       </if>
 	    	   <if  test="payStatus !=null ">
 		            and pay_status = #{payStatus}
-		       </if>
-	    	   <if  test="payNo !=null ">
-		            and pay_no = #{payNo}
 		       </if>
 	    	   <if  test="payTime !=null ">
 		            and pay_time = #{payTime}
@@ -66,48 +106,57 @@
 	    	   <if  test="allotStatus !=null ">
 		            and allot_status = #{allotStatus}
 		       </if>
-	    	   <if  test="allotTime !=null ">
-		            and allot_time = #{allotTime}
+		       <if  test="customerName !=null ">
+		            and c.name like #{customerName}
 		       </if>
-	    	   <if  test="allotDeliveryId !=null ">
-		            and allot_delivery_id = #{allotDeliveryId}
+		       <if  test="customerPhoneNumber !=null ">
+		            and c.phone_number like #{customerPhoneNumber}
 		       </if>
-	    	   <if  test="deliveryOrderTime !=null ">
-		            and delivery_order_time = #{deliveryOrderTime}
+		       <if  test="deliveryName !=null ">
+		            and d.name like #{deliveryName}
 		       </if>
-	    	   <if  test="deliveryCompleteTime !=null ">
-		            and delivery_complete_time = #{deliveryCompleteTime}
-		       </if>
-	    	   <if  test="customerUserId !=null ">
-		            and customer_user_id = #{customerUserId}
-		       </if>
-	    	   <if  test="customerAddress !=null ">
-		            and customer_address = #{customerAddress}
-		       </if>
-	    	   <if  test="longitude !=null ">
-		            and longitude = #{longitude}
-		       </if>
-	    	   <if  test="latitude !=null ">
-		            and latitude = #{latitude}
+		       <if  test="deliveryPhoneNumber !=null ">
+		            and d.phone_number like #{deliveryPhoneNumber}
 		       </if>
 	    	   <if  test="orderStatus !=null ">
 		            and order_status = #{orderStatus}
 		       </if>
-	    	   <if  test="remark !=null ">
-		            and remark = #{remark}
+	    </where>	
+   </select> 
+   
+   <!--监控订单数量统计-->
+   <select id="getDeliveryMonitorCount" parameterType="java.util.Map" resultType="java.lang.Integer" >                                             
+	    select count(1)
+	    from order_info
+	    where create_time = #{createTime} between #{startTime} and #{endTime}
+	    <where>
+	    	   <if  test="orderId !=null ">
+		            and o.order_id like #{orderId}
 		       </if>
-	    	   <if  test="editReason !=null ">
-		            and edit_reason = #{editReason}
-		       </if>
-	    	   <if  test="createTime !=null ">
-		            and create_time = #{createTime}
-		       </if>
-	    	   <if  test="updateTime !=null ">
-		            and update_time = #{updateTime}
+	    	   <if  test="startTime !=null ">
+		            and delivery_order_time between #{startTime} and ifnull(#{endTime},now())
 		       </if>
 	    </where>	
    </select> 
    
+   <select id="getDeliveryMonitorPage"  parameterType="java.util.Map" resultMap="DeliveryMonitorDtoResultMap">   
+          select                                             
+	      o.order_id AS order_id,c.name AS customer_name,c.phone_number AS customer_phone_number,d.name AS delivery_name,d.phone_number AS delivery_phone_number,o.delivery_order_time AS delivery_order_time
+	      from order_info AS o
+          left join customer_user AS c on c.id=o.customer_user_id
+          left join delivery_user AS d on o.allot_delivery_id=d.id
+	       <where>
+	    	   <if  test="orderId !=null ">
+		            and o.order_id like #{orderId}
+		       </if>
+	    	   <if  test="startTime !=null ">
+		            and delivery_order_time between #{startTime} and ifnull(#{endTime},now())
+		       </if>
+	    </where>	
+	    order by update_time
+	    limit #{startIndex},#{pageSize}
+     </select>
+      
    <select id="getOrderInfoList"  parameterType="com.zach.gasTrade.vo.OrderInfoVo" resultMap="OrderInfoResultMap">   
           select                                             
 	      <include refid="OrderInfoQuery" />
@@ -179,28 +228,18 @@
 	    </where>
      </select>
    
-     <select id="getOrderInfoPage"  parameterType="com.zach.gasTrade.vo.OrderInfoVo" resultMap="OrderInfoResultMap">   
+     <select id="getOrderInfoPage"  parameterType="com.zach.gasTrade.vo.OrderInfoVo" resultMap="OrderListDtoResultMap">   
           select                                             
-	      <include refid="OrderInfoQuery" />
-	      from order_info
+	      o.order_id AS order_id,o.amount AS amount,sum(o.amount) AS total_amount,o.pay_status AS pay_status,c.name AS customer_name,c.phone_number AS customer_phone_number,o.allot_status AS allot_status,d.name AS delivery_name,d.phone_number AS delivery_phone_number,o.order_status AS order_status,o.pay_time AS pay_time,o.delivery_order_time AS delivery_order_time
+	      from order_info AS o
+          left join customer_user AS c on c.id=o.customer_user_id
+          left join delivery_user AS d on o.allot_delivery_id=d.id
 	      <where>
 	    	   <if  test="orderId !=null ">
-		            and order_id = #{orderId}
-		       </if>
-	    	   <if  test="productId !=null ">
-		            and product_id = #{productId}
-		       </if>
-	    	   <if  test="productName !=null ">
-		            and product_name = #{productName}
-		       </if>
-	    	   <if  test="amount !=null ">
-		            and amount = #{amount}
+		            and o.order_id like #{orderId}
 		       </if>
 	    	   <if  test="payStatus !=null ">
 		            and pay_status = #{payStatus}
-		       </if>
-	    	   <if  test="payNo !=null ">
-		            and pay_no = #{payNo}
 		       </if>
 	    	   <if  test="payTime !=null ">
 		            and pay_time = #{payTime}
@@ -208,46 +247,22 @@
 	    	   <if  test="allotStatus !=null ">
 		            and allot_status = #{allotStatus}
 		       </if>
-	    	   <if  test="allotTime !=null ">
-		            and allot_time = #{allotTime}
+		       <if  test="customerName !=null ">
+		            and c.name like #{customerName}
 		       </if>
-	    	   <if  test="allotDeliveryId !=null ">
-		            and allot_delivery_id = #{allotDeliveryId}
+		       <if  test="customerPhoneNumber !=null ">
+		            and c.phone_number like #{customerPhoneNumber}
 		       </if>
-	    	   <if  test="deliveryOrderTime !=null ">
-		            and delivery_order_time = #{deliveryOrderTime}
+		       <if  test="deliveryName !=null ">
+		            and d.name like #{deliveryName}
 		       </if>
-	    	   <if  test="deliveryCompleteTime !=null ">
-		            and delivery_complete_time = #{deliveryCompleteTime}
-		       </if>
-	    	   <if  test="customerUserId !=null ">
-		            and customer_user_id = #{customerUserId}
-		       </if>
-	    	   <if  test="customerAddress !=null ">
-		            and customer_address = #{customerAddress}
-		       </if>
-	    	   <if  test="longitude !=null ">
-		            and longitude = #{longitude}
-		       </if>
-	    	   <if  test="latitude !=null ">
-		            and latitude = #{latitude}
+		       <if  test="deliveryPhoneNumber !=null ">
+		            and d.phone_number like #{deliveryPhoneNumber}
 		       </if>
 	    	   <if  test="orderStatus !=null ">
 		            and order_status = #{orderStatus}
 		       </if>
-	    	   <if  test="remark !=null ">
-		            and remark = #{remark}
-		       </if>
-	    	   <if  test="editReason !=null ">
-		            and edit_reason = #{editReason}
-		       </if>
-	    	   <if  test="createTime !=null ">
-		            and create_time = #{createTime}
-		       </if>
-	    	   <if  test="updateTime !=null ">
-		            and update_time = #{updateTime}
-		       </if>
-	    </where>
+	    </where>	
 	    order by update_time
 	    limit #{startIndex},#{pageSize}
      </select>

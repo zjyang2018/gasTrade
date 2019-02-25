@@ -6,8 +6,10 @@
 
 package com.zach.gasTrade.service;
 
-import com.zach.gasTrade.vo.DeliveryUserVo;
 import java.util.List;
+
+import com.zach.gasTrade.dto.DeliveryUserDto;
+import com.zach.gasTrade.vo.DeliveryUserVo;
 
 public interface DeliveryUserService{
 	/**
@@ -42,7 +44,7 @@ public interface DeliveryUserService{
 	 * 保存
 	 * @param deliveryUserVo
 	 */
-    public int save(DeliveryUserVo deliveryUserVo);
+    public int save(DeliveryUserDto deliveryUserDto);
     
     /**
 	 * 更新

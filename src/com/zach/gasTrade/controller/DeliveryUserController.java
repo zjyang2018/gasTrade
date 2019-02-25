@@ -6,144 +6,217 @@
 
 package com.zach.gasTrade.controller;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONObject;
-import com.zach.gasTrade.vo.DeliveryUserVo;
+import com.common.utils.DateTimeUtils;
+import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.PageResult;
+import com.zach.gasTrade.common.Result;
+import com.zach.gasTrade.dto.DeliveryUserDto;
 import com.zach.gasTrade.service.DeliveryUserService;
+import com.zach.gasTrade.vo.DeliveryUserVo;
 
 
 @Controller
 public class DeliveryUserController {
+	private Logger logger = Logger.getLogger(getClass());
+	
 	@Autowired
 	private DeliveryUserService deliveryUserService;
 	
 	
 	/**
-	 * 进入主页面
-	 * @param filterMask
-	 * @param model
+	 * 分页列表 + 搜索
 	 * @param request
-	 * @param response
-	 * @return
+	 * @param filterMask
+	 * @return PageResult
 	 */
-	@RequestMapping(value = "/deliveryUser/main", method = RequestMethod.GET)
-	String mainPage(DeliveryUserVo filterMask,Model model,HttpServletRequest request, HttpServletResponse response)
-	{ 
-		model.addAttribute("filterMask", filterMask);
-		return "DeliveryUser/main";
-	}
+	@RequestMapping(value = "/deliveryUser/query_page",method = RequestMethod.POST)
+	@ResponseBody
+    public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String,String> param, DeliveryUserVo filterMask) {
+		PageResult result=PageResult.initResult();
+		
+		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+		String searchParam = param.get("searchParam");
+		String selectParam = searchParam.trim() + "%";
+		// searchParam以"1"开头则按手机号搜索
+		if(selectParam.startsWith("1")) {
+			filterMask.setPhoneNumber(selectParam);
+		} else {
+			filterMask.setName(selectParam);
+		}
+		filterMask.setPage(pageNum);
+		filterMask.setPageSize(pageSize);
+		try{
+			int total = deliveryUserService.getDeliveryUserCount(filterMask);
+			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(filterMask);
+			
+			result.setAllCount(total);
+			result.setPageNum(pageNum);
+			result.setPageSize(pageSize);
+			result.setData(list);
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
+    }
 	
 	/**
-	 * table 列表
+	 * 分页列表 + 搜索(人员管理)
 	 * @param request
-	 * @param response
-	 * @param DeliveryUserVo
-	 * @throws Exception
+	 * @param filterMask
+	 * @return PageResult
 	 */
-	@RequestMapping(value = "/deliveryUser/query")
-    public void getJsonDataGrid(HttpServletRequest request,
-	    HttpServletResponse response,DeliveryUserVo filterMask) throws Exception {
-	List<DeliveryUserVo> list = new ArrayList<DeliveryUserVo>();
-	int total = deliveryUserService.getDeliveryUserCount(filterMask);
-	list = deliveryUserService.getDeliveryUserList(filterMask);
-	PrintWriter write = response.getWriter();
-	
-	Map map=new HashMap();
-	map.put("total", total);
-	map.put("rows",  list);
-
-	write.write(JSONObject.toJSONString(map));
-	write.flush();
-	write.close();
+	@RequestMapping(value = "/deliveryUser/select_page",method = RequestMethod.POST)
+	@ResponseBody
+    public PageResult selectPageData(HttpServletRequest request, @RequestBody Map<String,String> param, DeliveryUserVo filterMask) {
+		PageResult result=PageResult.initResult();
+		
+		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+		String  dateParam = param.get("dateParam");
+		String  workStatus = param.get("workStatus");
+		Date date = DateTimeUtils.stringToDate(dateParam, new Date().toString());
+		String searchParam = param.get("searchParam");
+		String selectParam = searchParam.trim() + "%";
+		// searchParam以"1"开头则按手机号搜索
+		if(selectParam.startsWith("1")) {
+			filterMask.setPhoneNumber(selectParam);
+		} else {
+			filterMask.setName(selectParam);
+		}
+		filterMask.setAccountStatus("10");
+		filterMask.setWorkStatus(workStatus);
+		filterMask.setUpdateTime(date);
+		filterMask.setPage(pageNum);
+		filterMask.setPageSize(pageSize);
+		try{
+			int total = deliveryUserService.getDeliveryUserCount(filterMask);
+			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(filterMask);
+			
+			result.setAllCount(total);
+			result.setPageNum(pageNum);
+			result.setPageSize(pageSize);
+			result.setData(list);
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
     }
 
-	/**
-	 * 进入新增页面
-	 * @param filterMask
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/deliveryUser/newPage", method = RequestMethod.POST)
-	String NewPage(DeliveryUserVo filterMask,Model model)
-	{
-		model.addAttribute("filterMask", filterMask);
-		return "DeliveryUser/new";
-	}
-	
+
 	/**
 	 * 新增
-	 * @param country
-	 * @param result
-	 * @return
-	 */
-	@RequestMapping(value = "/deliveryUser/save")
-	@Transactional
-	public String save(HttpServletRequest request,Model model,
-			    HttpServletResponse response,DeliveryUserVo filterMask) throws Exception {
-			//保存
-		    deliveryUserService.save(filterMask);
-		    model.addAttribute("filterMask", new DeliveryUserVo());
-			return "DeliveryUser/main";
-
-	}
-	
-	/**
-	 * 进入修改页面
+	 * @param request
 	 * @param filterMask
-	 * @param model
-	 * @return
+	 * @return Result
 	 */
-	@RequestMapping(value = "/deliveryUser/editPage", method = RequestMethod.POST)	
-    public String  editPage(DeliveryUserVo filterMask,Model model) throws Exception{
-	model.addAttribute("filterMask", filterMask);
-	return "DeliveryUser/edit";
-    }
-	
+	@RequestMapping(value = "/deliveryUser/save",method = RequestMethod.POST)
+	@ResponseBody
+	public Result save(HttpServletRequest request,@RequestBody DeliveryUserDto filterMask) {
+		Result result = Result.initResult();
+		
+		String initialPassword = filterMask.getInitialPassword();
+		String confirmPassword = filterMask.getComfirmPassword();
+		if(!initialPassword.equals(confirmPassword)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("确认密码输入不正确");
+			return result;
+		}
+		
+		filterMask.setPassword(initialPassword);
+				
+		try{
+			deliveryUserService.save(filterMask);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
+	}
 	
 	/**
 	 * 修改
-	 * @param country
-	 * @param result
-	 * @return
+	 * @param request
+	 * @param filterMask
+	 * @return Result
 	 */
-	 @RequestMapping(value = "/deliveryUser/edit")
-	    @Transactional
-	    public String edit(HttpServletRequest request,Model model,
-		    HttpServletResponse response,DeliveryUserVo filterMask) throws Exception {
-		
-		 deliveryUserService.update(filterMask);
-		 model.addAttribute("filterMask", new DeliveryUserVo());
-		 return "DeliveryUser/main";
-	    }
+	@RequestMapping(value = "/deliveryUser/edit",method = RequestMethod.POST)
+	@ResponseBody
+	public Result edit(HttpServletRequest request,@RequestBody DeliveryUserVo filterMask) {
+		Result result = Result.initResult();
+				
+		try{
+			deliveryUserService.update(filterMask);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
+	}
 	
-	 
 	/**
 	 * 删除
-	 * @return
+	 * @param request
+	 * @param filterMask
+	 * @return Result
 	 */
-	@RequestMapping(value = "/deliveryUser/delete")
-	@Transactional
-	public void delete(DeliveryUserVo filterMask,HttpServletRequest request, HttpServletResponse response)throws Exception
-	{
-		deliveryUserService.delete(filterMask);
-		PrintWriter write = response.getWriter();
-		write.write("SUCC");
-		write.flush();
-		write.close();
+	@RequestMapping(value = "/deliveryUser/delete",method = RequestMethod.POST)
+	@ResponseBody
+	public Result delete(HttpServletRequest request,@RequestBody DeliveryUserVo filterMask) {
+		Result result = Result.initResult();
+		
+		filterMask.setAccountStatus("20");
+				
+		try{
+			deliveryUserService.update(filterMask);
+			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		return result;
 	}
 }

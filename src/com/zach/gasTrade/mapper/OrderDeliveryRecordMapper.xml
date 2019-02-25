@@ -20,6 +20,25 @@
          <result property="moveLocation" column="move_location"/>
          <result property="createTime" column="create_time"/>
      </resultMap>
+     
+	  <!-- 自定义查询sql结果与java model映射-->
+	 <resultMap id="DeliveryMonitorDtoResultMap" type="com.zach.gasTrade.dto.DeliveryMonitorDto">
+         <result property="orderId" column="order_id"/>
+         <result property="customerName" column="customer_name"/>
+         <result property="customerPhoneNumber" column="customer_phone_number"/>
+         <result property="deliveryName" column="delivery_name"/>
+         <result property="deliveryPhoneNumber" column="delivery_phone_number"/>
+         <result property="deliveryTime" column="delivery_time"/>
+     </resultMap>
+     
+	  <!-- 自定义查询sql结果与java model映射-->
+	 <resultMap id="OrderDeliveryCountDtoResultMap" type="com.zach.gasTrade.dto.OrderDeliveryCountDto">
+         <result property="deliveryName" column="delivery_name"/>
+         <result property="dayCompleteTime" column="day_complete_time"/>
+         <result property="dayAcceptTime" column="day_accept_time"/>
+         <result property="monthCompleteTime" column="month_complete_time"/>
+         <result property="accumulatedCompleteTime" column="accumulated_complete_time"/>
+     </resultMap>
 
      
     <!-- 公用查询sql-->
@@ -27,9 +46,45 @@
 	    id ,order_id ,allot_time ,allot_desc ,accept_time ,accept_desc ,delivery_time ,delivery_desc ,complete_time ,complete_desc ,start_location ,end_location ,move_location ,create_time 
 	</sql>
 	
+    
+    <!--派送统计-->
+   <select id="getDeliveryUserCount" resultType="java.lang.Integer" >                                             
+	    select count(1)
+	    from order_info AS o
+        left join delivery_user AS d on o.allot_delivery_id=d.id
+        <where>
+	    	   <if  test="deliveryName !=null ">
+		            and d.name = #{deliveryName}
+		       </if>
+		       and d.account_status = "10"
+		</where>
+   </select> 
+   
+   <!--派送统计list-->
+    <select id="getOrderDeliveryPage"  parameterType="java.util.Map" resultMap="OrderDeliveryCountDtoResultMap">   
+	      select d.name as delivery_name,dct.day_complete_time as day_complete_time,dat.day_accept_time as day_accept_time,mct.month_complete_time as month_complete_time,count(delivery_complete_time) as accumulated_complete_time 
+	      from order_info AS o
+          left join delivery_user AS d on o.allot_delivery_id=d.id
+          left join (select allot_delivery_id,count(delivery_complete_time) as day_complete_time from order_info where  datediff(day, delivery_complete_time ,getdate()) = 0
+    group by allot_delivery_id)	AS dct on o.allot_delivery_id=dct.allot_delivery_id
+    	  left join (select allot_delivery_id,count(delivery_order_time) as day_accept_time from order_info where  datediff(day, delivery_order_time ,getdate()) = 0
+    group by allot_delivery_id) as dat on o.allot_delivery_id=dat.allot_delivery_id
+    	  left join (select allot_delivery_id,count(delivery_complete_time) as month_complete_time from order_info where  DateDiff(month, delivery_complete_time, GetDate()) = 0
+    group by allot_delivery_id) as mct on o.allot_delivery_id=mct.allot_delivery_id
+    	<where>
+	    	   <if  test="deliveryName !=null ">
+		            and d.name = #{deliveryName}
+		       </if>
+		       and d.account_status = "10"
+		</where>
+    	group by allot_delivery_id
+	    order by update_time
+	    limit #{startIndex},#{pageSize}
+     </select>
+     
 	
-   <!--查询记录数-->
-   <select id="getOrderDeliveryRecordCount" parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" resultType="java.lang.Integer" >                                             
+   <!--查询派送监控记录数-->
+   <select id="getDeliveryMonitorCount" parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" resultType="java.lang.Integer" >                                             
      	<![CDATA[
 	    select count(1)
 	    from order_delivery_record
@@ -130,54 +185,13 @@
 	    </where>
      </select>
    
-     <select id="getOrderDeliveryRecordPage"  parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" resultMap="OrderDeliveryRecordResultMap">   
-          select                                             
-	      <include refid="OrderDeliveryRecordQuery" />
-	      from order_delivery_record
-	      <where>
-	    	   <if  test="id !=null ">
-		            and id = #{id}
-		       </if>
-	    	   <if  test="orderId !=null ">
-		            and order_id = #{orderId}
-		       </if>
-	    	   <if  test="allotTime !=null ">
-		            and allot_time = #{allotTime}
-		       </if>
-	    	   <if  test="allotDesc !=null ">
-		            and allot_desc = #{allotDesc}
-		       </if>
-	    	   <if  test="acceptTime !=null ">
-		            and accept_time = #{acceptTime}
-		       </if>
-	    	   <if  test="acceptDesc !=null ">
-		            and accept_desc = #{acceptDesc}
-		       </if>
-	    	   <if  test="deliveryTime !=null ">
-		            and delivery_time = #{deliveryTime}
-		       </if>
-	    	   <if  test="deliveryDesc !=null ">
-		            and delivery_desc = #{deliveryDesc}
-		       </if>
-	    	   <if  test="completeTime !=null ">
-		            and complete_time = #{completeTime}
-		       </if>
-	    	   <if  test="completeDesc !=null ">
-		            and complete_desc = #{completeDesc}
-		       </if>
-	    	   <if  test="startLocation !=null ">
-		            and start_location = #{startLocation}
-		       </if>
-	    	   <if  test="endLocation !=null ">
-		            and end_location = #{endLocation}
-		       </if>
-	    	   <if  test="moveLocation !=null ">
-		            and move_location = #{moveLocation}
-		       </if>
-	    	   <if  test="createTime !=null ">
-		            and create_time = #{createTime}
-		       </if>
-	    </where>
+     <select id="getDeliveryMonitorPage"  parameterType="com.zach.gasTrade.vo.OrderDeliveryRecordVo" resultMap="DeliveryMonitorDtoResultMap">   
+	      select                                             
+	      odr.order_id AS order_id,c.name AS customer_name,c.phone_number AS customer_phone_number,d.name AS delivery_name,d.phone_number AS delivery_phone_number,odr.delivery_time AS delivery_time
+	      from order_delivery_record AS odr
+	      left join order_info AS o on o.order_id=odr.order_id
+          left join customer_user AS c on c.id=o.customer_user_id
+          left join delivery_user AS d on o.allot_delivery_id=d.id	
 	    order by update_time
 	    limit #{startIndex},#{pageSize}
      </select>

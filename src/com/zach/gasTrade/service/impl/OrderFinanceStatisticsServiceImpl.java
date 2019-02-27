@@ -67,9 +67,9 @@ public class OrderFinanceStatisticsServiceImpl implements OrderFinanceStatistics
 	
     /**
 	 * 保存
-	 * @param orderFinanceStatisticsVo
 	 */
-    public int save(OrderFinanceStatisticsVo orderFinanceStatisticsVo){
+    public int save(){
+    	OrderFinanceStatisticsVo orderFinanceStatisticsVo = new OrderFinanceStatisticsVo();
     	OrderFinanceStatisticsDto orderFinanceStatisticsDto = orderInfoService.getOrderDayCount();
     	String id = SerialGenerator.getUUID();
     	Date nowTime = new Date();

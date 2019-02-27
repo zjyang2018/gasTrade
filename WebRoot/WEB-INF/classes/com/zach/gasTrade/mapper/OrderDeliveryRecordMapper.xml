@@ -77,8 +77,8 @@
 		       </if>
 		       and d.account_status = "10"
 		</where>
-    	group by allot_delivery_id
-	    order by update_time
+    	group by o.allot_delivery_id
+	    order by o.update_time
 	    limit #{startIndex},#{pageSize}
      </select>
      
@@ -192,7 +192,7 @@
 	      left join order_info AS o on o.order_id=odr.order_id
           left join customer_user AS c on c.id=o.customer_user_id
           left join delivery_user AS d on o.allot_delivery_id=d.id	
-	    order by update_time
+	    order by odr.update_time
 	    limit #{startIndex},#{pageSize}
      </select>
      

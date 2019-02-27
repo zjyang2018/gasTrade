@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
@@ -61,15 +62,16 @@ public class OrderDeliveryRecordController {
 	@ResponseBody
     public PageResult getDeliveryCountList(HttpServletRequest request, @RequestBody Map<String,String> param) {
 		PageResult result=PageResult.initResult();
+		Map<String, Object> map = new HashMap<>();
 		
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		int startIndex = (pageNum - 1) * pageSize;
 		String name = param.get("deliveryName");
-		String deliveryName = name + "%";
-
-		Map<String, Object> map = new HashMap<>();
-		map.put("deliveryName", deliveryName);
+		if(StringUtil.isNotNullAndNotEmpty(name)) {
+			String deliveryName = name + "%";
+			map.put("deliveryName", deliveryName);
+		}
 		map.put("startIndex", startIndex);
 		map.put("pageSize", pageSize);
 		try{
@@ -131,6 +133,11 @@ public class OrderDeliveryRecordController {
 	public Result edit(HttpServletRequest request,@RequestBody Map<String,String> param) {
 		Result result = Result.initResult();
 		String orderId = param.get("orderId");
+		if(StringUtil.isNullOrEmpty(orderId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("产品编号不能为空");
+			return result;
+		}
 		String deliveryName = param.get("deliveryName");
 		
 		OrderInfoVo orderInfoVo = new OrderInfoVo();
@@ -167,6 +174,11 @@ public class OrderDeliveryRecordController {
 	@ResponseBody
 	public DataResult info(HttpServletRequest request,@RequestBody OrderInfoVo filterMask) {
 		DataResult result = DataResult.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
 			
 		try{
 			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);

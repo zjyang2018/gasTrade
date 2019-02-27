@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.common.seq.SerialGenerator;
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
@@ -50,10 +51,13 @@ public class ProductController {
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String likeName = param.get("productName");
-		String productName = likeName + "%";
+		if(StringUtil.isNotNullAndNotEmpty(likeName)) {
+			String productName = likeName + "%";
+			filterMask.setProductName(productName);
+		}
+		
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
-		filterMask.setProductName(productName);
 		try{
 			int total = productService.getProductCount(filterMask);
 			List<ProductVo> list = productService.getProductPage(filterMask);
@@ -137,6 +141,11 @@ public class ProductController {
 	@ResponseBody
 	public Result edit(HttpServletRequest request,@RequestBody ProductVo filterMask) {
 		Result result = Result.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getProductId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("产品编号不能为空");
+			return result;
+		}
 				
 		//保存数据库的路径
 		  String sqlPath = null; 
@@ -189,7 +198,11 @@ public class ProductController {
 	@ResponseBody
 	public Result delete(HttpServletRequest request,@RequestBody ProductVo filterMask) {
 		Result result = Result.initResult();
-		
+		if(StringUtil.isNullOrEmpty(filterMask.getProductId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("产品编号不能为空");
+			return result;
+		}
 		filterMask.setStatus("20");
 				
 		try{
@@ -217,6 +230,11 @@ public class ProductController {
 	@ResponseBody
 	public DataResult info(HttpServletRequest request,@RequestBody ProductVo filterMask) {
 		DataResult result = DataResult.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getProductId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("产品编号不能为空");
+			return result;
+		}
 			
 		try{
 			ProductVo product = productService.getProductBySelective(filterMask);

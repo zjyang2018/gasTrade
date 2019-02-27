@@ -131,7 +131,7 @@
 		            and create_time = #{createTime}
 		       </if>
 	    </where>
-	    order by update_time
+	    order by create_time
 	    limit #{startIndex},#{pageSize}
      </select>
      

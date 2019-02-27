@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.common.utils.DateTimeUtils;
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
@@ -51,13 +52,16 @@ public class DeliveryUserController {
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String searchParam = param.get("searchParam");
-		String selectParam = searchParam.trim() + "%";
-		// searchParam以"1"开头则按手机号搜索
-		if(selectParam.startsWith("1")) {
-			filterMask.setPhoneNumber(selectParam);
-		} else {
-			filterMask.setName(selectParam);
+		if(StringUtil.isNotNullAndNotEmpty(searchParam)) {
+			String selectParam = searchParam.trim() + "%";
+			// searchParam以"1"开头则按手机号搜索
+			if(selectParam.startsWith("1")) {
+				filterMask.setPhoneNumber(selectParam);
+			} else {
+				filterMask.setName(selectParam);
+			}
 		}
+		
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
 		try{
@@ -95,18 +99,25 @@ public class DeliveryUserController {
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String  dateParam = param.get("dateParam");
 		String  workStatus = param.get("workStatus");
-		Date date = DateTimeUtils.stringToDate(dateParam, new Date().toString());
+		
 		String searchParam = param.get("searchParam");
-		String selectParam = searchParam.trim() + "%";
-		// searchParam以"1"开头则按手机号搜索
-		if(selectParam.startsWith("1")) {
-			filterMask.setPhoneNumber(selectParam);
-		} else {
-			filterMask.setName(selectParam);
+		if(StringUtil.isNotNullAndNotEmpty(searchParam)) {
+			String selectParam = searchParam.trim() + "%";
+			// searchParam以"1"开头则按手机号搜索
+			if(selectParam.startsWith("1")) {
+				filterMask.setPhoneNumber(selectParam);
+			} else {
+				filterMask.setName(selectParam);
+			}
+		}
+		if(StringUtil.isNotNullAndNotEmpty(workStatus)) {
+			filterMask.setWorkStatus(workStatus);
+		}
+		if(StringUtil.isNotNullAndNotEmpty(dateParam)) {
+			Date date = DateTimeUtils.stringToDate(dateParam, new Date().toString());
+			filterMask.setUpdateTime(date);
 		}
 		filterMask.setAccountStatus("10");
-		filterMask.setWorkStatus(workStatus);
-		filterMask.setUpdateTime(date);
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
 		try{
@@ -176,6 +187,11 @@ public class DeliveryUserController {
 	@ResponseBody
 	public Result edit(HttpServletRequest request,@RequestBody DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("派送员编号不能为空");
+			return result;
+		}
 				
 		try{
 			deliveryUserService.update(filterMask);
@@ -202,6 +218,11 @@ public class DeliveryUserController {
 	@ResponseBody
 	public Result delete(HttpServletRequest request,@RequestBody DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("派送员编号不能为空");
+			return result;
+		}
 		
 		filterMask.setAccountStatus("20");
 				

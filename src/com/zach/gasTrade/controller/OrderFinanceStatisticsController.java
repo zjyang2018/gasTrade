@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
@@ -47,8 +48,11 @@ private Logger logger = Logger.getLogger(getClass());
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String searchDate = param.get("searchDate");
-		String date = searchDate + "%";
-		filterMask.setDate(date);
+		if(StringUtil.isNotNullAndNotEmpty(searchDate)) {
+			String date = searchDate + "%";
+			filterMask.setDate(date);
+		}
+				
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
 		try{
@@ -77,13 +81,13 @@ private Logger logger = Logger.getLogger(getClass());
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/orderFinanceStatistics/save",method = RequestMethod.POST)
+	@RequestMapping(value = "/orderFinanceStatistics/save",method = RequestMethod.GET)
 	@ResponseBody
-	public Result save(HttpServletRequest request,@RequestBody OrderFinanceStatisticsVo filterMask) {
+	public Result save(HttpServletRequest request) {
 		Result result = Result.initResult();
 				
 		try{			
-			orderFinanceStatisticsService.save(filterMask);
+			orderFinanceStatisticsService.save();
 			
 		}catch (RuntimeException e){
 			result.setCode(Constants.FAILURE);

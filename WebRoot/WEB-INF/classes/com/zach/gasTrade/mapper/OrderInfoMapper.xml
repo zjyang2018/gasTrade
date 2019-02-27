@@ -153,7 +153,7 @@
 		            and delivery_order_time between #{startTime} and ifnull(#{endTime},now())
 		       </if>
 	    </where>	
-	    order by update_time
+	    order by o.update_time
 	    limit #{startIndex},#{pageSize}
      </select>
       
@@ -228,7 +228,7 @@
 	    </where>
      </select>
    
-     <select id="getOrderInfoPage"  parameterType="com.zach.gasTrade.vo.OrderInfoVo" resultMap="OrderListDtoResultMap">   
+     <select id="getOrderInfoPage"  parameterType="com.zach.gasTrade.dto.OrderListDto" resultMap="OrderListDtoResultMap">   
           select                                             
 	      o.order_id AS order_id,o.amount AS amount,sum(o.amount) AS total_amount,o.pay_status AS pay_status,c.name AS customer_name,c.phone_number AS customer_phone_number,o.allot_status AS allot_status,d.name AS delivery_name,d.phone_number AS delivery_phone_number,o.order_status AS order_status,o.pay_time AS pay_time,o.delivery_order_time AS delivery_order_time
 	      from order_info AS o
@@ -263,7 +263,7 @@
 		            and order_status = #{orderStatus}
 		       </if>
 	    </where>	
-	    order by update_time
+	    order by o.update_time
 	    limit #{startIndex},#{pageSize}
      </select>
      

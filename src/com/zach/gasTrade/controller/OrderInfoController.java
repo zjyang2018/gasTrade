@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.common.utils.DateTimeUtils;
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
@@ -65,33 +66,51 @@ public class OrderInfoController {
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String orderId = param.get("orderId");
-		String id = orderId.trim() + "%";
+		if(StringUtil.isNotNullAndNotEmpty(orderId)) {
+			String id = orderId.trim() + "%";
+			filterMask.setOrderId(id);
+		}
+		
 		String payStatus = param.get("payStatus");
+		if(StringUtil.isNotNullAndNotEmpty(payStatus)) {
+			filterMask.setPayStatus(payStatus);
+		}
 		String searchCustomerParam = param.get("searchCustomerParam");
-		String selectCustomerParam = searchCustomerParam.trim() + "%";
-		// selectCustomerParam以"1"开头则按手机号搜索
-		if(selectCustomerParam.startsWith("1")) {
-			filterMask.setCustomerPhoneNumber(selectCustomerParam);
-		}else {
-			filterMask.setCustomerName(selectCustomerParam);
+		if(StringUtil.isNotNullAndNotEmpty(searchCustomerParam)) {
+			String selectCustomerParam = searchCustomerParam.trim() + "%";
+			// selectCustomerParam以"1"开头则按手机号搜索
+			if(selectCustomerParam.startsWith("1")) {
+				filterMask.setCustomerPhoneNumber(selectCustomerParam);
+			}else {
+				filterMask.setCustomerName(selectCustomerParam);
+			}
 		}
+		
 		String searchDeliveryParam = param.get("searchDeliveryParam");
-		String selectDeliveryParam = searchDeliveryParam.trim() + "%";
-		// selectDeliveryParam以"1"开头则按手机号搜索
-		if(selectDeliveryParam.startsWith("1")) {
-			filterMask.setDeliveryPhoneNumber(selectDeliveryParam);
-		}else {
-			filterMask.setDeliveryName(selectDeliveryParam);
+		if(StringUtil.isNotNullAndNotEmpty(searchDeliveryParam)) {
+			String selectDeliveryParam = searchDeliveryParam.trim() + "%";
+			// selectDeliveryParam以"1"开头则按手机号搜索
+			if(selectDeliveryParam.startsWith("1")) {
+				filterMask.setDeliveryPhoneNumber(selectDeliveryParam);
+			}else {
+				filterMask.setDeliveryName(selectDeliveryParam);
+			}
 		}
+		
 		String allotStatus = param.get("allotStatus");
+		if(StringUtil.isNotNullAndNotEmpty(allotStatus)) {
+			filterMask.setAllotStatus(allotStatus);
+		}
 		String orderStatus = param.get("orderStatus");
+		if(StringUtil.isNotNullAndNotEmpty(orderStatus)) {
+			filterMask.setOrderStatus(orderStatus);
+		}
 		String payTime = param.get("payTime");
-		Date payTimeToDate = DateTimeUtils.stringToDate(payTime, new Date().toString());
-		filterMask.setOrderId(id);
-		filterMask.setPayStatus(payStatus);
-		filterMask.setAllotStatus(allotStatus);
-		filterMask.setOrderStatus(orderStatus);
-		filterMask.setPayTime(payTimeToDate);
+		if(StringUtil.isNotNullAndNotEmpty(payTime)) {
+			Date payTimeToDate = DateTimeUtils.stringToDate(payTime, new Date().toString());
+			filterMask.setPayTime(payTimeToDate);
+		}
+		
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
 		try{
@@ -124,23 +143,30 @@ public class OrderInfoController {
 	@ResponseBody
     public PageResult getOrderMonitorList(HttpServletRequest request, @RequestBody Map<String,String> param) {
 		PageResult result=PageResult.initResult();
+		Map<String, Object> map = new HashMap<>();
 		
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String id = param.get("orderId");
-		String orderId = id.trim() + "%";
-		String startTime = param.get("startTime");
-		String endTime = param.get("endTime");
+		if(StringUtil.isNotNullAndNotEmpty(id)) {
+			String orderId = id.trim() + "%";
+			map.put("orderId", orderId);
+		}
 		
-		Date startDate = DateTimeUtils.stringToDate(startTime, new Date().toString());
-		Date endDate = DateTimeUtils.stringToDate(endTime, new Date().toString());
+		String startTime = param.get("startTime");
+		if(StringUtil.isNotNullAndNotEmpty(startTime)) {
+			Date startDate = DateTimeUtils.stringToDate(startTime, new Date().toString());
+			map.put("startDate", startDate);
+		}
+		String endTime = param.get("endTime");
+		if(StringUtil.isNotNullAndNotEmpty(endTime)) {
+			Date endDate = DateTimeUtils.stringToDate(endTime, new Date().toString());
+			map.put("endDate", endDate);
+		}
+
 		int startIndex = (pageNum - 1) * pageSize;
-		Map<String, Object> map = new HashMap<>();
 		map.put("startIndex", startIndex);
 		map.put("pageSize", pageSize);
-		map.put("orderId", orderId);
-		map.put("startDate", startDate);
-		map.put("endDate", endDate);
 		
 		try{
 			int total = orderInfoService.getDeliveryMonitorCount(map);
@@ -199,6 +225,11 @@ public class OrderInfoController {
 	public Result edit(HttpServletRequest request,@RequestBody Map<String,String> param) {
 		Result result = Result.initResult();
 		String orderId = param.get("orderId");
+		if(StringUtil.isNullOrEmpty(orderId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
 		String deliveryName = param.get("deliveryName");
 		String editReason = param.get("editReason");
 		
@@ -237,6 +268,11 @@ public class OrderInfoController {
 	@ResponseBody
 	public DataResult info(HttpServletRequest request,@RequestBody OrderInfoVo filterMask) {
 		DataResult result = DataResult.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
 			
 		try{
 			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);

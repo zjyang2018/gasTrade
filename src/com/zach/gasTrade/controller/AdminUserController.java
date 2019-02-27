@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
@@ -87,15 +88,23 @@ public class AdminUserController {
 		String searchParam = param.get("searchParam");
 		String workStatus = param.get("workStatus");
 		String accountStatus = param.get("accountStatus");
-		String selectParam = searchParam.trim() + "%";
-		// searchParam以"1"开头则按手机号搜索
-		if(selectParam.startsWith("1")) {
-			filterMask.setPhoneNumber(selectParam);
-		}else {
-			filterMask.setName(selectParam);
+		if(StringUtil.isNotNullAndNotEmpty(searchParam)) {
+			String selectParam = searchParam.trim() + "%";
+			// searchParam以"1"开头则按手机号搜索
+			if(selectParam.startsWith("1")) {
+				filterMask.setPhoneNumber(selectParam);
+			}else {
+				filterMask.setName(selectParam);
+			}
 		}
-		filterMask.setWorkStatus(workStatus);
-		filterMask.setAccountStatus(accountStatus);
+		if(StringUtil.isNotNullAndNotEmpty(workStatus)) {
+			filterMask.setWorkStatus(workStatus);
+		}
+		
+		if(StringUtil.isNotNullAndNotEmpty(accountStatus)) {
+			filterMask.setAccountStatus(accountStatus);
+		}
+		
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
 		try{
@@ -165,6 +174,11 @@ public class AdminUserController {
 	@ResponseBody
 	public Result edit(HttpServletRequest request,@RequestBody AdminUserVo filterMask) {
 		Result result = Result.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("管理员编号不能为空");
+			return result;
+		}
 				
 		try{
 			adminUserService.update(filterMask);
@@ -191,6 +205,11 @@ public class AdminUserController {
 	@ResponseBody
 	public Result delete(HttpServletRequest request,@RequestBody AdminUserVo filterMask) {
 		Result result = Result.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("管理员编号不能为空");
+			return result;
+		}
 		
 		filterMask.setAccountStatus("20");
 				
@@ -219,6 +238,11 @@ public class AdminUserController {
 	@ResponseBody
 	public DataResult info(HttpServletRequest request,@RequestBody AdminUserVo filterMask) {
 		DataResult result = DataResult.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("管理员编号不能为空");
+			return result;
+		}
 			
 		try{
 			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(filterMask);

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
@@ -49,14 +50,20 @@ public class CustomerUserController {
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String searchParam = param.get("searchParam");
 		String channel = param.get("channel");
-		String selectParam = searchParam.trim() + "%";
-		// searchParam以"1"开头则按手机号搜索
-		if(selectParam.startsWith("1")) {
-			filterMask.setPhoneNumber(selectParam);
-		}else {
-			filterMask.setName(selectParam);
+		
+		if(StringUtil.isNotNullAndNotEmpty(searchParam)) {
+			String selectParam = searchParam.trim() + "%";
+			// searchParam以"1"开头则按手机号搜索
+			if(selectParam.startsWith("1")) {
+				filterMask.setPhoneNumber(selectParam);
+			}else {
+				filterMask.setName(selectParam);
+			}
 		}
-		filterMask.setChannel(channel);
+		
+		if(StringUtil.isNotNullAndNotEmpty(channel)) {
+			filterMask.setChannel(channel);
+		}
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
 		try{
@@ -116,6 +123,11 @@ public class CustomerUserController {
 	@ResponseBody
 	public Result edit(HttpServletRequest request,@RequestBody CustomerUserVo filterMask) {
 		Result result = Result.initResult();
+		if(StringUtil.isNullOrEmpty(filterMask.getId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("客户编号不能为空");
+			return result;
+		}
 				
 		try{
 			customerUserService.update(filterMask);

@@ -6,8 +6,9 @@
 
 package com.zach.gasTrade.service;
 
-import com.zach.gasTrade.vo.OrderFinanceStatisticsVo;
 import java.util.List;
+
+import com.zach.gasTrade.vo.OrderFinanceStatisticsVo;
 
 public interface OrderFinanceStatisticsService{
 	/**
@@ -40,9 +41,8 @@ public interface OrderFinanceStatisticsService{
 	 
 	 /**
 	 * 保存
-	 * @param orderFinanceStatisticsVo
 	 */
-    public int save(OrderFinanceStatisticsVo orderFinanceStatisticsVo);
+    public int save();
     
     /**
 	 * 更新

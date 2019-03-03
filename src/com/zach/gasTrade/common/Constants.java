@@ -6,4 +6,7 @@ public class Constants {
 
 	public static final int SUCCESS = 0;
 	public static final int FAILURE = -1;
+	
+	public static final String BASE_PATH = "http://localhost:8080/gasTrade/images/";
+	//public static final String BASE_PATH = "http://39.98.54.16:8080/gasTrade/images/";
 }

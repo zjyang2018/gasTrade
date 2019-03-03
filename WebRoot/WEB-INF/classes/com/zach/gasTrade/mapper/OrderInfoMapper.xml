@@ -67,15 +67,15 @@
     <select id="getOrderDayCount" resultMap="OrderFinanceStatisticsResultMap">   
 	    select temp_table1.buyerCount as buyer_count,temp_table1.orderCount as order_count,temp_table2.payOrderCount as pay_order_count,temp_table3.deliveryOrderCount,temp_table2.avgAmount as avg_amount,temp_table2.orderAmount as order_amount
 	    from 
-        (select ifnull(count(distinct customer_user_id),0) as buyerCount,ifnull(count(orderId),0) as orderCount
+        (select ifnull(count(distinct customer_user_id),0) as buyerCount,ifnull(count(order_id),0) as orderCount
 	    from order_info 
-	    where datediff(day, create_time ,getdate()) = 0) as temp_table1,
-	    (select ifnull(count(orderId),0) as payOrderCount,ifnull(sum(amount),0) as orderAmount,ifnull(avg(amount),0) as avgAmount
+	    where datediff(create_time ,Now()) = 0) as temp_table1,
+	    (select ifnull(count(order_id),0) as payOrderCount,ifnull(sum(amount),0) as orderAmount,ifnull(avg(amount),0) as avgAmount
 	    from order_info
-	    where datediff(day, pay_time ,getdate()) = 0) as temp_table2,
-	    (select ifnull(count(orderId),0)  as deliveryOrderCount
+	    where datediff(pay_time ,Now()) = 0) as temp_table2,
+	    (select ifnull(count(order_id),0)  as deliveryOrderCount
 	    from order_info
-	    where datediff(day, delivery_complete_time ,getdate()) = 0) as temp_table3
+	    where datediff(delivery_complete_time ,Now()) = 0) as temp_table3
 	    
      </select>
      

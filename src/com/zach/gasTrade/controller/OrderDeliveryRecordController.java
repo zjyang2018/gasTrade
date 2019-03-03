@@ -135,7 +135,7 @@ public class OrderDeliveryRecordController {
 		String orderId = param.get("orderId");
 		if(StringUtil.isNullOrEmpty(orderId)) {
 			result.setCode(Constants.FAILURE);
-			result.setMsg("产品编号不能为空");
+			result.setMsg("订单编号不能为空");
 			return result;
 		}
 		String deliveryName = param.get("deliveryName");

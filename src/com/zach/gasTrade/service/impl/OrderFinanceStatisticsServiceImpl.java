@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.common.seq.SerialGenerator;
+import com.common.utils.DateTimeUtils;
 import com.zach.gasTrade.dao.OrderFinanceStatisticsDao;
 import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
 import com.zach.gasTrade.service.OrderFinanceStatisticsService;
@@ -74,7 +75,7 @@ public class OrderFinanceStatisticsServiceImpl implements OrderFinanceStatistics
     	String id = SerialGenerator.getUUID();
     	Date nowTime = new Date();
     	orderFinanceStatisticsVo.setId(id);
-    	orderFinanceStatisticsVo.setDate(nowTime.toString());
+    	orderFinanceStatisticsVo.setDate(DateTimeUtils.dateToString(nowTime, "yyyy-MM-dd"));
     	orderFinanceStatisticsVo.setCreateTime(nowTime);
     	orderFinanceStatisticsVo.setAvgAmount(orderFinanceStatisticsDto.getAvgAmount());
     	orderFinanceStatisticsVo.setBuyerCount(orderFinanceStatisticsDto.getBuyerCount());

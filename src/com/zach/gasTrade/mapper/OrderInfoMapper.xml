@@ -11,6 +11,7 @@
          <result property="amount" column="amount"/>
          <result property="payStatus" column="pay_status"/>
          <result property="payNo" column="pay_no"/>
+         <result property="realPayAmount" column="real_pay_amount"/>
          <result property="payTime" column="pay_time"/>
          <result property="allotStatus" column="allot_status"/>
          <result property="allotTime" column="allot_time"/>
@@ -364,6 +365,9 @@
         	<if test="payNo !=null "> 
         	pay_no = #{payNo} ,
         	</if> 
+        	<if test="realPayAmount !=null "> 
+        	real_pay_amount = #{realPayAmount} ,
+        	</if>
         	<if test="payTime !=null "> 
         	pay_time = #{payTime} ,
         	</if> 
@@ -433,6 +437,9 @@
 	        </if>	
 	        <if test="payNo !=null ">
 	        	pay_no ,
+	        </if>
+	         <if test="realPayAmount !=null ">
+	        	real_pay_amount ,
 	        </if>	
 	        <if test="payTime !=null ">
 	        	pay_time ,
@@ -497,6 +504,9 @@
 	        </if>	
 	        <if test="payNo !=null ">
 	        	#{payNo} ,
+	        </if>
+	        <if test="realPayAmount !=null ">
+	        	#{realPayAmount} ,
 	        </if>	
 	        <if test="payTime !=null ">
 	        	#{payTime} ,

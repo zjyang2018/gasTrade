@@ -261,7 +261,8 @@ public class PayService {
 			e.printStackTrace();
 			resultMap.put("errCode", "HttpURLException");
 			resultMap.put("msg", "调用银商接口出现异常：" + e.toString());
-			return JSONObject.parseObject(JSON.toJSONString(resultMap));
+			// return JSONObject.parseObject(JSON.toJSONString(resultMap));
+			throw new RuntimeException(e.getMessage());
 		} finally {
 			if (out != null) {
 				out.close();

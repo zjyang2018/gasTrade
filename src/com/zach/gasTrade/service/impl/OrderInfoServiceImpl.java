@@ -196,6 +196,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			String realPayAmountStr = params.get("buyerPayAmount");
 			String payTimeStr = params.get("payTime");
 			String refundAmountStr = params.get("refundAmount");
+			if (refundAmountStr != null && !refundAmountStr.isEmpty()) {
+				throw new RuntimeException("退款通知不处理," + JSON.toJSONString(params));
+			}
 			String refundOrderId = params.get("refundOrderId");
 			OrderInfoVo orderInfoVo = new OrderInfoVo();
 			orderInfoVo.setOrderId(orderId);

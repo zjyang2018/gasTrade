@@ -238,7 +238,13 @@ public class OrderInfoController {
 		logger.info("支付通知,params：" + params);
 
 		// 通知处理
-		boolean checkRet = orderInfoService.notifyHandle(params);
+		boolean checkRet = false;
+		try {
+			checkRet = orderInfoService.notifyHandle(params);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("系统异常,请稍后重试", e);
+		}
 
 		if (checkRet) {
 			writer.print("SUCCESS");

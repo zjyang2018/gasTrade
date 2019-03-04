@@ -111,8 +111,8 @@ public class PayService {
 		// json.put("goods", goodsList);
 		json.put("notifyUrl", notifyUrl);
 		json.put("returnUrl", returnUrl);
-
-		json.put("secureTransaction", true);
+		// 不担保交易
+		json.put("secureTransaction", false);
 
 		String url = UnoinPayUtil.makeOrderRequest(json, md5Key, apiUrl_makeOrder);
 

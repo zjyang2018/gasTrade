@@ -82,7 +82,7 @@
      
     <!-- 公用查询sql-->
     <sql id="OrderInfoQuery">
-	    order_id ,product_id ,product_name ,amount ,pay_status ,pay_no ,pay_time ,allot_status ,allot_time ,allot_delivery_id ,delivery_order_time ,delivery_complete_time ,customer_user_id ,customer_address ,longitude ,latitude ,order_status ,remark ,edit_reason ,create_time ,update_time 
+	    order_id ,product_id ,product_name ,amount ,pay_status ,pay_no ,real_pay_amount,pay_time ,allot_status ,allot_time ,allot_delivery_id ,delivery_order_time ,delivery_complete_time ,customer_user_id ,customer_address ,longitude ,latitude ,order_status ,remark ,edit_reason ,create_time ,update_time 
 	</sql>
 	
 	

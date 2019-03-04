@@ -17,10 +17,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * Created by faliny on 2017/8/25.
  */
-import net.sf.json.JSONObject;
 
 public class UnoinPayUtil {
 
@@ -86,7 +87,7 @@ public class UnoinPayUtil {
 	public static String genMerOrderId(String msgId) {
 		String date = DateFormatUtils.format(new Date(), "yyyyMMddHHmmssSSS");
 		String rand = RandomStringUtils.randomNumeric(7);
-		return date + msgId + rand;
+		return msgId + date + rand;
 	}
 
 	private static String buildUrlParametersStr(Map<String, String> paramMap) {
@@ -114,7 +115,7 @@ public class UnoinPayUtil {
 	public static Map<String, String> jsonToMap(JSONObject json) {
 		Map<String, String> map = new HashMap<String, String>();
 		for (Object key : json.keySet()) {
-			String value = json.optString((String) key);
+			String value = json.getString((String) key);
 			map.put((String) key, value);
 		}
 		return map;

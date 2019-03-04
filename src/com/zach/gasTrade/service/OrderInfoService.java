@@ -108,6 +108,6 @@ public interface OrderInfoService {
 	 * 
 	 * @param orderInfoVo
 	 */
-	public boolean refundAmount(String orderId);
+	public void refundAmount(String orderId);
 
 }

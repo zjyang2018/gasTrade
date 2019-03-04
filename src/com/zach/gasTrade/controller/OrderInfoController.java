@@ -207,6 +207,7 @@ public class OrderInfoController {
 
 		try {
 			String payUrl = orderInfoService.buy(filterMask);
+			logger.info("支付请求payUrl==>" + payUrl);
 			response.sendRedirect(payUrl);
 			// result.setData(orderInfoService.save(filterMask));
 		} catch (RuntimeException e) {
@@ -245,6 +246,37 @@ public class OrderInfoController {
 			writer.print("FAILED");
 		}
 		writer.flush();
+	}
+
+	/**
+	 * 接收通知的方法
+	 *
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/orderInfo/refund", method = RequestMethod.GET)
+	@ResponseBody
+	public Result refund(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Result result = Result.initResult();
+		try {
+			String orderId = request.getParameter("orderId");
+			if (orderId == null || orderId.isEmpty()) {
+				throw new RuntimeException("退款时,订单号不能为空");
+			}
+			orderInfoService.refundAmount(orderId);
+			// result.setData(orderInfoService.save(filterMask));
+			result.setMsg("退款成功");
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
 	}
 
 	/**

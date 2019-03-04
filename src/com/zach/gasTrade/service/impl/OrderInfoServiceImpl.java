@@ -11,10 +11,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zach.gasTrade.dao.CustomerUserDao;
 import com.zach.gasTrade.dao.OrderInfoDao;
 import com.zach.gasTrade.dao.ProductDao;
@@ -30,6 +32,7 @@ import com.zach.gasTrade.vo.ProductVo;
 
 @Service("orderInfoService")
 public class OrderInfoServiceImpl implements OrderInfoService {
+	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired
 	private PayService payService;
@@ -212,9 +215,15 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	}
 
 	@Override
-	public boolean refundAmount(String orderId) {
-		// TODO Auto-generated method stub
-		return false;
+	public void refundAmount(String orderId) {
+		OrderInfoVo orderInfoVo = new OrderInfoVo();
+		orderInfoVo.setOrderId(orderId);
+		OrderInfoVo orderInfo = orderInfoDao.getOrderInfoBySelective(orderInfoVo);
+		if (orderInfo == null) {
+			throw new RuntimeException(orderId + ",订单不存在");
+		}
+		JSONObject result = payService.refund(orderId, orderInfo.getRealPayAmount());
+		logger.info("退款返回参数值:" + result.toJSONString() + ",退款订单号:" + orderId);
 	}
 
 }

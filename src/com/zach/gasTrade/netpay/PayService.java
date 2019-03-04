@@ -22,16 +22,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zach.gasTrade.vo.ProductVo;
-
-import net.sf.json.JSONObject;
 
 @Component
 public class PayService {
 	private Logger logger = Logger.getLogger(getClass());
 
 	// 读取资源配置参数
-	@Value("${url}")
+	@Value("${apiUrl}")
 	private String APIurl;
 	@Value("${mid}")
 	private String mid;
@@ -72,7 +71,7 @@ public class PayService {
 	// 公众支付方式类型
 	final private static String msgType = "WXPay.jsPay";
 	// 订单生成分割值
-	final public static String msgSrcId = "YK";
+	final public static String msgSrcId = "3194TK";
 
 	// final private static String apiUrl_makeOrder =
 	// "https://qr-test2.chinaums.com/netpay-portal/webpay/pay.do";
@@ -166,7 +165,7 @@ public class PayService {
 		Map<String, String> resultMap = new HashMap<String, String>();
 		resultMap.put("preStr", preStrNew_md5Key);
 		resultMap.put("sign", sign);
-		resultStr = JSONObject.fromObject(resultMap).toString();
+		// resultStr = JSONObject.fromObject(resultMap).toString();
 
 		return map;
 
@@ -188,7 +187,7 @@ public class PayService {
 	 * @param params
 	 * @return
 	 */
-	public JSONObject refund(String redundOrderId, BigDecimal amount) {
+	public JSONObject refund(String orderId, BigDecimal amount) {
 		// 组织请求报文
 		JSONObject json = new JSONObject();
 		json.put("mid", mid);
@@ -196,7 +195,7 @@ public class PayService {
 		json.put("msgType", msgType_refund);
 		json.put("msgSrc", msgSrc);
 		json.put("instMid", instMid);
-		json.put("merOrderId", redundOrderId);
+		json.put("merOrderId", orderId);
 
 		// 是否要在商户系统下单，看商户需求 createBill()
 
@@ -218,7 +217,7 @@ public class PayService {
 		Map<String, String> resultMap = new HashMap<String, String>();
 		if (!StringUtils.isNotBlank(APIurl)) {
 			resultMap.put("errCode", "URLFailed");
-			return JSONObject.fromObject(resultMap);
+			return JSONObject.parseObject(JSON.toJSONString(resultMap));
 		}
 
 		try {
@@ -250,15 +249,19 @@ public class PayService {
 				// 转换成json对象
 				com.alibaba.fastjson.JSONObject respJson = JSON.parseObject(content.toString());
 				String resultCode = respJson.getString("errCode");
-				resultMap.put("errCode", resultCode);
-				resultMap.put("respStr", respJson.toString());
-				return JSONObject.fromObject(resultMap);
+				if ("SUCCESS".equals(resultCode)) {
+					resultMap.put("errCode", resultCode);
+					resultMap.put("respStr", respJson.toString());
+					return JSONObject.parseObject(JSON.toJSONString(resultMap));
+				} else {
+					throw new RuntimeException(respJson.getString("errMsg"));
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			resultMap.put("errCode", "HttpURLException");
 			resultMap.put("msg", "调用银商接口出现异常：" + e.toString());
-			return JSONObject.fromObject(resultMap);
+			return JSONObject.parseObject(JSON.toJSONString(resultMap));
 		} finally {
 			if (out != null) {
 				out.close();

@@ -29,8 +29,6 @@ import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.vo.AdminUserVo;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "平台用户相关api")
@@ -48,11 +46,13 @@ public class AdminUserController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@ApiOperation(value = "平台用户登录", notes = "样例参数{\n" + "  \"name\": \"test\",\n" + "  \"password\": \"password\",\n"
-			+ "}")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "name", value = "用户名称", required = false, paramType = "query", dataType = "String"),
-			@ApiImplicitParam(name = "password", value = "用户密码", required = true, paramType = "query", dataType = "String") })
+	@ApiOperation(value = "平台用户登录", notes = "样例参数{\n" + "  \"name\": \"test\",\n" + "  \"password\": \"password\"\n"
+			+ "}\\n返回参数字段说明:\\n")
+	// @ApiImplicitParams({
+	// @ApiImplicitParam(name = "name", value = "用户名称", required = true, paramType =
+	// "query", dataType = "String"),
+	// @ApiImplicitParam(name = "password", value = "用户密码", required = true,
+	// paramType = "query", dataType = "String") })
 	@RequestMapping(value = "/adminUser/login", method = RequestMethod.POST)
 	@ResponseBody
 	public Result login(HttpServletRequest request, @RequestBody Map<String, String> param, AdminUserVo filterMask) {

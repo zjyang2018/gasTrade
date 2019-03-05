@@ -16,6 +16,9 @@
 	<mvc:resources location="/scripts/" mapping="/scripts/**"/>
 	<mvc:resources location="/mv/" mapping="/mv/**"/>
 	<mvc:resources location="/views/equipConfig/" mapping="/views/equipConfig/**"/>
+	<!-- swagger2静态资源过滤访问 -->   
+	<mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
+	<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/" />
                         
 	<!-- 自动扫描该包，使SpringMVC认为包下用了@controller注解的类是控制器 -->
 	<context:component-scan base-package="com.zach.gasTrade.controller" />

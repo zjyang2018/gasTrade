@@ -43,6 +43,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 		// response);
 		// return false;
 		// }
+		response.addHeader("Access-Control-Allow-Origin", "*");
 		return true;
 	}
 

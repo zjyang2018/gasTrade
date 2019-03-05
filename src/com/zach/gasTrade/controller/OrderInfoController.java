@@ -40,6 +40,10 @@ import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 import com.zach.gasTrade.vo.OrderInfoVo;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@Api(tags = "订单相关api")
 @Controller
 public class OrderInfoController {
 	private Logger logger = Logger.getLogger(getClass());
@@ -199,6 +203,8 @@ public class OrderInfoController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "订单去支付", notes = "样例参数{\n" + "  \"productId\": \"6666666\",\n"
+			+ "  \"customerUserId\": \"6888888\"\n" + "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/orderInfo/buy", method = RequestMethod.POST)
 	@ResponseBody
 	public DataResult buy(HttpServletRequest request, HttpServletResponse response,
@@ -229,6 +235,7 @@ public class OrderInfoController {
 	 * @param response
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "接收通知的方法", notes = "银联支付通知回调")
 	@RequestMapping(value = "/orderInfo/payNotify", method = RequestMethod.POST)
 	public void notifyHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// 收到通知后记得返回SUCCESS
@@ -261,6 +268,7 @@ public class OrderInfoController {
 	 * @param response
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "根据订单号退款", notes = "接口参数为:orderId,系统暂时不支持退款,该接口仅用于测试支付功能,退款支付费用;同时以方便支持下迭代需求支持")
 	@RequestMapping(value = "/orderInfo/refund", method = RequestMethod.GET)
 	@ResponseBody
 	public Result refund(HttpServletRequest request, HttpServletResponse response) throws Exception {

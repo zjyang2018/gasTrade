@@ -35,6 +35,9 @@ import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.ProductService;
 import com.zach.gasTrade.vo.ProductVo;
 
+import io.swagger.annotations.Api;
+
+@Api(tags = "产品相关api")
 @Controller
 public class ProductController {
 	private Logger logger = Logger.getLogger(getClass());

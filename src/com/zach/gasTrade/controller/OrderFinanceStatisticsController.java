@@ -26,77 +26,83 @@ import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.OrderFinanceStatisticsService;
 import com.zach.gasTrade.vo.OrderFinanceStatisticsVo;
 
+import io.swagger.annotations.Api;
 
+@Api(tags = "财务统计相关api")
 @Controller
 public class OrderFinanceStatisticsController {
-private Logger logger = Logger.getLogger(getClass());
-	
+	private Logger logger = Logger.getLogger(getClass());
+
 	@Autowired
 	private OrderFinanceStatisticsService orderFinanceStatisticsService;
-		
+
 	/**
-	 * 分页列表  + 搜索
+	 * 分页列表 + 搜索
+	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return PageResult
 	 */
-	@RequestMapping(value = "/orderFinanceStatistics/query_page",method = RequestMethod.POST)
+	@RequestMapping(value = "/orderFinanceStatistics/query_page", method = RequestMethod.POST)
 	@ResponseBody
-    public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String,String> param, OrderFinanceStatisticsVo filterMask) {
-		PageResult result=PageResult.initResult();
-		
+	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
+			OrderFinanceStatisticsVo filterMask) {
+		PageResult result = PageResult.initResult();
+
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String searchDate = param.get("searchDate");
-		if(StringUtil.isNotNullAndNotEmpty(searchDate)) {
+		if (StringUtil.isNotNullAndNotEmpty(searchDate)) {
 			String date = searchDate + "%";
 			filterMask.setDate(date);
 		}
-				
+
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
-		try{
+		try {
 			int total = orderFinanceStatisticsService.getOrderFinanceStatisticsCount(filterMask);
-			List<OrderFinanceStatisticsVo> list = orderFinanceStatisticsService.getOrderFinanceStatisticsPage(filterMask);
-			
+			List<OrderFinanceStatisticsVo> list = orderFinanceStatisticsService
+					.getOrderFinanceStatisticsPage(filterMask);
+
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
 			result.setPageSize(pageSize);
 			result.setData(list);
-		}catch (RuntimeException e){
+		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
-			logger.error("系统异常,"+e.getMessage(),e);
-		}catch (Exception e){
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试",e);
+			logger.error("系统异常,请稍后重试", e);
 		}
 		return result;
-    }
-	
+	}
+
 	/**
 	 * 新增
+	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/orderFinanceStatistics/save",method = RequestMethod.GET)
+	@RequestMapping(value = "/orderFinanceStatistics/save", method = RequestMethod.GET)
 	@ResponseBody
 	public Result save(HttpServletRequest request) {
 		Result result = Result.initResult();
-				
-		try{			
+
+		try {
 			orderFinanceStatisticsService.save();
-			
-		}catch (RuntimeException e){
+
+		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
-			logger.error("系统异常,"+e.getMessage(),e);
-		}catch (Exception e){
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试",e);
+			logger.error("系统异常,请稍后重试", e);
 		}
 		return result;
 	}

@@ -35,6 +35,9 @@ import com.zach.gasTrade.vo.DeliveryUserVo;
 import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
 import com.zach.gasTrade.vo.OrderInfoVo;
 
+import io.swagger.annotations.Api;
+
+@Api(tags = "订单派送记录相关api")
 @Controller
 public class OrderDeliveryRecordController {
 	private Logger logger = Logger.getLogger(getClass());

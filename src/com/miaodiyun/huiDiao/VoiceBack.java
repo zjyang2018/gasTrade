@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,25 +24,23 @@ import com.miaodiyun.huiDiao.entity.VoiceBackResp;
  * @Description: 语音验证码状态通知接口
  *
  */
-@WebServlet("/xxxx")
-public class VoiceBack extends HttpServlet
-{
+// @WebServlet("/xxxx")
+public class VoiceBack extends HttpServlet {
 
 	private static final long serialVersionUID = -2119868200097964820L;
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		this.doPost(request, response);
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		// 获取请求参数
 		BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
 		String str = null;
 		StringBuffer reqBody = new StringBuffer();
-		while ((str = reader.readLine()) != null)
-		{
+		while ((str = reader.readLine()) != null) {
 			reqBody.append(str);
 		}
 		System.out.println("收到请求：" + reqBody);
@@ -54,11 +51,9 @@ public class VoiceBack extends HttpServlet
 
 		// 判断签名是否正确
 		String sig = DigestUtils.md5Hex(Config.ACCOUNT_SID + Config.AUTH_TOKEN + voiceCallback.getTimestamp());
-		if (sig.equals(voiceCallback.getSig()))
-		{
+		if (sig.equals(voiceCallback.getSig())) {
 			System.out.println("签名正确。");
-		} else
-		{
+		} else {
 			System.out.println("签名错误。");
 			VoiceBackResp voiceCallbackResp = new VoiceBackResp();
 			voiceCallbackResp.setRespCode(RespCode.SIGN_ERROR);

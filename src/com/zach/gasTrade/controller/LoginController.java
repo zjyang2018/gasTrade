@@ -66,11 +66,12 @@ public class LoginController {
 		Result result = Result.initResult();
 
 		String mobile = param.get("mobile");
-		String codeType = param.get("String codeType");
+		String codeType = param.get("codeType");
 		String deliveryId = param.get("deliveryId");
 		String code = VerificationCodeUtils.genRegCode();
 		if ("1".equals(codeType)) {
-			cacheService.add("regCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
+			String wxOpenId = param.get("wxOpenId");
+			cacheService.add("regCode" + wxOpenId, code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		} else if ("2".equals(codeType)) {
 			if (StringUtil.isNullOrEmpty(deliveryId)) {
 				result.setCode(Constants.FAILURE);
@@ -86,7 +87,7 @@ public class LoginController {
 				result.setMsg("手机号不正确,请重新输入");
 				return result;
 			}
-			cacheService.add("pwdCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
+			cacheService.add("pwdCode" + deliveryId, code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		}
 		// 发送短信验证码
 		msgService.sendMsg(mobile, code);
@@ -109,11 +110,12 @@ public class LoginController {
 		// filterMask.setChannel("10");
 		String smgCode = parameter.get("smgCode");
 		try {
-			String regCode = cacheService.get("regCode");
+			String wxOpenId = parameter.get("wxOpenId");
+			String regCode = cacheService.get("regCode" + wxOpenId);
 			if (!regCode.equals(smgCode)) {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}
-			filterMask.setWxOpenId(parameter.get("wxOpenId"));
+			filterMask.setWxOpenId(wxOpenId);
 			// custmomerUserService.save(filterMask);
 			CustomerUserVo customerUser = custmomerUserService.getCustomerUserBySelective(filterMask);
 			customerUser.setChannel("10");
@@ -292,7 +294,7 @@ public class LoginController {
 			result.setMsg("验证码不能为空");
 			return result;
 		}
-		String code = cacheService.get("pwdCode");
+		String code = cacheService.get("pwdCode" + deliveryId);
 		if (!code.equals(verificationCode)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("验证码错误,请重新输入");

@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.controller;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.TimerTask;
 
@@ -63,7 +64,7 @@ public class LoginController {
 		Result result = Result.initResult();
 
 		String mobile = param.get("mobile");
-		String codeType = param.get("String codeType");
+		String codeType = param.get("codeType");
 		String deliveryId = param.get("deliveryId");
 		String code = VerificationCodeUtils.genRegCode();
 		final HttpSession httpSession = request.getSession();
@@ -105,7 +106,7 @@ public class LoginController {
 
 				timer.cancel();
 			}
-		}, 1 * 60 * 1000);
+		}, 5 * 60 * 1000);
 
 		return result;
 	}
@@ -119,16 +120,29 @@ public class LoginController {
 	 */
 	@RequestMapping(value = "/customerUser/reg", method = RequestMethod.POST)
 	@ResponseBody
-	public Result register(HttpServletRequest request, @RequestBody CustomerUserVo filterMask) {
+	public Result register(HttpServletRequest request, @RequestBody Map<String, String> parameter) {
 		Result result = Result.initResult();
-		filterMask.setChannel("10");
-
+		CustomerUserVo filterMask = new CustomerUserVo();
+		// filterMask.setChannel("10");
+		String smgCode = parameter.get("smgCode");
 		try {
-			custmomerUserService.save(filterMask);
+			HttpSession httpSession = request.getSession();
+			String regCode = (String) httpSession.getAttribute("regCode");
+			if (!regCode.equals(smgCode)) {
+				throw new RuntimeException("短信验证码无效,请重新获取");
+			}
+			filterMask.setWxOpenId(parameter.get("wxOpenId"));
+			// custmomerUserService.save(filterMask);
+			CustomerUserVo customerUser = custmomerUserService.getCustomerUserBySelective(filterMask);
+			customerUser.setChannel("10");
+			customerUser.setPhoneNumber(parameter.get("phoneNumber"));
+			customerUser.setUpdateTime(new Date());
+			// 更新客户信息
+			custmomerUserService.update(customerUser);
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
-			result.setMsg("用户不存在");
+			result.setMsg(e.getMessage());
 			logger.error("系统异常," + e.getMessage(), e);
 		} catch (Exception e) {
 			result.setCode(Constants.FAILURE);

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.dao.ProductDao;
+import com.zach.gasTrade.dto.ProductListDto;
 import com.zach.gasTrade.service.ProductService;
 import com.zach.gasTrade.vo.ProductVo;
 
@@ -47,7 +48,7 @@ public class ProductServiceImpl implements ProductService{
      * @param productVo
      * @return
      */
-    public List<ProductVo> getProductList(ProductVo productVo){
+    public List<ProductListDto> getProductList(ProductVo productVo){
     	return productDao.getProductList(productVo);
     }
     
@@ -94,6 +95,12 @@ public class ProductServiceImpl implements ProductService{
     public int delete(ProductVo productVo){
     	return productDao.delete(productVo);
     }
+
+	@Override
+	public List<ProductListDto> getProductInfoPage(ProductVo filterMask) {
+		// TODO Auto-generated method stub
+		return productDao.getProductInfoPage(filterMask);
+	}
 	
 	
 }

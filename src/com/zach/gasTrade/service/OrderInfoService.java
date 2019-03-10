@@ -9,7 +9,10 @@ package com.zach.gasTrade.service;
 import java.util.List;
 import java.util.Map;
 
+import com.zach.gasTrade.dto.CustomerOrderGenerateInfoDto;
+import com.zach.gasTrade.dto.CustomerOrderInfoDto;
 import com.zach.gasTrade.dto.DeliveryMonitorDto;
+import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
 import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
 import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.vo.OrderInfoVo;
@@ -109,5 +112,18 @@ public interface OrderInfoService {
 	 * @param orderInfoVo
 	 */
 	public void refundAmount(String orderId);
+
+	public int getOrderInfoNumber(OrderInfoVo filterMask);
+
+	public List<CustomerOrderInfoDto> getCustomerOrderInfoPage(OrderInfoVo filterMask);
+
+	public List<DeliveryOrderInfoDto> getDeliveryOrderInfoPage(OrderInfoVo filterMask);
+
+	/**
+	 * 订单生成
+	 * 
+	 * @param orderInfoVo
+	 */
+	public CustomerOrderGenerateInfoDto orderGenerate(OrderInfoVo filterMask);
 
 }

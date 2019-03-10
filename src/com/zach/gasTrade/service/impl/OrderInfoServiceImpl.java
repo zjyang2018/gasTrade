@@ -17,10 +17,14 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.dao.CustomerUserDao;
 import com.zach.gasTrade.dao.OrderInfoDao;
 import com.zach.gasTrade.dao.ProductDao;
+import com.zach.gasTrade.dto.CustomerOrderGenerateInfoDto;
+import com.zach.gasTrade.dto.CustomerOrderInfoDto;
 import com.zach.gasTrade.dto.DeliveryMonitorDto;
+import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
 import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
 import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.netpay.PayService;
@@ -227,6 +231,56 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		}
 		JSONObject result = payService.refund(orderId, orderInfo.getRealPayAmount());
 		logger.info("退款返回参数值:" + result.toJSONString() + ",退款订单号:" + orderId);
+	}
+
+	@Override
+	public int getOrderInfoNumber(OrderInfoVo filterMask) {
+		// TODO Auto-generated method stub
+		return orderInfoDao.getOrderInfoNumber(filterMask);
+	}
+
+	@Override
+	public List<CustomerOrderInfoDto> getCustomerOrderInfoPage(OrderInfoVo filterMask) {
+		// TODO Auto-generated method stub
+		return orderInfoDao.getCustomerOrderInfoPage(filterMask);
+	}
+
+	@Override
+	public List<DeliveryOrderInfoDto> getDeliveryOrderInfoPage(OrderInfoVo filterMask) {
+		// TODO Auto-generated method stub
+		return orderInfoDao.getDeliveryOrderInfoPage(filterMask);
+	}
+
+	@Override
+	public CustomerOrderGenerateInfoDto orderGenerate(OrderInfoVo filterMask) {
+		// TODO Auto-generated method stub
+		String orderId = SerialGenerator.getSerialNum();
+    	Date nowTime = new Date();
+    	CustomerUserVo customerUserVo = new CustomerUserVo();
+    	customerUserVo.setId(filterMask.getCustomerUserId());
+    	CustomerUserVo customerUser = customerUserDao.getCustomerUserBySelective(customerUserVo);
+    	filterMask.setOrderId(orderId);
+    	filterMask.setPayStatus("10");
+    	filterMask.setAllotStatus("10");
+    	filterMask.setCustomerAddress(customerUser.getAddress());
+    	filterMask.setLongitude(customerUser.getLongitude());
+    	filterMask.setLatitude(customerUser.getLatitude());
+    	filterMask.setOrderStatus("10");
+    	filterMask.setRemark("");
+    	filterMask.setCreateTime(nowTime);
+    	filterMask.setUpdateTime(nowTime);
+    	    	
+    	int n = orderInfoDao.save(filterMask);
+        if(n==1) {
+        	CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto = new CustomerOrderGenerateInfoDto();
+        	customerOrderGenerateInfoDto.setOrderId(orderId);
+        	customerOrderGenerateInfoDto.setProductAmount(filterMask.getAmount());
+        	customerOrderGenerateInfoDto.setAddress(customerUser.getAddress());
+        	customerOrderGenerateInfoDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
+        	customerOrderGenerateInfoDto.setRemark("");
+        	return customerOrderGenerateInfoDto;
+        }
+		return null;
 	}
 
 }

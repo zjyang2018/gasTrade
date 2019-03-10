@@ -29,7 +29,6 @@ import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.vo.AdminUserVo;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "平台用户相关api")
 @Controller
@@ -38,49 +37,6 @@ public class AdminUserController {
 
 	@Autowired
 	private AdminUserService adminUserService;
-
-	/**
-	 * 登录
-	 * 
-	 * @param request
-	 * @param filterMask
-	 * @return Result
-	 */
-	@ApiOperation(value = "平台用户登录", notes = "样例参数{\n" + "  \"name\": \"test\",\n" + "  \"password\": \"password\"\n"
-			+ "}\\n返回参数字段说明:\\n")
-	// @ApiImplicitParams({
-	// @ApiImplicitParam(name = "name", value = "用户名称", required = true, paramType =
-	// "query", dataType = "String"),
-	// @ApiImplicitParam(name = "password", value = "用户密码", required = true,
-	// paramType = "query", dataType = "String") })
-	@RequestMapping(value = "/adminUser/login", method = RequestMethod.POST)
-	@ResponseBody
-	public Result login(HttpServletRequest request, @RequestBody Map<String, String> param, AdminUserVo filterMask) {
-		Result result = Result.initResult();
-
-		String name = param.get("name");
-		String password = param.get("password");
-
-		filterMask.setName(name);
-
-		try {
-			AdminUserVo adminUserVo = adminUserService.getAdminUserBySelective(filterMask);
-			String pwd = adminUserVo.getPassword();
-			if (!password.equals(pwd)) {
-				result.setCode(Constants.FAILURE);
-				result.setMsg("密码不正确");
-			}
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("用户不存在");
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
 
 	/**
 	 * 分页列表 + 搜索

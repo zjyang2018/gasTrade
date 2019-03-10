@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.zach.gasTrade.dto.ProductListDto;
 import com.zach.gasTrade.vo.ProductVo;
 
 @Repository("productDao")
@@ -33,7 +34,7 @@ public interface ProductDao {
      * @param productVo
      * @return
      */
-	 public List<ProductVo> getProductList(ProductVo productVo);
+	 public List<ProductListDto> getProductList(ProductVo productVo);
 	 
 	 /**
      * 根据条件查询一条信息
@@ -59,5 +60,7 @@ public interface ProductDao {
 	 * @param productVo
 	 */
     public int delete(ProductVo productVo);
+
+	public List<ProductListDto> getProductInfoPage(ProductVo filterMask);
 
 }

@@ -6,8 +6,10 @@
 
 package com.zach.gasTrade.service;
 
-import com.zach.gasTrade.vo.ProductVo;
 import java.util.List;
+
+import com.zach.gasTrade.dto.ProductListDto;
+import com.zach.gasTrade.vo.ProductVo;
 
 public interface ProductService{
 	/**
@@ -29,7 +31,7 @@ public interface ProductService{
      * @param productVo
      * @return
      */
-	 public List<ProductVo> getProductList(ProductVo productVo);
+	 public List<ProductListDto> getProductList(ProductVo productVo);
 	 
 	 /**
      * 根据条件查询一条信息
@@ -55,6 +57,8 @@ public interface ProductService{
 	 * @param productVo
 	 */
     public int delete(ProductVo productVo);
+
+	public List<ProductListDto> getProductInfoPage(ProductVo filterMask);
     
 
 }

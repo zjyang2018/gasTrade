@@ -6,88 +6,63 @@
 
 package com.zach.gasTrade.controller;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONObject;
+import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.DataResult;
+import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.DeliveryLocationHistoryService;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "派送员历史位置信息相关api")
 @Controller
 public class DeliveryLocationHistoryController {
+	private Logger logger = Logger.getLogger(getClass());
+	
 	@Autowired
 	private DeliveryLocationHistoryService deliveryLocationHistoryService;
 
 	/**
-	 * 进入主页面
+	 * 查询
 	 * 
-	 * @param filterMask
-	 * @param model
-	 * @param request
-	 * @param response
+	 * @param country
+	 * @param result
 	 * @return
 	 */
-	@RequestMapping(value = "/deliveryLocationHistory/main", method = RequestMethod.GET)
-	String mainPage(DeliveryLocationHistoryVo filterMask, Model model, HttpServletRequest request,
-			HttpServletResponse response) {
-		model.addAttribute("filterMask", filterMask);
-		return "DeliveryLocationHistory/main";
-	}
-
-	/**
-	 * table 列表
-	 * 
-	 * @param request
-	 * @param response
-	 * @param DeliveryLocationHistoryVo
-	 * @throws Exception
-	 */
+	@ApiOperation(value = "查询派送员地址", notes = "样例参数{\n" + "  \"deliveryUserId\": \"6666666\"\n" + "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryLocationHistory/query")
-	public void getJsonDataGrid(HttpServletRequest request, HttpServletResponse response,
-			DeliveryLocationHistoryVo filterMask) throws Exception {
-		List<DeliveryLocationHistoryVo> list = new ArrayList<DeliveryLocationHistoryVo>();
-		int total = deliveryLocationHistoryService.getDeliveryLocationHistoryCount(filterMask);
-		list = deliveryLocationHistoryService.getDeliveryLocationHistoryList(filterMask);
-		PrintWriter write = response.getWriter();
+	@ResponseBody
+	public Result query(HttpServletRequest request,@RequestBody DeliveryLocationHistoryVo filterMask) throws Exception {
+		DataResult result = DataResult.initResult();
 
-		Map map = new HashMap();
-		map.put("total", total);
-		map.put("rows", list);
+		try {
+			// 查询
+			DeliveryLocationHistoryVo deliveryLocationHistory = deliveryLocationHistoryService.getDeliveryLocationHistoryBySelective(filterMask);	
+			result.setData(deliveryLocationHistory);
+			
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
 
-		write.write(JSONObject.toJSONString(map));
-		write.flush();
-		write.close();
 	}
-
-	/**
-	 * 进入新增页面
-	 * 
-	 * @param filterMask
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/deliveryLocationHistory/newPage", method = RequestMethod.POST)
-	String NewPage(DeliveryLocationHistoryVo filterMask, Model model) {
-		model.addAttribute("filterMask", filterMask);
-		return "DeliveryLocationHistory/new";
-	}
-
+	
 	/**
 	 * 新增
 	 * 
@@ -95,30 +70,31 @@ public class DeliveryLocationHistoryController {
 	 * @param result
 	 * @return
 	 */
+	@ApiOperation(value = "保存派送员地址", notes = "样例参数{\n" + "  \"deliveryUserId\": \"6666666\",\n"
+			+ "  \"location\": \"长沙市中心\",\n" + "  \"longitude\": \"112.59\",\n"
+			+ "  \"latitude\": \"28.12\"\n" + "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryLocationHistory/save")
-	@Transactional
-	public String save(HttpServletRequest request, Model model, HttpServletResponse response,
-			DeliveryLocationHistoryVo filterMask) throws Exception {
-		// 保存
-		deliveryLocationHistoryService.save(filterMask);
-		model.addAttribute("filterMask", new DeliveryLocationHistoryVo());
-		return "DeliveryLocationHistory/main";
+	@ResponseBody
+	public Result save(HttpServletRequest request,@RequestBody DeliveryLocationHistoryVo filterMask) {
+		Result result = Result.initResult();
+		
+		try {
+			// 保存
+			deliveryLocationHistoryService.save(filterMask);
+			
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
 
 	}
-
-	/**
-	 * 进入修改页面
-	 * 
-	 * @param filterMask
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/deliveryLocationHistory/editPage", method = RequestMethod.POST)
-	public String editPage(DeliveryLocationHistoryVo filterMask, Model model) throws Exception {
-		model.addAttribute("filterMask", filterMask);
-		return "DeliveryLocationHistory/edit";
-	}
-
+	
 	/**
 	 * 修改
 	 * 
@@ -126,14 +102,28 @@ public class DeliveryLocationHistoryController {
 	 * @param result
 	 * @return
 	 */
+	@ApiOperation(value = "更新派送员地址", notes = "样例参数{\n" + "  \"deliveryUserId\": \"6666666\",\n"
+			+ "  \"location\": \"长沙市中心\",\n" + "  \"longitude\": \"112.59\",\n"
+			+ "  \"latitude\": \"28.12\"\n" + "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryLocationHistory/edit")
-	@Transactional
-	public String edit(HttpServletRequest request, Model model, HttpServletResponse response,
-			DeliveryLocationHistoryVo filterMask) throws Exception {
-
-		deliveryLocationHistoryService.update(filterMask);
-		model.addAttribute("filterMask", new DeliveryLocationHistoryVo());
-		return "DeliveryLocationHistory/main";
+	@ResponseBody
+	public Result edit(HttpServletRequest request,@RequestBody DeliveryLocationHistoryVo filterMask) {
+		Result result = Result.initResult();
+		
+		try {
+			// 更新
+			deliveryLocationHistoryService.update(filterMask);
+			
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
 	}
 
 	/**
@@ -141,14 +131,25 @@ public class DeliveryLocationHistoryController {
 	 * 
 	 * @return
 	 */
+	@ApiOperation(value = "删除派送员地址", notes = "样例参数{\n" + "  \"deliveryUserId\": \"6666666\"\n" + "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryLocationHistory/delete")
-	@Transactional
-	public void delete(DeliveryLocationHistoryVo filterMask, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		deliveryLocationHistoryService.delete(filterMask);
-		PrintWriter write = response.getWriter();
-		write.write("SUCC");
-		write.flush();
-		write.close();
+	@ResponseBody
+	public Result delete(HttpServletRequest request, DeliveryLocationHistoryVo filterMask) {
+		Result result = Result.initResult();
+		
+		try {
+			// 删除
+			deliveryLocationHistoryService.delete(filterMask);
+			
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
 	}
 }

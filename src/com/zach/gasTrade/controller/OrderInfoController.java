@@ -29,16 +29,27 @@ import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
+import com.zach.gasTrade.dto.CustomerOrderGenerateInfoDto;
+import com.zach.gasTrade.dto.CustomerOrderInfoDto;
+import com.zach.gasTrade.dto.DeliveryDetailDto;
 import com.zach.gasTrade.dto.DeliveryMonitorDto;
+import com.zach.gasTrade.dto.DeliveryOrderCompleteDetailDto;
+import com.zach.gasTrade.dto.DeliveryOrderDetailDto;
+import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
+import com.zach.gasTrade.dto.OrderDetailDto;
 import com.zach.gasTrade.dto.OrderInfoDto;
 import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.netpay.UnoinPayUtil;
+import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.service.CustomerUserService;
 import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.service.OrderInfoService;
+import com.zach.gasTrade.service.ProductService;
+import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 import com.zach.gasTrade.vo.OrderInfoVo;
+import com.zach.gasTrade.vo.ProductVo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,6 +67,12 @@ public class OrderInfoController {
 
 	@Autowired
 	private DeliveryUserService deliveryUserService;
+	
+	@Autowired
+	private ProductService productService;
+	
+	@Autowired
+	private AdminUserService adminUserService;
 
 	/**
 	 * 分页列表 + 搜索 + 高级搜索
@@ -193,6 +210,33 @@ public class OrderInfoController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
+		return result;
+	}
+	
+	/**
+	 * 订单生成
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/orderInfo/orderGenerate",method = RequestMethod.POST)
+	@ResponseBody
+	public Result orderGenerate(HttpServletRequest request,@RequestBody OrderInfoVo filterMask) {
+		DataResult result = DataResult.initResult();
+				
+		try{
+			CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto = orderInfoService.orderGenerate(filterMask);
+			result.setData(customerOrderGenerateInfoDto);
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		
 		return result;
 	}
 
@@ -339,7 +383,7 @@ public class OrderInfoController {
 	}
 
 	/**
-	 * 详情
+	 * 订单详情
 	 * 
 	 * @param request
 	 * @param filterMask
@@ -351,7 +395,7 @@ public class OrderInfoController {
 		DataResult result = DataResult.initResult();
 		if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
 			result.setCode(Constants.FAILURE);
-			result.setMsg("订单编号不能为空");
+			result.setMsg("商品编号不能为空");
 			return result;
 		}
 
@@ -381,6 +425,427 @@ public class OrderInfoController {
 			orderInfoDto.setUpdateTime(orderInfo.getUpdateTime());
 
 			result.setData(orderInfoDto);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+	
+	/**
+	 * 签收详情
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/orderInfo/receiveInfo", method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult receiveInfo(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
+		DataResult result = DataResult.initResult();
+		if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+
+		try {
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			
+			CustomerOrderInfoDto customerOrderInfoDto = new CustomerOrderInfoDto();
+			customerOrderInfoDto.setOrderId(orderInfo.getOrderId());
+			customerOrderInfoDto.setProductName(orderInfo.getProductName());
+			customerOrderInfoDto.setProductAmount(orderInfo.getAmount());
+			customerOrderInfoDto.setCustomerName(customerUser.getName());
+			customerOrderInfoDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
+			customerOrderInfoDto.setRemark(orderInfo.getRemark());
+
+			result.setData(customerOrderInfoDto);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+	
+	/**
+	 * 公众号——客户端——订单详情
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/orderInfo/orderDetail", method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult orderDetail(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
+		DataResult result = DataResult.initResult();
+		if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+
+		try {
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			ProductVo productVo = new ProductVo();
+			productVo.setProductId(orderInfo.getProductId());
+			ProductVo product = productService.getProductBySelective(productVo);
+			
+			OrderDetailDto orderDetailDto = new OrderDetailDto();
+			orderDetailDto.setOrderId(orderInfo.getOrderId());
+			orderDetailDto.setProductName(orderInfo.getProductName());
+			orderDetailDto.setAmount(orderInfo.getAmount());
+			orderDetailDto.setSpec(product.getProductDesc());
+			orderDetailDto.setPayAmount(orderInfo.getAmount());
+			orderDetailDto.setPayTime(orderInfo.getPayTime());
+			
+			result.setData(orderDetailDto);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+	
+	/**
+	 * 公众号——客户端——派送详情
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/orderInfo/deliveryDetail", method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult deliveryDetail(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
+		DataResult result = DataResult.initResult();
+		if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+
+		try {
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			ProductVo productVo = new ProductVo();
+			productVo.setProductId(orderInfo.getProductId());
+			ProductVo product = productService.getProductBySelective(productVo);
+			
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			
+			AdminUserVo adminUserVo = new AdminUserVo();
+			adminUserVo.setId(product.getCreateUserId());
+			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
+			
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
+			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			
+			DeliveryDetailDto deliveryDetailDto = new DeliveryDetailDto();
+			deliveryDetailDto.setOrderId(orderInfo.getOrderId());
+			deliveryDetailDto.setProductName(orderInfo.getProductName());
+			deliveryDetailDto.setAmount(orderInfo.getAmount());
+			deliveryDetailDto.setPayTime(orderInfo.getPayTime());
+			deliveryDetailDto.setDeliveryOrderTime(orderInfo.getDeliveryOrderTime());
+			deliveryDetailDto.setDeliveryName(deliveryUser.getName());
+			deliveryDetailDto.setDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
+			deliveryDetailDto.setProductAddress(adminUser.getAddress());
+			deliveryDetailDto.setCustomerAddress(customerUser.getAddress());
+			
+			result.setData(deliveryDetailDto);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+	
+	/**
+	 * 公众号——客户端——确认签收
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/orderInfo/confirmReceive", method = RequestMethod.POST)
+	@ResponseBody
+	public Result confirmReceive(HttpServletRequest request, @RequestBody Map<String, String> param) {
+		Result result = Result.initResult();
+		String orderId = param.get("orderId");
+		if (StringUtil.isNullOrEmpty(orderId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+		
+		Date nowTime = new Date();
+	
+		OrderInfoVo orderInfoVo = new OrderInfoVo();
+		orderInfoVo.setOrderId(orderId);
+		orderInfoVo.setDeliveryCompleteTime(nowTime);
+		orderInfoVo.setOrderStatus("60");
+		
+		try {
+			orderInfoService.update(orderInfoVo);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	
+	/**
+	 * 公众号——派送员端——我的订单
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/wxin/deliveryOrderInfo",method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult deliveryOrderInfo(HttpServletRequest request,@RequestBody Map<String,String> param,OrderInfoVo filterMask) {
+		PageResult result=PageResult.initResult();
+		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+		String allotDeliveryId = param.get("allotDeliveryId");
+		String status = param.get("status");
+		if(StringUtil.isNullOrEmpty(allotDeliveryId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("派送员编号不能为空");
+			return result;
+		}
+		filterMask.setAllotDeliveryId(allotDeliveryId);
+		filterMask.setPage(pageNum);
+		filterMask.setPageSize(pageSize);
+		int total = 0;
+		List<DeliveryOrderInfoDto> list =null;
+		try{
+		// 待接单
+		if("1".equals(status)) {
+			filterMask.setAllotStatus("10");
+			total = orderInfoService.getOrderInfoNumber(filterMask);
+			list = orderInfoService.getDeliveryOrderInfoPage(filterMask);
+		}
+		// 派送中
+		if("2".equals(status)) {
+			filterMask.setOrderStatus("50");
+			total = orderInfoService.getOrderInfoNumber(filterMask);
+			list = orderInfoService.getDeliveryOrderInfoPage(filterMask);
+		}
+		// 已完成
+		if("3".equals(status)) {
+			filterMask.setOrderStatus("60");
+			total = orderInfoService.getOrderInfoNumber(filterMask);
+			list = orderInfoService.getDeliveryOrderInfoPage(filterMask);
+		}			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		result.setAllCount(total);
+		result.setPageNum(pageNum);
+		result.setPageSize(pageSize);
+		result.setData(list);
+		return result;
+	}
+	/**
+	 * 公众号——客户端——我的订单
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/wxin/customerOrderInfo",method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult customerOrderInfo(HttpServletRequest request,@RequestBody Map<String,String> param,OrderInfoVo filterMask) {
+		PageResult result=PageResult.initResult();
+		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+		String customerUserId = param.get("customerUserId");
+		String status = param.get("status");
+		if(StringUtil.isNullOrEmpty(customerUserId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("客户编号不能为空");
+			return result;
+		}
+		filterMask.setCustomerUserId(customerUserId);
+		filterMask.setPage(pageNum);
+		filterMask.setPageSize(pageSize);
+		int total = 0;
+		List<CustomerOrderInfoDto> list =null;
+		try{
+		// 待支付
+		if("1".equals(status)) {
+			filterMask.setPayStatus("10");
+			total = orderInfoService.getOrderInfoNumber(filterMask);
+			list = orderInfoService.getCustomerOrderInfoPage(filterMask);
+		}
+		// 派送中
+		if("2".equals(status)) {
+			filterMask.setOrderStatus("50");
+			total = orderInfoService.getOrderInfoNumber(filterMask);
+			list = orderInfoService.getCustomerOrderInfoPage(filterMask);
+		}
+		// 已完成
+		if("3".equals(status)) {
+			filterMask.setOrderStatus("60");
+			total = orderInfoService.getOrderInfoNumber(filterMask);
+			list = orderInfoService.getCustomerOrderInfoPage(filterMask);
+		}			
+		}catch (RuntimeException e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常,"+e.getMessage(),e);
+		}catch (Exception e){
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试",e);
+		}
+		result.setAllCount(total);
+		result.setPageNum(pageNum);
+		result.setPageSize(pageSize);
+		result.setData(list);
+		return result;
+	}
+	
+	/**
+	 * 公众号——派送端——派单详情
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/orderInfo/deliveryOrderDetail", method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult deliveryOrderDetail(HttpServletRequest request, @RequestBody Map<String, String> param) {
+		DataResult result = DataResult.initResult();
+		
+		String orderId = param.get("orderId");
+		// 1:派单详情;2:接单详情
+		String status = param.get("status");
+		
+		if (StringUtil.isNullOrEmpty(orderId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+
+		OrderInfoVo filterMask = new OrderInfoVo();
+		filterMask.setOrderId(orderId);
+		try {
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			ProductVo productVo = new ProductVo();
+			productVo.setProductId(orderInfo.getProductId());
+			ProductVo product = productService.getProductBySelective(productVo);
+			
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			
+			AdminUserVo adminUserVo = new AdminUserVo();
+			adminUserVo.setId(product.getCreateUserId());
+			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
+									
+			DeliveryOrderDetailDto deliveryOrderDetailDto = new DeliveryOrderDetailDto();
+			deliveryOrderDetailDto.setOrderId(orderInfo.getOrderId());
+			deliveryOrderDetailDto.setProductName(orderInfo.getProductName());
+			if("1".equals(status)) {
+				deliveryOrderDetailDto.setStockQty(product.getStockQty());
+			}
+			deliveryOrderDetailDto.setCustomerName(customerUser.getName());
+			deliveryOrderDetailDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
+			deliveryOrderDetailDto.setCustomerAddress(customerUser.getAddress());
+			deliveryOrderDetailDto.setProductAddress(adminUser.getAddress());
+			deliveryOrderDetailDto.setRemark("");
+						
+			result.setData(deliveryOrderDetailDto);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+	
+	/**
+	 * 公众号——派送端——派单完成详情
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/orderInfo/deliveryOrderCompleteDetail", method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult deliveryOrderCompleteDetail(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
+		DataResult result = DataResult.initResult();
+		if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+
+		try {
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			ProductVo productVo = new ProductVo();
+			productVo.setProductId(orderInfo.getProductId());
+			ProductVo product = productService.getProductBySelective(productVo);
+			
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+									
+			DeliveryOrderCompleteDetailDto deliveryOrderCompleteDetailDto = new DeliveryOrderCompleteDetailDto();
+			deliveryOrderCompleteDetailDto.setOrderId(orderInfo.getOrderId());
+			deliveryOrderCompleteDetailDto.setProductName(orderInfo.getProductName());
+			deliveryOrderCompleteDetailDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
+			deliveryOrderCompleteDetailDto.setCustomerName(customerUser.getName());
+			deliveryOrderCompleteDetailDto.setCustomerAddress(customerUser.getAddress());
+			deliveryOrderCompleteDetailDto.setRemark("");
+						
+			result.setData(deliveryOrderCompleteDetailDto);
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

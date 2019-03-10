@@ -67,11 +67,7 @@ public class CustomerUserServiceImpl implements CustomerUserService{
     public int save(CustomerUserVo customerUserVo){
     	String id = SerialGenerator.getUUID();
     	Date nowTime = new Date();
-    	customerUserVo.setId(id);
-    	// TODO wx_open_id、longitude、latitude
-    	customerUserVo.setWxOpenId("");
-    	customerUserVo.setLongitude("");
-    	customerUserVo.setLatitude("");
+    	customerUserVo.setId(id);   	
     	customerUserVo.setCreateTime(nowTime);
     	customerUserVo.setUpdateTime(nowTime);
     	

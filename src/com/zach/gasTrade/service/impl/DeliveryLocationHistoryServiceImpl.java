@@ -7,17 +7,15 @@
 package com.zach.gasTrade.service.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
+import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.dao.DeliveryLocationHistoryDao;
 import com.zach.gasTrade.service.DeliveryLocationHistoryService;
+import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 
 
 @Service("deliveryLocationHistoryService")
@@ -67,6 +65,10 @@ public class DeliveryLocationHistoryServiceImpl implements DeliveryLocationHisto
 	 * @param deliveryLocationHistoryVo
 	 */
     public int save(DeliveryLocationHistoryVo deliveryLocationHistoryVo){
+    	String id = SerialGenerator.getUUID();
+    	Date nowTime = new Date();
+    	deliveryLocationHistoryVo.setId(id);
+    	deliveryLocationHistoryVo.setCreateTime(nowTime);
     	
     	return deliveryLocationHistoryDao.save(deliveryLocationHistoryVo);
     }
@@ -76,6 +78,8 @@ public class DeliveryLocationHistoryServiceImpl implements DeliveryLocationHisto
 	 * @param deliveryLocationHistoryVo
 	 */
     public int update(DeliveryLocationHistoryVo deliveryLocationHistoryVo){
+    	Date nowTime = new Date();
+    	deliveryLocationHistoryVo.setCreateTime(nowTime);
     	return deliveryLocationHistoryDao.update(deliveryLocationHistoryVo);
     }
     

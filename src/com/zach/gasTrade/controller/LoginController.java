@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.common.cache.CacheService;
 import com.common.utils.StringUtil;
 import com.common.utils.VerificationCodeUtils;
@@ -48,7 +49,7 @@ public class LoginController {
 	private CustomerUserService custmomerUserService;
 
 	@Autowired
-	private CacheService redisCacheService;
+	private CacheService cacheService;
 
 	@Autowired
 	private MsgService msgService;
@@ -64,13 +65,14 @@ public class LoginController {
 	@ResponseBody
 	public Result mobileVerifyCode(HttpServletRequest request, @RequestBody Map<String, String> param) {
 		Result result = Result.initResult();
-
+		logger.info("注册短信接口参数:" + JSON.toJSONString(param));
 		String mobile = param.get("mobile");
 		String codeType = param.get("codeType");
 		String deliveryId = param.get("deliveryId");
 		String code = VerificationCodeUtils.genRegCode();
 		if ("1".equals(codeType)) {
-			redisCacheService.add("regCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
+			String wxOpenId = param.get("wxOpenId");
+			cacheService.add("regCode" + wxOpenId, code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		} else if ("2".equals(codeType)) {
 			if (StringUtil.isNullOrEmpty(deliveryId)) {
 				result.setCode(Constants.FAILURE);
@@ -86,7 +88,7 @@ public class LoginController {
 				result.setMsg("手机号不正确,请重新输入");
 				return result;
 			}
-			redisCacheService.add("pwdCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
+			cacheService.add("pwdCode" + deliveryId, code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		}
 		// 发送短信验证码
 		msgService.sendMsg(mobile, code);
@@ -106,14 +108,17 @@ public class LoginController {
 	public Result register(HttpServletRequest request, @RequestBody Map<String, String> parameter) {
 		Result result = Result.initResult();
 		CustomerUserVo filterMask = new CustomerUserVo();
+		logger.info("注册接口参数:" + JSON.toJSONString(parameter));
 		// filterMask.setChannel("10");
 		String smgCode = parameter.get("smgCode");
 		try {
-			String regCode = redisCacheService.get("regCode");
+			String wxOpenId = parameter.get("wxOpenId");
+			String regCode = cacheService.get("regCode" + wxOpenId);
+			logger.info("注册获取参数,wxOpenId==>" + wxOpenId + ",regCode==>" + regCode);
 			if (!regCode.equals(smgCode)) {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}
-			filterMask.setWxOpenId(parameter.get("wxOpenId"));
+			filterMask.setWxOpenId(wxOpenId);
 			// custmomerUserService.save(filterMask);
 			CustomerUserVo customerUser = custmomerUserService.getCustomerUserBySelective(filterMask);
 			customerUser.setChannel("10");
@@ -131,7 +136,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		redisCacheService.delete("regCode");
+		cacheService.delete("regCode");
 		return result;
 	}
 
@@ -167,7 +172,7 @@ public class LoginController {
 				result.setMsg("验证码不能为空");
 				return result;
 			}
-			String code = redisCacheService.get("regCode");
+			String code = cacheService.get("regCode");
 			if (!code.equals(verificationCode)) {
 				result.setCode(Constants.FAILURE);
 				result.setMsg("验证码错误,请重新输入");
@@ -185,7 +190,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		redisCacheService.delete("regCode");
+		cacheService.delete("regCode");
 		return result;
 	}
 
@@ -292,7 +297,7 @@ public class LoginController {
 			result.setMsg("验证码不能为空");
 			return result;
 		}
-		String code = redisCacheService.get("pwdCode");
+		String code = cacheService.get("pwdCode" + deliveryId);
 		if (!code.equals(verificationCode)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("验证码错误,请重新输入");
@@ -320,7 +325,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		redisCacheService.delete("pwdCode");
+		cacheService.delete("pwdCode");
 		return result;
 
 	}

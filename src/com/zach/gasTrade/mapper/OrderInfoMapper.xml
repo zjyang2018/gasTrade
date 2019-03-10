@@ -52,7 +52,7 @@
 	 <resultMap id="OrderListDtoResultMap" type="com.zach.gasTrade.dto.OrderListDto">
          <result property="orderId" column="order_id"/>
          <result property="amount" column="amount"/>
-         <result property="amountAmount" column="total_amount"/>
+         <result property=totalAmount column="total_amount"/>
          <result property="payStatus" column="pay_status"/>
          <result property="customerName" column="customer_name"/>
          <result property="customerPhoneNumber" column="customer_phone_number"/>

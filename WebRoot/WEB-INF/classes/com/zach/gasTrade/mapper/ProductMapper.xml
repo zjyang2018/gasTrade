@@ -19,6 +19,14 @@
          <result property="createUserId" column="create_user_id"/>
      </resultMap>
 
+	 <!-- 查询sql结果与java model映射-->
+	 <resultMap id="ProductListDtoResultMap" type="com.zach.gasTrade.dto.ProductListDto">
+         <result property="productId" column="product_id"/>
+         <result property="productName" column="product_name"/>
+         <result property="amount" column="amount"/>
+         <result property="spec" column="spec"/>
+         <result property="imagePath" column="image_path"/>
+     </resultMap>
      
     <!-- 公用查询sql-->
     <sql id="ProductQuery">
@@ -72,7 +80,7 @@
 	    </where>	
    </select> 
    
-   <select id="getProductList"  parameterType="com.zach.gasTrade.vo.ProductVo" resultMap="ProductResultMap">   
+   <select id="getProductList"  parameterType="com.zach.gasTrade.vo.ProductVo" resultMap="ProductListDtoResultMap">   
           select                                             
 	      <include refid="ProductQuery" />
 	      from product
@@ -117,6 +125,52 @@
      </select>
    
      <select id="getProductPage"  parameterType="com.zach.gasTrade.vo.ProductVo" resultMap="ProductResultMap">   
+          select                                             
+	      <include refid="ProductQuery" />
+	      from product
+	      <where>
+	    	   <if  test="productId !=null ">
+		            and product_id = #{productId}
+		       </if>
+	    	   <if  test="productName !=null ">
+		            and product_name like #{productName}
+		       </if>
+	    	   <if  test="amount !=null ">
+		            and amount = #{amount}
+		       </if>
+	    	   <if  test="spec !=null ">
+		            and spec = #{spec}
+		       </if>
+	    	   <if  test="productDesc !=null ">
+		            and product_desc = #{productDesc}
+		       </if>
+	    	   <if  test="imagePath !=null ">
+		            and image_path = #{imagePath}
+		       </if>
+	    	   <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
+		       </if>
+	    	   <if  test="status !=null ">
+		            and status = '10'
+		       </if>
+	    	   <if  test="updateTime !=null ">
+		            and update_time = #{updateTime}
+		       </if>
+	    	   <if  test="updateUserId !=null ">
+		            and update_user_id = #{updateUserId}
+		       </if>
+	    	   <if  test="createTime !=null ">
+		            and create_time = #{createTime}
+		       </if>
+	    	   <if  test="createUserId !=null ">
+		            and create_user_id = #{createUserId}
+		       </if>
+	    </where>
+	    order by update_time
+	    limit #{startIndex},#{pageSize}
+     </select>
+     
+     <select id="getProductInfoPage"  parameterType="com.zach.gasTrade.vo.ProductVo" resultMap="ProductListDtoResultMap">   
           select                                             
 	      <include refid="ProductQuery" />
 	      from product

@@ -19,7 +19,7 @@ public class IndustrySMS {
 	// 谢总:
 	// 张:13923469163
 
-	private static String smsContentX = "尊敬的客户，您的验证码为4567，请于5分钟内正确输入，如非本人操作，请忽略此短信。";
+	private static String smsContentX = "【拓客科技】尊敬的客户，您的验证码为4567，请于5分钟内正确输入，如非本人操作，请忽略此短信。";
 
 	/**
 	 * 验证码通知短信

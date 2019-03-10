@@ -65,14 +65,13 @@ public class LoginController {
 	@ResponseBody
 	public Result mobileVerifyCode(HttpServletRequest request, @RequestBody Map<String, String> param) {
 		Result result = Result.initResult();
-
+		logger.info("注册短信接口参数:" + JSON.toJSONString(param));
 		String mobile = param.get("mobile");
 		String codeType = param.get("codeType");
 		String deliveryId = param.get("deliveryId");
 		String code = VerificationCodeUtils.genRegCode();
 		if ("1".equals(codeType)) {
 			String wxOpenId = param.get("wxOpenId");
-			logger.info("codeType==>" + codeType + ",wxOpenId==>" + wxOpenId);
 			cacheService.add("regCode" + wxOpenId, code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		} else if ("2".equals(codeType)) {
 			if (StringUtil.isNullOrEmpty(deliveryId)) {

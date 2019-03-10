@@ -48,7 +48,7 @@ public class LoginController {
 	private CustomerUserService custmomerUserService;
 
 	@Autowired
-	private CacheService redisCacheService;
+	private CacheService cacheService;
 
 	@Autowired
 	private MsgService msgService;
@@ -70,7 +70,7 @@ public class LoginController {
 		String deliveryId = param.get("deliveryId");
 		String code = VerificationCodeUtils.genRegCode();
 		if ("1".equals(codeType)) {
-			redisCacheService.add("regCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
+			cacheService.add("regCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		} else if ("2".equals(codeType)) {
 			if (StringUtil.isNullOrEmpty(deliveryId)) {
 				result.setCode(Constants.FAILURE);
@@ -86,7 +86,7 @@ public class LoginController {
 				result.setMsg("手机号不正确,请重新输入");
 				return result;
 			}
-			redisCacheService.add("pwdCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
+			cacheService.add("pwdCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		}
 		// 发送短信验证码
 		msgService.sendMsg(mobile, code);
@@ -109,7 +109,7 @@ public class LoginController {
 		// filterMask.setChannel("10");
 		String smgCode = parameter.get("smgCode");
 		try {
-			String regCode = redisCacheService.get("regCode");
+			String regCode = cacheService.get("regCode");
 			if (!regCode.equals(smgCode)) {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}
@@ -131,7 +131,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		redisCacheService.delete("regCode");
+		cacheService.delete("regCode");
 		return result;
 	}
 
@@ -167,7 +167,7 @@ public class LoginController {
 				result.setMsg("验证码不能为空");
 				return result;
 			}
-			String code = redisCacheService.get("regCode");
+			String code = cacheService.get("regCode");
 			if (!code.equals(verificationCode)) {
 				result.setCode(Constants.FAILURE);
 				result.setMsg("验证码错误,请重新输入");
@@ -185,7 +185,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		redisCacheService.delete("regCode");
+		cacheService.delete("regCode");
 		return result;
 	}
 
@@ -292,7 +292,7 @@ public class LoginController {
 			result.setMsg("验证码不能为空");
 			return result;
 		}
-		String code = redisCacheService.get("pwdCode");
+		String code = cacheService.get("pwdCode");
 		if (!code.equals(verificationCode)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("验证码错误,请重新输入");
@@ -320,7 +320,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		redisCacheService.delete("pwdCode");
+		cacheService.delete("pwdCode");
 		return result;
 
 	}

@@ -43,8 +43,11 @@ public class MsgServiceImpl implements MsgService {
 
 	@Override
 	public void sendMsg(String phone, String text) {
-		// TODO Auto-generated method stub
-
+		StringBuilder smsText = new StringBuilder();
+		smsText.append("【拓客科技】尊敬的客户，您的验证码为").append(text).append("，请于5分钟内正确输入，如非本人操作，请忽略此短信。");
+		// String msgText = "【拓客科技】尊敬的客户，您的验证码为4567，请于5分钟内正确输入，如非本人操作，请忽略此短信。";
+		IndustrySMS.setParameter(phone, smsText.toString());
+		IndustrySMS.execute();
 	}
 
 }

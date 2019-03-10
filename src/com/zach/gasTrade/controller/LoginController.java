@@ -8,10 +8,8 @@ package com.zach.gasTrade.controller;
 
 
 import java.util.Map;
-import java.util.TimerTask;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.common.cache.redis.RedisCacheService;
 import com.common.utils.StringUtil;
 import com.common.utils.VerificationCodeUtils;
+import com.miaodiyun.httpApiDemo.IndustrySMS;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.AdminUserService;
@@ -51,6 +51,9 @@ public class LoginController {
 	@Autowired
 	private MsgService msgService;
 	
+	@Autowired
+	private RedisCacheService redisCacheService;
+	
 	/**
 	 * 发送手机验证码
 	 * @param request
@@ -66,9 +69,8 @@ public class LoginController {
         String codeType = param.get("String codeType");
         String deliveryId = param.get("deliveryId");
         String code = VerificationCodeUtils.genRegCode();
-        HttpSession httpSession = request.getSession();
         if("1".equals(codeType)) {
-        	httpSession.setAttribute("regCode", code);
+        	redisCacheService.add("regCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
         }else if("2".equals(codeType)) {
         	if(StringUtil.isNullOrEmpty(deliveryId)) {
         		result.setCode(Constants.FAILURE);
@@ -84,29 +86,11 @@ public class LoginController {
     			result.setMsg("手机号不正确,请重新输入");
     			return result;
     		}
-        	httpSession.setAttribute("pwdCode", code);
+    		redisCacheService.add("pwdCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
         }
-        msgService.sendMsg(mobile, code);
-        // TimeTask实现1分钟后从session中删除code
-        java.util.Timer timer = new java.util.Timer();
-        timer.schedule(new TimerTask() {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				String regCode = (String) httpSession.getAttribute("regCode");
-				String pwdCode = (String) httpSession.getAttribute("pwdCode");
-				if(StringUtil.isNotNullAndNotEmpty(regCode)) {
-					httpSession.removeAttribute("regCode");
-				}
-				if(StringUtil.isNotNullAndNotEmpty(pwdCode)) {
-					httpSession.removeAttribute("pwdCode");
-				}
-				
-				timer.cancel();
-			}
-		}, 1*60*1000);
-        
+        // 发送短信验证码
+        IndustrySMS.setParameter(mobile, code);
+      
         return result;
     }
 	
@@ -167,8 +151,7 @@ public class LoginController {
         			result.setMsg("验证码不能为空");
         			return result;
         	}
-        	HttpSession httpSession = request.getSession();
-        	String code = (String) httpSession.getAttribute("regCode");
+        	String code = redisCacheService.get("regCode");
         	if(!code.equals(verificationCode)) {
         		result.setCode(Constants.FAILURE);
     			result.setMsg("验证码错误,请重新输入");
@@ -176,9 +159,7 @@ public class LoginController {
         	}
         	customerUserVo.setPhoneNumber(phoneNumber);
         	custmomerUserService.update(customerUserVo);
-        	
-        	httpSession.removeAttribute("regCode");
-			
+        		
 		}catch (RuntimeException e){
 			result.setCode(Constants.FAILURE);
 			result.setMsg("用户不存在");
@@ -188,6 +169,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试",e);
 		}
+        redisCacheService.delete("regCode");
 		return result;	
     }
 	
@@ -289,8 +271,7 @@ public class LoginController {
 			result.setMsg("验证码不能为空");
 			return result;
 	}
-	HttpSession httpSession = request.getSession();
-	String code = (String) httpSession.getAttribute("pwdCode");
+	String code = redisCacheService.get("pwdCode");
 	if(!code.equals(verificationCode)) {
 		result.setCode(Constants.FAILURE);
 		result.setMsg("验证码错误,请重新输入");
@@ -318,6 +299,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试",e);
 		}
+		redisCacheService.delete("pwdCode");
 		return result;	
 
 	}

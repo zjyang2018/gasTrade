@@ -2,7 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
 <mapper namespace="com.zach.gasTrade.dao.OrderInfoDao">
-	
+	<!-- 自定义查询sql结果与java model映射 -->
+	<resultMap id="DeliveryOrderInfoDtoResultMap" type="com.zach.gasTrade.dto.DeliveryOrderInfoDto">
+		<result property="orderId" column="order_id" />
+		<result property="customerName" column="customer_name" />
+		<result property="customerPhoneNumber" column="customer_phone_number" />
+		<result property="productName" column="product_name" />
+		<result property="imagePath" column="image_path" />
+	</resultMap>
+
+	<!-- 自定义查询sql结果与java model映射 -->
+	<resultMap id="CustomerOrderInfoDtoResultMap" type="com.zach.gasTrade.dto.CustomerOrderInfoDto">
+		<result property="orderId" column="order_id" />
+		<result property="productName" column="product_name" />
+		<result property="imagePath" column="image_path" />
+		<result property="deliveryName" column="delivery_name" />
+		<result property="deliveryPhoneNumber" column="delivery_phone_number" />
+		<result property="deliveryCompleteTime" column="delivery_complete_time" />
+		<result property="customerName" column="customer_name" />
+	</resultMap>
+
 	 <!-- 查询sql结果与java model映射-->
 	 <resultMap id="OrderInfoResultMap" type="com.zach.gasTrade.vo.OrderInfoVo">
          <result property="orderId" column="order_id"/>
@@ -84,476 +103,617 @@
     <sql id="OrderInfoQuery">
 	    order_id ,product_id ,product_name ,amount ,pay_status ,pay_no ,real_pay_amount,pay_time ,allot_status ,allot_time ,allot_delivery_id ,delivery_order_time ,delivery_complete_time ,customer_user_id ,customer_address ,longitude ,latitude ,order_status ,remark ,edit_reason ,create_time ,update_time 
 	</sql>
-	
-	
-   <!--查询记录数-->
-   <select id="getOrderInfoCount" parameterType="com.zach.gasTrade.vo.OrderInfoVo" resultType="java.lang.Integer" >                                             
+
+
+	<!--查询记录数 -->
+	<select id="getOrderInfoCount" parameterType="com.zach.gasTrade.dto.OrderListDto"
+		resultType="java.lang.Integer">                                             
      	<![CDATA[
 	    select count(1)
 	    from order_info AS o
         left join customer_user AS c on c.id=o.customer_user_id
         left join delivery_user AS d on o.allot_delivery_id=d.id
 	    ]]>
-        <where>
-	    	   <if  test="orderId !=null ">
-		            and o.order_id like #{orderId}
-		       </if>
-	    	   <if  test="payStatus !=null ">
-		            and pay_status = #{payStatus}
-		       </if>
-	    	   <if  test="payTime !=null ">
-		            and pay_time = #{payTime}
-		       </if>
-	    	   <if  test="allotStatus !=null ">
-		            and allot_status = #{allotStatus}
-		       </if>
-		       <if  test="customerName !=null ">
-		            and c.name like #{customerName}
-		       </if>
-		       <if  test="customerPhoneNumber !=null ">
-		            and c.phone_number like #{customerPhoneNumber}
-		       </if>
-		       <if  test="deliveryName !=null ">
-		            and d.name like #{deliveryName}
-		       </if>
-		       <if  test="deliveryPhoneNumber !=null ">
-		            and d.phone_number like #{deliveryPhoneNumber}
-		       </if>
-	    	   <if  test="orderStatus !=null ">
-		            and order_status = #{orderStatus}
-		       </if>
-	    </where>	
-   </select> 
-   
-   <!--监控订单数量统计-->
-   <select id="getDeliveryMonitorCount" parameterType="java.util.Map" resultType="java.lang.Integer" >                                             
+		<where>
+			<if test="orderId !=null ">
+				and o.order_id like #{orderId}
+			</if>
+			<if test="payStatus !=null ">
+				and pay_status = #{payStatus}
+			</if>
+			<if test="payTime !=null ">
+				and pay_time = #{payTime}
+			</if>
+			<if test="allotStatus !=null ">
+				and allot_status = #{allotStatus}
+			</if>
+			<if test="customerName !=null ">
+				and c.name like #{customerName}
+			</if>
+			<if test="customerPhoneNumber !=null ">
+				and c.phone_number like #{customerPhoneNumber}
+			</if>
+			<if test="deliveryName !=null ">
+				and d.name like #{deliveryName}
+			</if>
+			<if test="deliveryPhoneNumber !=null ">
+				and d.phone_number like #{deliveryPhoneNumber}
+			</if>
+			<if test="orderStatus !=null ">
+				and order_status = #{orderStatus}
+			</if>
+		</where>
+	</select>
+
+	<!--公众号——派送员端或客户端——我的订单统计 -->
+	<select id="getOrderInfoNumber" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
+		resultType="java.lang.Integer">                                             
+     	<![CDATA[
 	    select count(1)
 	    from order_info
-	    where create_time = #{createTime} between #{startTime} and #{endTime}
-	    <where>
-	    	   <if  test="orderId !=null ">
-		            and o.order_id like #{orderId}
-		       </if>
-	    	   <if  test="startTime !=null ">
-		            and delivery_order_time between #{startTime} and ifnull(#{endTime},now())
-		       </if>
-	    </where>	
-   </select> 
-   
-   <select id="getDeliveryMonitorPage"  parameterType="java.util.Map" resultMap="DeliveryMonitorDtoResultMap">   
-          select                                             
-	      o.order_id AS order_id,c.name AS customer_name,c.phone_number AS customer_phone_number,d.name AS delivery_name,d.phone_number AS delivery_phone_number,o.delivery_order_time AS delivery_order_time
-	      from order_info AS o
-          left join customer_user AS c on c.id=o.customer_user_id
-          left join delivery_user AS d on o.allot_delivery_id=d.id
-	       <where>
-	    	   <if  test="orderId !=null ">
-		            and o.order_id like #{orderId}
-		       </if>
-	    	   <if  test="startTime !=null ">
-		            and delivery_order_time between #{startTime} and ifnull(#{endTime},now())
-		       </if>
-	    </where>	
-	    order by o.update_time
-	    limit #{startIndex},#{pageSize}
-     </select>
-      
-   <select id="getOrderInfoList"  parameterType="com.zach.gasTrade.vo.OrderInfoVo" resultMap="OrderInfoResultMap">   
-          select                                             
-	      <include refid="OrderInfoQuery" />
-	      from order_info
-	      <where>
-	    	   <if  test="orderId !=null ">
-		            and order_id = #{orderId}
-		       </if>
-	    	   <if  test="productId !=null ">
-		            and product_id = #{productId}
-		       </if>
-	    	   <if  test="productName !=null ">
-		            and product_name = #{productName}
-		       </if>
-	    	   <if  test="amount !=null ">
-		            and amount = #{amount}
-		       </if>
-	    	   <if  test="payStatus !=null ">
-		            and pay_status = #{payStatus}
-		       </if>
-	    	   <if  test="payNo !=null ">
-		            and pay_no = #{payNo}
-		       </if>
-	    	   <if  test="payTime !=null ">
-		            and pay_time = #{payTime}
-		       </if>
-	    	   <if  test="allotStatus !=null ">
-		            and allot_status = #{allotStatus}
-		       </if>
-	    	   <if  test="allotTime !=null ">
-		            and allot_time = #{allotTime}
-		       </if>
-	    	   <if  test="allotDeliveryId !=null ">
-		            and allot_delivery_id = #{allotDeliveryId}
-		       </if>
-	    	   <if  test="deliveryOrderTime !=null ">
-		            and delivery_order_time = #{deliveryOrderTime}
-		       </if>
-	    	   <if  test="deliveryCompleteTime !=null ">
-		            and delivery_complete_time = #{deliveryCompleteTime}
-		       </if>
-	    	   <if  test="customerUserId !=null ">
-		            and customer_user_id = #{customerUserId}
-		       </if>
-	    	   <if  test="customerAddress !=null ">
-		            and customer_address = #{customerAddress}
-		       </if>
-	    	   <if  test="longitude !=null ">
-		            and longitude = #{longitude}
-		       </if>
-	    	   <if  test="latitude !=null ">
-		            and latitude = #{latitude}
-		       </if>
-	    	   <if  test="orderStatus !=null ">
-		            and order_status = #{orderStatus}
-		       </if>
-	    	   <if  test="remark !=null ">
-		            and remark = #{remark}
-		       </if>
-	    	   <if  test="editReason !=null ">
-		            and edit_reason = #{editReason}
-		       </if>
-	    	   <if  test="createTime !=null ">
-		            and create_time = #{createTime}
-		       </if>
-	    	   <if  test="updateTime !=null ">
-		            and update_time = #{updateTime}
-		       </if>
-	    </where>
-     </select>
-   
-     <select id="getOrderInfoPage"  parameterType="com.zach.gasTrade.dto.OrderListDto" resultMap="OrderListDtoResultMap">   
-          select                                             
-	      o.order_id AS order_id,o.amount AS amount,sum(o.amount) AS total_amount,o.pay_status AS pay_status,c.name AS customer_name,c.phone_number AS customer_phone_number,o.allot_status AS allot_status,d.name AS delivery_name,d.phone_number AS delivery_phone_number,o.order_status AS order_status,o.pay_time AS pay_time,o.delivery_order_time AS delivery_order_time
-	      from order_info AS o
-          left join customer_user AS c on c.id=o.customer_user_id
-          left join delivery_user AS d on o.allot_delivery_id=d.id
-	      <where>
-	    	   <if  test="orderId !=null ">
-		            and o.order_id like #{orderId}
-		       </if>
-	    	   <if  test="payStatus !=null ">
-		            and pay_status = #{payStatus}
-		       </if>
-	    	   <if  test="payTime !=null ">
-		            and pay_time = #{payTime}
-		       </if>
-	    	   <if  test="allotStatus !=null ">
-		            and allot_status = #{allotStatus}
-		       </if>
-		       <if  test="customerName !=null ">
-		            and c.name like #{customerName}
-		       </if>
-		       <if  test="customerPhoneNumber !=null ">
-		            and c.phone_number like #{customerPhoneNumber}
-		       </if>
-		       <if  test="deliveryName !=null ">
-		            and d.name like #{deliveryName}
-		       </if>
-		       <if  test="deliveryPhoneNumber !=null ">
-		            and d.phone_number like #{deliveryPhoneNumber}
-		       </if>
-	    	   <if  test="orderStatus !=null ">
-		            and order_status = #{orderStatus}
-		       </if>
-	    </where>	
-	    order by o.update_time
-	    limit #{startIndex},#{pageSize}
-     </select>
-     
-     <select id="getOrderInfoBySelective"  parameterType="com.zach.gasTrade.vo.OrderInfoVo" resultMap="OrderInfoResultMap">   
-          select                                             
-	      <include refid="OrderInfoQuery" />
-	      from order_info
-	      <where>
-	    	   <if  test="orderId !=null ">
-		            and order_id = #{orderId}
-		       </if>
-	    	   <if  test="productId !=null ">
-		            and product_id = #{productId}
-		       </if>
-	    	   <if  test="productName !=null ">
-		            and product_name = #{productName}
-		       </if>
-	    	   <if  test="amount !=null ">
-		            and amount = #{amount}
-		       </if>
-	    	   <if  test="payStatus !=null ">
-		            and pay_status = #{payStatus}
-		       </if>
-	    	   <if  test="payNo !=null ">
-		            and pay_no = #{payNo}
-		       </if>
-	    	   <if  test="payTime !=null ">
-		            and pay_time = #{payTime}
-		       </if>
-	    	   <if  test="allotStatus !=null ">
-		            and allot_status = #{allotStatus}
-		       </if>
-	    	   <if  test="allotTime !=null ">
-		            and allot_time = #{allotTime}
-		       </if>
-	    	   <if  test="allotDeliveryId !=null ">
-		            and allot_delivery_id = #{allotDeliveryId}
-		       </if>
-	    	   <if  test="deliveryOrderTime !=null ">
-		            and delivery_order_time = #{deliveryOrderTime}
-		       </if>
-	    	   <if  test="deliveryCompleteTime !=null ">
-		            and delivery_complete_time = #{deliveryCompleteTime}
-		       </if>
-	    	   <if  test="customerUserId !=null ">
-		            and customer_user_id = #{customerUserId}
-		       </if>
-	    	   <if  test="customerAddress !=null ">
-		            and customer_address = #{customerAddress}
-		       </if>
-	    	   <if  test="longitude !=null ">
-		            and longitude = #{longitude}
-		       </if>
-	    	   <if  test="latitude !=null ">
-		            and latitude = #{latitude}
-		       </if>
-	    	   <if  test="orderStatus !=null ">
-		            and order_status = #{orderStatus}
-		       </if>
-	    	   <if  test="remark !=null ">
-		            and remark = #{remark}
-		       </if>
-	    	   <if  test="editReason !=null ">
-		            and edit_reason = #{editReason}
-		       </if>
-	    	   <if  test="createTime !=null ">
-		            and create_time = #{createTime}
-		       </if>
-	    	   <if  test="updateTime !=null ">
-		            and update_time = #{updateTime}
-		       </if>
-	    </where>
-     </select>
-     
-    <!-- 删除 -->
-    <delete id="delete" parameterType="com.zach.gasTrade.vo.OrderInfoVo">
+        ]]>
+		<where>
+			<if test="orderId !=null ">
+				and order_id = #{orderId}
+			</if>
+			<if test="productId !=null ">
+				and product_id = #{productId}
+			</if>
+			<if test="productName !=null ">
+				and product_name = #{productName}
+			</if>
+			<if test="amount !=null ">
+				and amount = #{amount}
+			</if>
+			<if test="payStatus !=null ">
+				and pay_status = #{payStatus}
+			</if>
+			<if test="payNo !=null ">
+				and pay_no = #{payNo}
+			</if>
+			<if test="payTime !=null ">
+				and pay_time = #{payTime}
+			</if>
+			<if test="allotStatus !=null ">
+				and allot_status = #{allotStatus}
+			</if>
+			<if test="allotTime !=null ">
+				and allot_time = #{allotTime}
+			</if>
+			<if test="allotDeliveryId !=null ">
+				and allot_delivery_id = #{allotDeliveryId}
+			</if>
+			<if test="deliveryOrderTime !=null ">
+				and delivery_order_time = #{deliveryOrderTime}
+			</if>
+			<if test="deliveryCompleteTime !=null ">
+				and delivery_complete_time = #{deliveryCompleteTime}
+			</if>
+			<if test="customerUserId !=null ">
+				and customer_user_id = #{customerUserId}
+			</if>
+			<if test="customerAddress !=null ">
+				and customer_address = #{customerAddress}
+			</if>
+			<if test="longitude !=null ">
+				and longitude = #{longitude}
+			</if>
+			<if test="latitude !=null ">
+				and latitude = #{latitude}
+			</if>
+			<if test="orderStatus !=null ">
+				and order_status = #{orderStatus}
+			</if>
+			<if test="remark !=null ">
+				and remark = #{remark}
+			</if>
+			<if test="editReason !=null ">
+				and edit_reason = #{editReason}
+			</if>
+			<if test="createTime !=null ">
+				and create_time = #{createTime}
+			</if>
+			<if test="updateTime !=null ">
+				and update_time = #{updateTime}
+			</if>
+		</where>
+	</select>
+
+	<!--监控订单数量统计 -->
+	<select id="getDeliveryMonitorCount" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+		select count(1)
+		from order_info
+		where create_time = #{createTime} between #{startTime} and #{endTime}
+		<where>
+			<if test="orderId !=null ">
+				and o.order_id like #{orderId}
+			</if>
+			<if test="startTime !=null ">
+				and delivery_order_time between #{startTime} and
+				ifnull(#{endTime},now())
+			</if>
+		</where>
+	</select>
+
+	<select id="getDeliveryMonitorPage" parameterType="java.util.Map"
+		resultMap="DeliveryMonitorDtoResultMap">
+		select
+		o.order_id AS order_id,c.name AS customer_name,c.phone_number AS
+		customer_phone_number,d.name AS delivery_name,d.phone_number AS
+		delivery_phone_number,o.delivery_order_time AS delivery_order_time
+		from order_info AS o
+		left join customer_user AS c on c.id=o.customer_user_id
+		left join delivery_user AS d on o.allot_delivery_id=d.id
+		<where>
+			<if test="orderId !=null ">
+				and o.order_id like #{orderId}
+			</if>
+			<if test="startTime !=null ">
+				and delivery_order_time between #{startTime} and
+				ifnull(#{endTime},now())
+			</if>
+		</where>
+		order by o.update_time
+		limit #{startIndex},#{pageSize}
+	</select>
+	<!-- 公众号——派送员端——我的订单列表 -->
+	<select id="getDeliveryOrderInfoPage" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
+		resultMap="DeliveryOrderInfoDtoResultMap">
+		select
+		o.order_id AS order_id,c.name AS customer_name,c.phone_number AS
+		customer_phone_number, o.product_name AS product_name,p.image_path AS
+		image_path
+		from order_info AS o
+		left join customer_user AS c on c.id=o.customer_user_id
+		left join product AS p on p.product_id=o.product_id
+		<where>
+			<if test="allotStatus !=null ">
+				and allot_status = #{allotStatus}
+			</if>
+			<if test="allotDeliveryId !=null ">
+				and allot_delivery_id = #{allotDeliveryId}
+			</if>
+			<if test="orderStatus !=null ">
+				and order_status = #{orderStatus}
+			</if>
+
+		</where>
+		order by o.update_time
+		limit #{startIndex},#{pageSize}
+	</select>
+	
+	<!-- 公众号——客户端——我的订单列表 -->
+	<select id="getCustomerOrderInfoPage" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
+		resultMap="CustomerOrderInfoDtoResultMap">
+		select
+		o.order_id AS order_id,o.product_name AS product_name,p.image_path AS
+		image_path,d.name AS delivery_name,d.phone_number AS
+		delivery_phone_number,o.delivery_complete_time AS delivery_complete_time,c.name AS customer_name
+		from order_info AS o
+		left join customer_user AS c on o.customer_user_id=c.id
+		left join delivery_user AS d on o.allot_delivery_id=d.id
+		left join product AS p on o.product_id=p.product_id
+		<where>
+			<if test="payStatus !=null ">
+				and pay_status = #{payStatus}
+			</if>
+			<if test="customerUserId !=null ">
+				and customer_user_id = #{customerUserId}
+			</if>
+			<if test="orderStatus !=null ">
+				and order_status = #{orderStatus}
+			</if>
+
+		</where>
+		order by o.update_time
+		limit #{startIndex},#{pageSize}
+	</select>
+
+	<select id="getOrderInfoList" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
+		resultMap="OrderInfoResultMap">
+		select
+		<include refid="OrderInfoQuery" />
+		from order_info
+		<where>
+			<if test="orderId !=null ">
+				and order_id = #{orderId}
+			</if>
+			<if test="productId !=null ">
+				and product_id = #{productId}
+			</if>
+			<if test="productName !=null ">
+				and product_name = #{productName}
+			</if>
+			<if test="amount !=null ">
+				and amount = #{amount}
+			</if>
+			<if test="payStatus !=null ">
+				and pay_status = #{payStatus}
+			</if>
+			<if test="payNo !=null ">
+				and pay_no = #{payNo}
+			</if>
+			<if test="payTime !=null ">
+				and pay_time = #{payTime}
+			</if>
+			<if test="allotStatus !=null ">
+				and allot_status = #{allotStatus}
+			</if>
+			<if test="allotTime !=null ">
+				and allot_time = #{allotTime}
+			</if>
+			<if test="allotDeliveryId !=null ">
+				and allot_delivery_id = #{allotDeliveryId}
+			</if>
+			<if test="deliveryOrderTime !=null ">
+				and delivery_order_time = #{deliveryOrderTime}
+			</if>
+			<if test="deliveryCompleteTime !=null ">
+				and delivery_complete_time = #{deliveryCompleteTime}
+			</if>
+			<if test="customerUserId !=null ">
+				and customer_user_id = #{customerUserId}
+			</if>
+			<if test="customerAddress !=null ">
+				and customer_address = #{customerAddress}
+			</if>
+			<if test="longitude !=null ">
+				and longitude = #{longitude}
+			</if>
+			<if test="latitude !=null ">
+				and latitude = #{latitude}
+			</if>
+			<if test="orderStatus !=null ">
+				and order_status = #{orderStatus}
+			</if>
+			<if test="remark !=null ">
+				and remark = #{remark}
+			</if>
+			<if test="editReason !=null ">
+				and edit_reason = #{editReason}
+			</if>
+			<if test="createTime !=null ">
+				and create_time = #{createTime}
+			</if>
+			<if test="updateTime !=null ">
+				and update_time = #{updateTime}
+			</if>
+		</where>
+	</select>
+
+	<select id="getOrderInfoPage" parameterType="com.zach.gasTrade.dto.OrderListDto"
+		resultMap="OrderListDtoResultMap">
+		select
+		o.order_id AS order_id,o.amount AS amount,sum(o.amount) AS
+		total_amount,o.pay_status AS pay_status,c.name AS
+		customer_name,c.phone_number AS customer_phone_number,o.allot_status
+		AS allot_status,d.name AS delivery_name,d.phone_number AS
+		delivery_phone_number,o.order_status AS order_status,o.pay_time AS
+		pay_time,o.delivery_order_time AS delivery_order_time
+		from order_info AS o
+		left join customer_user AS c on c.id=o.customer_user_id
+		left join delivery_user AS d on o.allot_delivery_id=d.id
+		<where>
+			<if test="orderId !=null ">
+				and o.order_id like #{orderId}
+			</if>
+			<if test="payStatus !=null ">
+				and pay_status = #{payStatus}
+			</if>
+			<if test="payTime !=null ">
+				and pay_time = #{payTime}
+			</if>
+			<if test="allotStatus !=null ">
+				and allot_status = #{allotStatus}
+			</if>
+			<if test="customerName !=null ">
+				and c.name like #{customerName}
+			</if>
+			<if test="customerPhoneNumber !=null ">
+				and c.phone_number like #{customerPhoneNumber}
+			</if>
+			<if test="deliveryName !=null ">
+				and d.name like #{deliveryName}
+			</if>
+			<if test="deliveryPhoneNumber !=null ">
+				and d.phone_number like #{deliveryPhoneNumber}
+			</if>
+			<if test="orderStatus !=null ">
+				and order_status = #{orderStatus}
+			</if>
+		</where>
+		order by o.update_time
+		limit #{startIndex},#{pageSize}
+	</select>
+
+	<select id="getOrderInfoBySelective" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
+		resultMap="OrderInfoResultMap">
+		select
+		<include refid="OrderInfoQuery" />
+		from order_info
+		<where>
+			<if test="orderId !=null ">
+				and order_id = #{orderId}
+			</if>
+			<if test="productId !=null ">
+				and product_id = #{productId}
+			</if>
+			<if test="productName !=null ">
+				and product_name = #{productName}
+			</if>
+			<if test="amount !=null ">
+				and amount = #{amount}
+			</if>
+			<if test="payStatus !=null ">
+				and pay_status = #{payStatus}
+			</if>
+			<if test="payNo !=null ">
+				and pay_no = #{payNo}
+			</if>
+			<if test="payTime !=null ">
+				and pay_time = #{payTime}
+			</if>
+			<if test="allotStatus !=null ">
+				and allot_status = #{allotStatus}
+			</if>
+			<if test="allotTime !=null ">
+				and allot_time = #{allotTime}
+			</if>
+			<if test="allotDeliveryId !=null ">
+				and allot_delivery_id = #{allotDeliveryId}
+			</if>
+			<if test="deliveryOrderTime !=null ">
+				and delivery_order_time = #{deliveryOrderTime}
+			</if>
+			<if test="deliveryCompleteTime !=null ">
+				and delivery_complete_time = #{deliveryCompleteTime}
+			</if>
+			<if test="customerUserId !=null ">
+				and customer_user_id = #{customerUserId}
+			</if>
+			<if test="customerAddress !=null ">
+				and customer_address = #{customerAddress}
+			</if>
+			<if test="longitude !=null ">
+				and longitude = #{longitude}
+			</if>
+			<if test="latitude !=null ">
+				and latitude = #{latitude}
+			</if>
+			<if test="orderStatus !=null ">
+				and order_status = #{orderStatus}
+			</if>
+			<if test="remark !=null ">
+				and remark = #{remark}
+			</if>
+			<if test="editReason !=null ">
+				and edit_reason = #{editReason}
+			</if>
+			<if test="createTime !=null ">
+				and create_time = #{createTime}
+			</if>
+			<if test="updateTime !=null ">
+				and update_time = #{updateTime}
+			</if>
+		</where>
+	</select>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="com.zach.gasTrade.vo.OrderInfoVo">
     	<![CDATA[
 	        DELETE FROM order_info WHERE
 		        order_id = #{orderId}    
     	]]>
-    </delete>
-    
-     <!-- 修改 -->
-    <update id="update"  parameterType="com.zach.gasTrade.vo.OrderInfoVo">
-        UPDATE order_info SET
-        	<if test="productId !=null "> 
-        	product_id = #{productId} ,
-        	</if> 
-        	<if test="productName !=null "> 
-        	product_name = #{productName} ,
-        	</if> 
-        	<if test="amount !=null "> 
-        	amount = #{amount} ,
-        	</if> 
-        	<if test="payStatus !=null "> 
-        	pay_status = #{payStatus} ,
-        	</if> 
-        	<if test="payNo !=null "> 
-        	pay_no = #{payNo} ,
-        	</if> 
-        	<if test="realPayAmount !=null "> 
-        	real_pay_amount = #{realPayAmount} ,
-        	</if>
-        	<if test="payTime !=null "> 
-        	pay_time = #{payTime} ,
-        	</if> 
-        	<if test="allotStatus !=null "> 
-        	allot_status = #{allotStatus} ,
-        	</if> 
-        	<if test="allotTime !=null "> 
-        	allot_time = #{allotTime} ,
-        	</if> 
-        	<if test="allotDeliveryId !=null "> 
-        	allot_delivery_id = #{allotDeliveryId} ,
-        	</if> 
-        	<if test="deliveryOrderTime !=null "> 
-        	delivery_order_time = #{deliveryOrderTime} ,
-        	</if> 
-        	<if test="deliveryCompleteTime !=null "> 
-        	delivery_complete_time = #{deliveryCompleteTime} ,
-        	</if> 
-        	<if test="customerUserId !=null "> 
-        	customer_user_id = #{customerUserId} ,
-        	</if> 
-        	<if test="customerAddress !=null "> 
-        	customer_address = #{customerAddress} ,
-        	</if> 
-        	<if test="longitude !=null "> 
-        	longitude = #{longitude} ,
-        	</if> 
-        	<if test="latitude !=null "> 
-        	latitude = #{latitude} ,
-        	</if> 
-        	<if test="orderStatus !=null "> 
-        	order_status = #{orderStatus} ,
-        	</if> 
-        	<if test="remark !=null "> 
-        	remark = #{remark} ,
-        	</if> 
-        	<if test="editReason !=null "> 
-        	edit_reason = #{editReason} ,
-        	</if> 
-        	<if test="createTime !=null "> 
-        	create_time = #{createTime} ,
-        	</if> 
-        	<if test="updateTime !=null "> 
-        	update_time = #{updateTime} 
-        	</if> 
-        WHERE 
-        	order_id = #{orderId} 
-    </update>
-    
-    <!-- 保存 -->
-     <insert id="save" parameterType="com.zach.gasTrade.vo.OrderInfoVo" >
-        INSERT INTO order_info (
-	        <if test="orderId !=null ">
-	        	order_id ,
-	        </if>	
-	        <if test="productId !=null ">
-	        	product_id ,
-	        </if>	
-	        <if test="productName !=null ">
-	        	product_name ,
-	        </if>	
-	        <if test="amount !=null ">
-	        	amount ,
-	        </if>	
-	        <if test="payStatus !=null ">
-	        	pay_status ,
-	        </if>	
-	        <if test="payNo !=null ">
-	        	pay_no ,
-	        </if>
-	         <if test="realPayAmount !=null ">
-	        	real_pay_amount ,
-	        </if>	
-	        <if test="payTime !=null ">
-	        	pay_time ,
-	        </if>	
-	        <if test="allotStatus !=null ">
-	        	allot_status ,
-	        </if>	
-	        <if test="allotTime !=null ">
-	        	allot_time ,
-	        </if>	
-	        <if test="allotDeliveryId !=null ">
-	        	allot_delivery_id ,
-	        </if>	
-	        <if test="deliveryOrderTime !=null ">
-	        	delivery_order_time ,
-	        </if>	
-	        <if test="deliveryCompleteTime !=null ">
-	        	delivery_complete_time ,
-	        </if>	
-	        <if test="customerUserId !=null ">
-	        	customer_user_id ,
-	        </if>	
-	        <if test="customerAddress !=null ">
-	        	customer_address ,
-	        </if>	
-	        <if test="longitude !=null ">
-	        	longitude ,
-	        </if>	
-	        <if test="latitude !=null ">
-	        	latitude ,
-	        </if>	
-	        <if test="orderStatus !=null ">
-	        	order_status ,
-	        </if>	
-	        <if test="remark !=null ">
-	        	remark ,
-	        </if>	
-	        <if test="editReason !=null ">
-	        	edit_reason ,
-	        </if>	
-	        <if test="createTime !=null ">
-	        	create_time ,
-	        </if>	
-	        <if test="updateTime !=null ">
-	        	update_time 
-	        </if>	
-        ) VALUES (
-	        <if test="orderId !=null ">
-	        	#{orderId} ,
-	        </if>	
-	        <if test="productId !=null ">
-	        	#{productId} ,
-	        </if>	
-	        <if test="productName !=null ">
-	        	#{productName} ,
-	        </if>	
-	        <if test="amount !=null ">
-	        	#{amount} ,
-	        </if>	
-	        <if test="payStatus !=null ">
-	        	#{payStatus} ,
-	        </if>	
-	        <if test="payNo !=null ">
-	        	#{payNo} ,
-	        </if>
-	        <if test="realPayAmount !=null ">
-	        	#{realPayAmount} ,
-	        </if>	
-	        <if test="payTime !=null ">
-	        	#{payTime} ,
-	        </if>	
-	        <if test="allotStatus !=null ">
-	        	#{allotStatus} ,
-	        </if>	
-	        <if test="allotTime !=null ">
-	        	#{allotTime} ,
-	        </if>	
-	        <if test="allotDeliveryId !=null ">
-	        	#{allotDeliveryId} ,
-	        </if>	
-	        <if test="deliveryOrderTime !=null ">
-	        	#{deliveryOrderTime} ,
-	        </if>	
-	        <if test="deliveryCompleteTime !=null ">
-	        	#{deliveryCompleteTime} ,
-	        </if>	
-	        <if test="customerUserId !=null ">
-	        	#{customerUserId} ,
-	        </if>	
-	        <if test="customerAddress !=null ">
-	        	#{customerAddress} ,
-	        </if>	
-	        <if test="longitude !=null ">
-	        	#{longitude} ,
-	        </if>	
-	        <if test="latitude !=null ">
-	        	#{latitude} ,
-	        </if>	
-	        <if test="orderStatus !=null ">
-	        	#{orderStatus} ,
-	        </if>	
-	        <if test="remark !=null ">
-	        	#{remark} ,
-	        </if>	
-	        <if test="editReason !=null ">
-	        	#{editReason} ,
-	        </if>	
-	        <if test="createTime !=null ">
-	        	#{createTime} ,
-	        </if>	
-	        <if test="updateTime !=null ">
-	        	#{updateTime} 
-	        </if>	
-        )
-   </insert>
+	</delete>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.zach.gasTrade.vo.OrderInfoVo">
+		UPDATE order_info SET
+		<if test="productId !=null ">
+			product_id = #{productId} ,
+		</if>
+		<if test="productName !=null ">
+			product_name = #{productName} ,
+		</if>
+		<if test="amount !=null ">
+			amount = #{amount} ,
+		</if>
+		<if test="payStatus !=null ">
+			pay_status = #{payStatus} ,
+		</if>
+		<if test="payNo !=null ">
+			pay_no = #{payNo} ,
+		</if>
+		<if test="realPayAmount !=null ">
+			real_pay_amount = #{realPayAmount} ,
+		</if>
+		<if test="payTime !=null ">
+			pay_time = #{payTime} ,
+		</if>
+		<if test="allotStatus !=null ">
+			allot_status = #{allotStatus} ,
+		</if>
+		<if test="allotTime !=null ">
+			allot_time = #{allotTime} ,
+		</if>
+		<if test="allotDeliveryId !=null ">
+			allot_delivery_id = #{allotDeliveryId} ,
+		</if>
+		<if test="deliveryOrderTime !=null ">
+			delivery_order_time = #{deliveryOrderTime} ,
+		</if>
+		<if test="deliveryCompleteTime !=null ">
+			delivery_complete_time = #{deliveryCompleteTime} ,
+		</if>
+		<if test="customerUserId !=null ">
+			customer_user_id = #{customerUserId} ,
+		</if>
+		<if test="customerAddress !=null ">
+			customer_address = #{customerAddress} ,
+		</if>
+		<if test="longitude !=null ">
+			longitude = #{longitude} ,
+		</if>
+		<if test="latitude !=null ">
+			latitude = #{latitude} ,
+		</if>
+		<if test="orderStatus !=null ">
+			order_status = #{orderStatus} ,
+		</if>
+		<if test="remark !=null ">
+			remark = #{remark} ,
+		</if>
+		<if test="editReason !=null ">
+			edit_reason = #{editReason} ,
+		</if>
+		<if test="createTime !=null ">
+			create_time = #{createTime} ,
+		</if>
+		<if test="updateTime !=null ">
+			update_time = #{updateTime}
+		</if>
+		WHERE
+		order_id = #{orderId}
+	</update>
+
+	<!-- 保存 -->
+	<insert id="save" parameterType="com.zach.gasTrade.vo.OrderInfoVo">
+		INSERT INTO order_info (
+		<if test="orderId !=null ">
+			order_id ,
+		</if>
+		<if test="productId !=null ">
+			product_id ,
+		</if>
+		<if test="productName !=null ">
+			product_name ,
+		</if>
+		<if test="amount !=null ">
+			amount ,
+		</if>
+		<if test="payStatus !=null ">
+			pay_status ,
+		</if>
+		<if test="payNo !=null ">
+			pay_no ,
+		</if>
+		<if test="realPayAmount !=null ">
+			real_pay_amount ,
+		</if>
+		<if test="payTime !=null ">
+			pay_time ,
+		</if>
+		<if test="allotStatus !=null ">
+			allot_status ,
+		</if>
+		<if test="allotTime !=null ">
+			allot_time ,
+		</if>
+		<if test="allotDeliveryId !=null ">
+			allot_delivery_id ,
+		</if>
+		<if test="deliveryOrderTime !=null ">
+			delivery_order_time ,
+		</if>
+		<if test="deliveryCompleteTime !=null ">
+			delivery_complete_time ,
+		</if>
+		<if test="customerUserId !=null ">
+			customer_user_id ,
+		</if>
+		<if test="customerAddress !=null ">
+			customer_address ,
+		</if>
+		<if test="longitude !=null ">
+			longitude ,
+		</if>
+		<if test="latitude !=null ">
+			latitude ,
+		</if>
+		<if test="orderStatus !=null ">
+			order_status ,
+		</if>
+		<if test="remark !=null ">
+			remark ,
+		</if>
+		<if test="editReason !=null ">
+			edit_reason ,
+		</if>
+		<if test="createTime !=null ">
+			create_time ,
+		</if>
+		<if test="updateTime !=null ">
+			update_time
+		</if>
+		) VALUES (
+		<if test="orderId !=null ">
+			#{orderId} ,
+		</if>
+		<if test="productId !=null ">
+			#{productId} ,
+		</if>
+		<if test="productName !=null ">
+			#{productName} ,
+		</if>
+		<if test="amount !=null ">
+			#{amount} ,
+		</if>
+		<if test="payStatus !=null ">
+			#{payStatus} ,
+		</if>
+		<if test="payNo !=null ">
+			#{payNo} ,
+		</if>
+		<if test="realPayAmount !=null ">
+			#{realPayAmount} ,
+		</if>
+		<if test="payTime !=null ">
+			#{payTime} ,
+		</if>
+		<if test="allotStatus !=null ">
+			#{allotStatus} ,
+		</if>
+		<if test="allotTime !=null ">
+			#{allotTime} ,
+		</if>
+		<if test="allotDeliveryId !=null ">
+			#{allotDeliveryId} ,
+		</if>
+		<if test="deliveryOrderTime !=null ">
+			#{deliveryOrderTime} ,
+		</if>
+		<if test="deliveryCompleteTime !=null ">
+			#{deliveryCompleteTime} ,
+		</if>
+		<if test="customerUserId !=null ">
+			#{customerUserId} ,
+		</if>
+		<if test="customerAddress !=null ">
+			#{customerAddress} ,
+		</if>
+		<if test="longitude !=null ">
+			#{longitude} ,
+		</if>
+		<if test="latitude !=null ">
+			#{latitude} ,
+		</if>
+		<if test="orderStatus !=null ">
+			#{orderStatus} ,
+		</if>
+		<if test="remark !=null ">
+			#{remark} ,
+		</if>
+		<if test="editReason !=null ">
+			#{editReason} ,
+		</if>
+		<if test="createTime !=null ">
+			#{createTime} ,
+		</if>
+		<if test="updateTime !=null ">
+			#{updateTime}
+		</if>
+		)
+	</insert>
 </mapper>
 

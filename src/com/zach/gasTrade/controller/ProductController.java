@@ -471,12 +471,8 @@ public class ProductController {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * 公众号——产品详情
-=======
-	 * 详情
 	 * 
->>>>>>> 819d9dcd304c1744464f3ab2388f6ad090e00b7b
 	 * @param request
 	 * @param filterMask
 	 * @return Result
@@ -506,72 +502,74 @@ public class ProductController {
 			for (String str : imgPathArr) {
 				imagesPath += Constants.BASE_PATH + str + ",";
 			}
-  	    	if(imagesPath.endsWith(",")) {
-  	    		imagesPath = imagesPath.substring(0,imagesPath.length()-1);
-  	    	}
-  	    	
-  	    	ProductInfoDto productInfoDto = new ProductInfoDto();
-  	    	productInfoDto.setProductId(product.getProductId());
-  	    	productInfoDto.setProductName(product.getProductName());
-  	    	productInfoDto.setAmount(product.getAmount());
-  	    	productInfoDto.setProductDesc(product.getProductDesc());
-  	    	productInfoDto.setSpec(product.getSpec());
-  	    	productInfoDto.setImagePath(imagesPath);
-  	    	productInfoDto.setAddress(adminUser.getAddress());
+			if (imagesPath.endsWith(",")) {
+				imagesPath = imagesPath.substring(0, imagesPath.length() - 1);
+			}
+
+			ProductInfoDto productInfoDto = new ProductInfoDto();
+			productInfoDto.setProductId(product.getProductId());
+			productInfoDto.setProductName(product.getProductName());
+			productInfoDto.setAmount(product.getAmount());
+			productInfoDto.setProductDesc(product.getProductDesc());
+			productInfoDto.setSpec(product.getSpec());
+			productInfoDto.setImagePath(imagesPath);
+			productInfoDto.setAddress(adminUser.getAddress());
 			result.setData(productInfoDto);
-			
-		}catch (RuntimeException e){
+
+		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
-			logger.error("系统异常,"+e.getMessage(),e);
-		}catch (Exception e){
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试",e);
+			logger.error("系统异常,请稍后重试", e);
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 公众号——商品列表
+	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/product/list",method = RequestMethod.POST)
+	@RequestMapping(value = "/product/list", method = RequestMethod.POST)
 	@ResponseBody
-	public DataResult productList(HttpServletRequest request, @RequestBody Map<String,String> param, ProductVo filterMask) {
-PageResult result=PageResult.initResult();
-		
+	public DataResult productList(HttpServletRequest request, @RequestBody Map<String, String> param,
+			ProductVo filterMask) {
+		PageResult result = PageResult.initResult();
+
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
-		filterMask.setStatus("10");	
+		filterMask.setStatus("10");
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
-		try{
+		try {
 			int total = productService.getProductCount(filterMask);
 			List<ProductListDto> products = productService.getProductInfoPage(filterMask);
 			for (ProductListDto product : products) {
 				String imgPath = product.getImagePath();
-		        String[] imgPathArr = {};
-		        if(StringUtil.isNotNullAndNotEmpty(imgPath)) {
-		        	imgPathArr = imgPath.split(",");
-		        }
-		        String imagesPath = "";
-		        for (String str : imgPathArr) {
-	  	    		imagesPath += Constants.BASE_PATH + str + ",";
+				String[] imgPathArr = {};
+				if (StringUtil.isNotNullAndNotEmpty(imgPath)) {
+					imgPathArr = imgPath.split(",");
 				}
-	  	    	if(imagesPath.endsWith(",")) {
-	  	    		imagesPath = imagesPath.substring(0,imagesPath.length()-1);
-	  	    	}
-	  	    	product.setImagePath(imagesPath);
+				String imagesPath = "";
+				for (String str : imgPathArr) {
+					imagesPath += Constants.BASE_PATH + str + ",";
+				}
+				if (imagesPath.endsWith(",")) {
+					imagesPath = imagesPath.substring(0, imagesPath.length() - 1);
+				}
+				product.setImagePath(imagesPath);
 			}
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
 			result.setPageSize(pageSize);
 			result.setData(products);
-			
-		}catch (RuntimeException e){
+
+		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
 			logger.error("系统异常," + e.getMessage(), e);

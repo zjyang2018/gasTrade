@@ -35,16 +35,19 @@ public class MsgServiceImpl implements MsgService {
 	}
 
 	public static void main(String[] args) {
-		MsgServiceImpl bean = new MsgServiceImpl();
-		String msgText = bean.createSendMsg("台州市能邦科技", "五楼", "窗口角楼", "电流传感器", "");
-		IndustrySMS.setParameter("13923469163", msgText);
+		StringBuilder smsText = new StringBuilder();
+		smsText.append("【拓客科技】尊敬的用户，您的验证码为").append("1212").append("，请于5分钟内正确输入，如非本人操作，请忽略此短信。");
+		IndustrySMS.setParameter("13923469163", smsText.toString());
 		IndustrySMS.execute();
 	}
 
 	@Override
 	public void sendMsg(String phone, String text) {
-		// TODO Auto-generated method stub
-
+		StringBuilder smsText = new StringBuilder();
+		smsText.append("【拓客科技】尊敬的用户，您的验证码为").append(text).append("，请于5分钟内正确输入，如非本人操作，请忽略此短信。");
+		// String msgText = "【拓客科技】尊敬的客户，您的验证码为4567，请于5分钟内正确输入，如非本人操作，请忽略此短信。";
+		IndustrySMS.setParameter(phone, smsText.toString());
+		IndustrySMS.execute();
 	}
 
 }

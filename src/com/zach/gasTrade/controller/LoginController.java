@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.common.cache.redis.RedisCacheService;
+import com.common.cache.CacheService;
 import com.common.utils.StringUtil;
 import com.common.utils.VerificationCodeUtils;
 import com.zach.gasTrade.common.Constants;
@@ -46,13 +46,13 @@ public class LoginController {
 
 	@Autowired
 	private CustomerUserService custmomerUserService;
-	
+
 	@Autowired
-	private RedisCacheService redisCacheService;
-	
+	private CacheService redisCacheService;
+
 	@Autowired
 	private MsgService msgService;
-	
+
 	/**
 	 * 发送手机验证码
 	 * 
@@ -62,38 +62,38 @@ public class LoginController {
 	 */
 	@RequestMapping(value = "/mobilecode", method = RequestMethod.POST)
 	@ResponseBody
-    public Result mobileVerifyCode(HttpServletRequest request,@RequestBody Map<String, String> param) {
-		Result result=Result.initResult();
-		
-        String mobile = param.get("mobile");
-        String codeType = param.get("String codeType");
-        String deliveryId = param.get("deliveryId");
-        String code = VerificationCodeUtils.genRegCode();
-        if("1".equals(codeType)) {
-        	redisCacheService.add("regCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
-        }else if("2".equals(codeType)) {
-        	if(StringUtil.isNullOrEmpty(deliveryId)) {
-        		result.setCode(Constants.FAILURE);
-    			result.setMsg("派送员编号 不能为空");
-    			return result;
-        	}
-        	DeliveryUserVo filterMask = new DeliveryUserVo();
-        	filterMask.setId(deliveryId);
-    		filterMask.setPhoneNumber(mobile);
-    		DeliveryUserVo deliveryUserVo = deliveryUserService.getDeliveryUserBySelective(filterMask);
-    		if(deliveryUserVo == null) {
-    			result.setCode(Constants.FAILURE);
-    			result.setMsg("手机号不正确,请重新输入");
-    			return result;
-    		}
-    		redisCacheService.add("pwdCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
-        }
-        // 发送短信验证码
-        msgService.sendMsg(mobile, code);
-      
-        return result;
-    }
-	
+	public Result mobileVerifyCode(HttpServletRequest request, @RequestBody Map<String, String> param) {
+		Result result = Result.initResult();
+
+		String mobile = param.get("mobile");
+		String codeType = param.get("String codeType");
+		String deliveryId = param.get("deliveryId");
+		String code = VerificationCodeUtils.genRegCode();
+		if ("1".equals(codeType)) {
+			redisCacheService.add("regCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
+		} else if ("2".equals(codeType)) {
+			if (StringUtil.isNullOrEmpty(deliveryId)) {
+				result.setCode(Constants.FAILURE);
+				result.setMsg("派送员编号 不能为空");
+				return result;
+			}
+			DeliveryUserVo filterMask = new DeliveryUserVo();
+			filterMask.setId(deliveryId);
+			filterMask.setPhoneNumber(mobile);
+			DeliveryUserVo deliveryUserVo = deliveryUserService.getDeliveryUserBySelective(filterMask);
+			if (deliveryUserVo == null) {
+				result.setCode(Constants.FAILURE);
+				result.setMsg("手机号不正确,请重新输入");
+				return result;
+			}
+			redisCacheService.add("pwdCode", code, Constants.VERIFY_CODE_EXPIRE_TIME);
+		}
+		// 发送短信验证码
+		msgService.sendMsg(mobile, code);
+
+		return result;
+	}
+
 	/**
 	 * 客户端——注册
 	 * 
@@ -109,7 +109,7 @@ public class LoginController {
 		// filterMask.setChannel("10");
 		String smgCode = parameter.get("smgCode");
 		try {
-			String regCode =redisCacheService.get("regCode");
+			String regCode = redisCacheService.get("regCode");
 			if (!regCode.equals(smgCode)) {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}
@@ -151,32 +151,32 @@ public class LoginController {
 		String phoneNumber = param.get("phoneNumber");
 		String verificationCode = param.get("verificationCode");
 
-		filterMask.setWxOpenId(wxOpenId);		
-        try {		
-        	CustomerUserVo customerUserVo = custmomerUserService.getCustomerUserBySelective(filterMask);
-        	if(StringUtil.isNullOrEmpty(phoneNumber)) {
-            	String mobile = customerUserVo.getPhoneNumber();
-            	if(StringUtil.isNullOrEmpty(mobile)) {
-            		result.setCode(1);
-        			result.setMsg("首次登录，需绑定手机号");
-        			return result;
-            	}
-        	}
-        	if(StringUtil.isNullOrEmpty(verificationCode)) {    	
-            		result.setCode(Constants.FAILURE);
-        			result.setMsg("验证码不能为空");
-        			return result;
-        	}
-        	String code = redisCacheService.get("regCode");
-        	if(!code.equals(verificationCode)) {
-        		result.setCode(Constants.FAILURE);
-    			result.setMsg("验证码错误,请重新输入");
-    			return result;
-        	}
-        	customerUserVo.setPhoneNumber(phoneNumber);
-        	custmomerUserService.update(customerUserVo);
-        		
-		}catch (RuntimeException e){
+		filterMask.setWxOpenId(wxOpenId);
+		try {
+			CustomerUserVo customerUserVo = custmomerUserService.getCustomerUserBySelective(filterMask);
+			if (StringUtil.isNullOrEmpty(phoneNumber)) {
+				String mobile = customerUserVo.getPhoneNumber();
+				if (StringUtil.isNullOrEmpty(mobile)) {
+					result.setCode(1);
+					result.setMsg("首次登录，需绑定手机号");
+					return result;
+				}
+			}
+			if (StringUtil.isNullOrEmpty(verificationCode)) {
+				result.setCode(Constants.FAILURE);
+				result.setMsg("验证码不能为空");
+				return result;
+			}
+			String code = redisCacheService.get("regCode");
+			if (!code.equals(verificationCode)) {
+				result.setCode(Constants.FAILURE);
+				result.setMsg("验证码错误,请重新输入");
+				return result;
+			}
+			customerUserVo.setPhoneNumber(phoneNumber);
+			custmomerUserService.update(customerUserVo);
+
+		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("用户不存在");
 			logger.error("系统异常," + e.getMessage(), e);
@@ -185,9 +185,9 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-        redisCacheService.delete("regCode");
-		return result;	
-    }
+		redisCacheService.delete("regCode");
+		return result;
+	}
 
 	/**
 	 * 登录
@@ -291,15 +291,15 @@ public class LoginController {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("验证码不能为空");
 			return result;
-	}
-	String code = redisCacheService.get("pwdCode");
-	if(!code.equals(verificationCode)) {
-		result.setCode(Constants.FAILURE);
-		result.setMsg("验证码错误,请重新输入");
-		return result;
-	}
-		
-		if(!newPassword.equals(comfirmPassword)) {
+		}
+		String code = redisCacheService.get("pwdCode");
+		if (!code.equals(verificationCode)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("验证码错误,请重新输入");
+			return result;
+		}
+
+		if (!newPassword.equals(comfirmPassword)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("两次密码输入不一样");
 			return result;
@@ -321,7 +321,7 @@ public class LoginController {
 			logger.error("系统异常,请稍后重试", e);
 		}
 		redisCacheService.delete("pwdCode");
-		return result;	
+		return result;
 
 	}
 }

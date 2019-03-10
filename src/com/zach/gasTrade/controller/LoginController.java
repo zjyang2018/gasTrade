@@ -66,7 +66,7 @@ public class LoginController {
 		Result result = Result.initResult();
 
 		String mobile = param.get("mobile");
-		String codeType = param.get("String codeType");
+		String codeType = param.get("codeType");
 		String deliveryId = param.get("deliveryId");
 		String code = VerificationCodeUtils.genRegCode();
 		if ("1".equals(codeType)) {

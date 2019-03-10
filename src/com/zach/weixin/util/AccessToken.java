@@ -33,11 +33,8 @@ public class AccessToken implements Serializable {
     public void setExpiresin(int expiresin) {
         this.expiresin = expiresin;
     }
-	public AccessToken(String accessToken, int expiresin) {
-		super();
-		this.accessToken = accessToken;
-		this.expiresin = expiresin;
-	}
-   
+    public AccessToken() {
+        // TODO Auto-generated constructor stub
+    }
 
 }

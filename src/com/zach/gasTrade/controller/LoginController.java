@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.common.cache.CacheService;
 import com.common.utils.StringUtil;
 import com.common.utils.VerificationCodeUtils;
@@ -71,6 +72,7 @@ public class LoginController {
 		String code = VerificationCodeUtils.genRegCode();
 		if ("1".equals(codeType)) {
 			String wxOpenId = param.get("wxOpenId");
+			logger.info("codeType==>" + codeType + ",wxOpenId==>" + wxOpenId);
 			cacheService.add("regCode" + wxOpenId, code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		} else if ("2".equals(codeType)) {
 			if (StringUtil.isNullOrEmpty(deliveryId)) {
@@ -107,11 +109,13 @@ public class LoginController {
 	public Result register(HttpServletRequest request, @RequestBody Map<String, String> parameter) {
 		Result result = Result.initResult();
 		CustomerUserVo filterMask = new CustomerUserVo();
+		logger.info("注册接口参数:" + JSON.toJSONString(parameter));
 		// filterMask.setChannel("10");
 		String smgCode = parameter.get("smgCode");
 		try {
 			String wxOpenId = parameter.get("wxOpenId");
 			String regCode = cacheService.get("regCode" + wxOpenId);
+			logger.info("注册获取参数,wxOpenId==>" + wxOpenId + ",regCode==>" + regCode);
 			if (!regCode.equals(smgCode)) {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}

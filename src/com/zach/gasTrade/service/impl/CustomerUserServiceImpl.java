@@ -116,11 +116,11 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 		CustomerUserVo customerUserVo = new CustomerUserVo();
 		customerUserVo.setWxOpenId(openId);
 		CustomerUserVo customerUser = this.getCustomerUserBySelective(customerUserVo);
-		if (customerUser == null) {
-			returnData.put("isRegister", false);
+		if (customerUser != null && customerUser.getPhoneNumber() != null) {
+			returnData.put("isRegister", true);
 			this.save(customerUserVo);
 		} else {
-			returnData.put("isRegister", true);
+			returnData.put("isRegister", false);
 		}
 
 		return returnData;

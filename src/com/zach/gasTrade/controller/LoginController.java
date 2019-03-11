@@ -33,8 +33,10 @@ import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 import com.zach.safety.service.MsgService;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@Api(tags = "登录相关api")
 @Controller
 public class LoginController {
 	private Logger logger = Logger.getLogger(getClass());
@@ -61,6 +63,7 @@ public class LoginController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "发送验证码", notes = "请求参数说明||mobile:手机号码,codeType:1-注册,2-修改密码,wxOpenId:微信openId(注册需传),deliveryId:派送员用户ID(派送员修改密码需传)\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/mobilecode", method = RequestMethod.POST)
 	@ResponseBody
 	public Result mobileVerifyCode(HttpServletRequest request, @RequestBody Map<String, String> param) {
@@ -103,6 +106,7 @@ public class LoginController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "客户端绑定手机号注册", notes = "请求参数说明||phoneNumber:手机号码,smgCode:短信验证码,wxOpenId:微信openId\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/customerUser/reg", method = RequestMethod.POST)
 	@ResponseBody
 	public Result register(HttpServletRequest request, @RequestBody Map<String, String> parameter) {
@@ -147,6 +151,7 @@ public class LoginController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "客户端登录(此接口不用)", notes = "请求参数说明||phoneNumber:手机号码,verificationCode:短信验证码,wxOpenId:微信openId\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/customerUser/login", method = RequestMethod.POST)
 	@ResponseBody
 	public Result customerUserLogin(HttpServletRequest request, @RequestBody Map<String, String> param,
@@ -244,6 +249,8 @@ public class LoginController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "派送员登录", notes = "样例参数{\n" + "  \"loginName\": \"test\",\n" + "  \"password\": \"password\"\n"
+			+ "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryUser/login", method = RequestMethod.POST)
 	@ResponseBody
 	public Result deliveryUserLogin(HttpServletRequest request, @RequestBody Map<String, String> param,

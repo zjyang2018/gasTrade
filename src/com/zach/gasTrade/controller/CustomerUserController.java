@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.CustomerUserService;
@@ -115,7 +116,7 @@ public class CustomerUserController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 修改
 	 * 
@@ -136,6 +137,37 @@ public class CustomerUserController {
 		try {
 			customerUserService.update(filterMask);
 
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	/**
+	 * 微信回调授权获取openId
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/weixin/getWeiXinUserInfo", method = RequestMethod.GET)
+	@ResponseBody
+	public DataResult getWeiXinUserInfo(HttpServletRequest request) {
+		DataResult result = DataResult.initResult();
+		String code = request.getParameter("code");
+		logger.info("获取到微信授权code:" + code);
+		// Map<String, String> paramer = new HashMap<String, String>();
+		// paramer.put("code", "code");
+		// paramer.put("isRegister", "false");
+		try {
+			Map<String, Object> returnData = customerUserService.getWeiXinUserInfo(code);
+			result.setData(returnData);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

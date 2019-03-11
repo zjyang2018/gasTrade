@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.common.http.HttpUrlClient;
 import com.common.seq.SerialGenerator;
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.dao.CustomerUserDao;
 import com.zach.gasTrade.service.CustomerUserService;
 import com.zach.gasTrade.vo.CustomerUserVo;
@@ -116,7 +117,7 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 		CustomerUserVo customerUserVo = new CustomerUserVo();
 		customerUserVo.setWxOpenId(openId);
 		CustomerUserVo customerUser = this.getCustomerUserBySelective(customerUserVo);
-		if (customerUser != null && customerUser.getPhoneNumber() != null) {
+		if (customerUser != null && StringUtil.isNotNullAndNotEmpty(customerUser.getPhoneNumber())) {
 			returnData.put("isRegister", true);
 			this.save(customerUserVo);
 		} else {

@@ -11,6 +11,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.common.utils.MapHelper;
+import com.zach.gasTrade.dao.DeliveryLocationHistoryDao;
+import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	@Autowired
 	private CustomerUserDao customerUserDao;
 
+	@Autowired
+	private DeliveryLocationHistoryDao deliveryLocationHistoryDao;
+
 	/**
 	 * 总数
 	 * 
@@ -83,7 +89,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	/**
 	 * 分页列表
 	 * 
-	 * @param orderInfoModel
+	 * @param orderListDto
 	 * @return
 	 */
 	public List<OrderListDto> getOrderInfoPage(OrderListDto orderListDto) {
@@ -149,6 +155,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		orderInfoVo.setOrderStatus("10");
 		orderInfoVo.setLatitude(customerUser.getLongitude());
 		orderInfoVo.setLongitude(customerUser.getLatitude());
+		orderInfoVo.setCustomerAddress(customerUser.getAddress());
 		Date now = new Date();
 		orderInfoVo.setCreateTime(now);
 		orderInfoVo.setUpdateTime(now);
@@ -161,6 +168,32 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		}
 
 		return payUrl;
+	}
+
+
+	/**
+	 * 自动分配订单
+	 *
+	 * @param orderInfoVo
+	 */
+	public void autoAllotDeliveryOrder(OrderInfoVo orderInfoVo){
+		List<DeliveryLocationHistoryVo> list  = deliveryLocationHistoryDao.getDeliveryLocationHistoryByRecent();
+		String deliveryUserId = "";
+		double minDistance = 0.00;
+		for(DeliveryLocationHistoryVo bean : list){
+			double distance = MapHelper.GetPointDistance(bean.getLatitude()+","+bean.getLongitude(),orderInfoVo.getLatitude()+","+orderInfoVo.getLongitude());
+			if(minDistance > distance){
+				minDistance = distance;
+				deliveryUserId= bean.getDeliveryUserId();
+			}
+		}
+
+		orderInfoVo.setAllotDeliveryId(deliveryUserId);
+		orderInfoVo.setAllotStatus("20");
+		Date now = new Date();
+		orderInfoVo.setAllotTime(now);
+		orderInfoVo.setUpdateTime(now);
+		orderInfoDao.update(orderInfoVo);
 	}
 
 	/**

@@ -60,4 +60,10 @@ public interface DeliveryLocationHistoryDao {
 	 */
     public int delete(DeliveryLocationHistoryVo deliveryLocationHistoryVo);
 
+	/**
+	 * 获取最近记录列表
+	 * @return
+	 */
+	public List<DeliveryLocationHistoryVo> getDeliveryLocationHistoryByRecent();
+
 }

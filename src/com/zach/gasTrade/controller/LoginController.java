@@ -32,6 +32,8 @@ import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 import com.zach.safety.service.MsgService;
+import com.zach.weixin.util.AppTemplates;
+import com.zach.weixin.util.WX_TemplateMsgUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -55,7 +57,7 @@ public class LoginController {
 
 	@Autowired
 	private MsgService msgService;
-
+	
 	/**
 	 * 发送手机验证码
 	 * 
@@ -130,6 +132,16 @@ public class LoginController {
 			customerUser.setUpdateTime(new Date());
 			// 更新客户信息
 			custmomerUserService.update(customerUser);
+			
+			String res = WX_TemplateMsgUtil.sendWechatMsgToUser(wxOpenId,"veNLgN8mi-L3Gn67PfkO6l-yS42CV7m8T0c4Pf-PjFw", "", 
+	                  "#000000", AppTemplates.followTemplateMsg("gasTrade"));
+			if("error".equals(res)) {
+				result.setCode(Constants.FAILURE);
+				result.setMsg("公众号消息推送异常");
+				logger.error("公众号消息推送异常");
+			}
+			
+			cacheService.delete("regCode");
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
@@ -140,7 +152,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		cacheService.delete("regCode");
+		
 		return result;
 	}
 
@@ -185,6 +197,8 @@ public class LoginController {
 			}
 			customerUserVo.setPhoneNumber(phoneNumber);
 			custmomerUserService.update(customerUserVo);
+			
+			cacheService.delete("regCode");
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
@@ -195,7 +209,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		cacheService.delete("regCode");
+		
 		return result;
 	}
 

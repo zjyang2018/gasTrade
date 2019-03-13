@@ -47,9 +47,11 @@ public class WeiXinUtils {
 		json.put("template_id", templateMessage.getTemplateId());
 		json.put("url", templateMessage.getUrl());
 		json.put("topcolor", templateMessage.getTopcolor());
-		json.put("data", JSON.toJSONString(templateMessage.getTemplateData()));
+		json.put("data", templateMessage.getTemplateData());
+		log.info("打印参数:" + json.toJSONString());
 		try {
-			JSONObject result = HttpsUtil.httpsRequest(tmpurl, "POST", json.toString());
+			JSONObject result = HttpsUtil.httpsRequest(tmpurl, "POST", json.toJSONString());
+			// JSONObject result = new JSONObject();
 			// JSONObject resultJson = new JSONObject(result);
 			log.info("推送微信消息返回参数：" + result.toJSONString());
 			String errmsg = (String) result.get("errmsg");
@@ -64,13 +66,19 @@ public class WeiXinUtils {
 
 	public static void main(String[] args) {
 		AccessToken access = TokenUtil.getWXToken();
-		TemplateMessage templateMessage = new TemplateMessage();
+		TemplateMessage templateMessage = TemplateMessage.New();
 		templateMessage.setOpenId("oBD9n6PMmJ9znS2AX6AsP-pR_Tzo");
-		templateMessage.setTemplateId("test");
+		templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");
 		templateMessage.setUrl("");
+		templateMessage.setTopcolor("#696969");
 
 		Map<String, TemplateData> msgData = new HashMap<String, TemplateData>();
-		msgData.put("first", new TemplateData("", "#696969"));
+		msgData.put("first", new TemplateData("尊敬的客户，您好，您的订单已支付完成。", "#696969"));
+		msgData.put("keyword1", new TemplateData("3194TK201903041213026613246939", "#696969"));
+		msgData.put("keyword2", new TemplateData("2019/03/12", "#696969"));
+		msgData.put("keyword3", new TemplateData("微信支付", "#696969"));
+		msgData.put("keyword4", new TemplateData("100.00", "#696969"));
+		msgData.put("remark", new TemplateData("查看详情", "#696969"));
 
 		templateMessage.setTemplateData(msgData);
 		// 推送消息

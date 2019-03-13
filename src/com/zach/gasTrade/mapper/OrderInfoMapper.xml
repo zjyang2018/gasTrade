@@ -83,19 +83,45 @@
          <result property="orderAmount" column="order_amount"/>
      </resultMap>
      
-	 <!--每日订单统计数据-->
-    <select id="getOrderDayCount" resultMap="OrderFinanceStatisticsResultMap">   
-	    select temp_table1.buyerCount as buyer_count,temp_table1.orderCount as order_count,temp_table2.payOrderCount as pay_order_count,temp_table3.deliveryOrderCount,temp_table2.avgAmount as avg_amount,temp_table2.orderAmount as order_amount
-	    from 
-        (select ifnull(count(distinct customer_user_id),0) as buyerCount,ifnull(count(order_id),0) as orderCount
-	    from order_info 
-	    where datediff(create_time ,Now()) = 0) as temp_table1,
-	    (select ifnull(count(order_id),0) as payOrderCount,ifnull(sum(amount),0) as orderAmount,ifnull(avg(amount),0) as avgAmount
-	    from order_info
-	    where datediff(pay_time ,Now()) = 0) as temp_table2,
-	    (select ifnull(count(order_id),0)  as deliveryOrderCount
-	    from order_info
-	    where datediff(delivery_complete_time ,Now()) = 0) as temp_table3
+	 <!--前一日订单统计数据-->
+    <select id="getOrderDayCount" parameterType="java.lang.String" resultMap="OrderFinanceStatisticsResultMap">   
+		SELECT
+			temp_table1.buyerCount AS buyer_count,
+			temp_table1.orderCount AS order_count,
+			temp_table2.payOrderCount AS pay_order_count,
+			temp_table3.deliveryOrderCount,
+			temp_table1.orderAmount/temp_table1.orderCount AS avg_amount,
+			temp_table1.orderAmount AS order_amount
+		FROM
+			(
+				SELECT
+					ifnull(
+						count(DISTINCT customer_user_id),
+						0
+					) AS buyerCount,
+					ifnull(sum(amount), 0) AS orderAmount,
+					ifnull(count(order_id), 0) AS orderCount
+				FROM
+					order_info
+				WHERE
+					DATE_FORMAT(create_time,'%Y-%m-%d') = #{yestody}
+			) AS temp_table1,
+			(
+				SELECT
+					ifnull(count(order_id), 0) AS payOrderCount
+				FROM
+					order_info
+				WHERE
+					DATE_FORMAT(create_time,'%Y-%m-%d') = #{yestody} and pay_status='20'
+			) AS temp_table2,
+			(
+				SELECT
+					ifnull(count(order_id), 0) AS deliveryOrderCount
+				FROM
+					order_info
+				WHERE
+					DATE_FORMAT(create_time,'%Y-%m-%d') = #{yestody} AND order_status in ('40','50','60')
+			) AS temp_table3
 	    
      </select>
      

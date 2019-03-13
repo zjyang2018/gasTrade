@@ -228,8 +228,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	/**
 	 * 每日订单数量统计
 	 */
-	public OrderFinanceStatisticsDto getOrderDayCount() {
-		return orderInfoDao.getOrderDayCount();
+	public OrderFinanceStatisticsDto getOrderDayCount(String yestody) {
+
+		return orderInfoDao.getOrderDayCount(yestody);
 	}
 
 	@Override

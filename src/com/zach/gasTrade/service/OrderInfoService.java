@@ -90,7 +90,7 @@ public interface OrderInfoService {
 	/**
 	 * 每日订单数量统计
 	 */
-	public OrderFinanceStatisticsDto getOrderDayCount();
+	public OrderFinanceStatisticsDto getOrderDayCount(String yestody);
 
 	/**
 	 * 订单下单

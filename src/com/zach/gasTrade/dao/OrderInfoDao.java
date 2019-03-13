@@ -9,6 +9,7 @@ package com.zach.gasTrade.dao;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.zach.gasTrade.dto.CustomerOrderInfoDto;
@@ -93,7 +94,7 @@ public interface OrderInfoDao {
 	/**
 	 * 每日订单数量统计
 	 */
-	public OrderFinanceStatisticsDto getOrderDayCount();
+	public OrderFinanceStatisticsDto getOrderDayCount(@Param("yestody") String yestody);
 
 	public int getOrderInfoNumber(OrderInfoVo filterMask);
 

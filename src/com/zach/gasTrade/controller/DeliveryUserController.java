@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.common.utils.DateTimeUtils;
+import com.alibaba.fastjson.JSON;
+import com.common.utils.CalendarUtils;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.PageResult;
@@ -30,6 +31,7 @@ import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "派送员用户相关api")
 @Controller
@@ -94,38 +96,40 @@ public class DeliveryUserController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "派送员管理", notes = "请求参数说明||pageNum:起始页码,pageSize:记录数,dateParam:日期,workStatus:工作状态,searchParam:搜索参数\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryUser/select_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult selectPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
 			DeliveryUserVo filterMask) {
 		PageResult result = PageResult.initResult();
-
-		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
-		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
-		String dateParam = param.get("dateParam");
-		String workStatus = param.get("workStatus");
-
-		String searchParam = param.get("searchParam");
-		if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
-			String selectParam = searchParam.trim() + "%";
-			// searchParam以"1"开头则按手机号搜索
-			if (selectParam.startsWith("1")) {
-				filterMask.setPhoneNumber(selectParam);
-			} else {
-				filterMask.setName(selectParam);
-			}
-		}
-		if (StringUtil.isNotNullAndNotEmpty(workStatus)) {
-			filterMask.setWorkStatus(workStatus);
-		}
-		if (StringUtil.isNotNullAndNotEmpty(dateParam)) {
-			Date date = DateTimeUtils.stringToDate(dateParam, new Date().toString());
-			filterMask.setUpdateTime(date);
-		}
-		filterMask.setAccountStatus("10");
-		filterMask.setPage(pageNum);
-		filterMask.setPageSize(pageSize);
 		try {
+			int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+			int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+			String time = param.get("dateParam");
+			String workStatus = param.get("workStatus");
+			String searchParam = param.get("searchParam");
+
+			if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
+				String selectParam = searchParam.trim() + "%";
+				// searchParam以"1"开头则按手机号搜索
+				if (selectParam.startsWith("1")) {
+					filterMask.setPhoneNumber(selectParam);
+				} else {
+					// 按性名搜索
+					filterMask.setName(selectParam);
+				}
+			}
+			if (StringUtil.isNotNullAndNotEmpty(workStatus)) {
+				filterMask.setWorkStatus(workStatus);
+			}
+			if (StringUtil.isNotNullAndNotEmpty(time)) {
+				// 将字符串转换为日期时间格式的Date类型(yyyy-MM-dd HH:mm:ss)
+				Date dateTime = CalendarUtils.parseDateTime(time);
+				filterMask.setUpdateTime(dateTime);
+			}
+			filterMask.setPage(pageNum);
+			filterMask.setPageSize(pageSize);
+
 			int total = deliveryUserService.getDeliveryUserCount(filterMask);
 			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(filterMask);
 
@@ -215,25 +219,33 @@ public class DeliveryUserController {
 	}
 
 	/**
-	 * 删除
+	 * 切换账号状态 账号状态:10-正常，20-冻结
 	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/deliveryUser/delete", method = RequestMethod.POST)
+	@ApiOperation(value = "切换账号状态", notes = "请求参数说明||id:派送员编号,frozenReason:冻结原因,accountStatus:账号状态:10-正常，20-冻结\\n返回参数字段说明:\\n")
+	@RequestMapping(value = "/deliveryUser/change_account_status", method = RequestMethod.POST)
 	@ResponseBody
 	public Result delete(HttpServletRequest request, @RequestBody DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
-		if (StringUtil.isNullOrEmpty(filterMask.getId())) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("派送员编号不能为空");
-			return result;
-		}
-
-		filterMask.setAccountStatus("20");
-
+		logger.info("切换账号状态接口参数:" + JSON.toJSONString(filterMask));
 		try {
+			// 参数非空判断
+			if (StringUtil.isNullOrEmpty(filterMask.getId())) {
+				throw new RuntimeException("派送员编号不能为空");
+			}
+			if (StringUtil.isNullOrEmpty(filterMask.getFrozenReason())) {
+				throw new RuntimeException("冻结原因不能为空");
+			}
+			if (StringUtil.isNullOrEmpty(filterMask.getAccountStatus())) {
+				throw new RuntimeException("账号状态不能为空");
+			}
+			if ("20".equals(filterMask.getAccountStatus())) {
+				filterMask.setWorkStatus("20");
+			}
+			// 更新数据库
 			deliveryUserService.update(filterMask);
 
 		} catch (RuntimeException e) {

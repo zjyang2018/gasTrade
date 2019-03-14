@@ -126,4 +126,10 @@ public interface OrderInfoService {
 	 */
 	public CustomerOrderGenerateInfoDto orderGenerate(OrderInfoVo filterMask);
 
+	/**
+	 * 自动分配订单
+	 * 
+	 */
+	public void autoAllotDeliveryOrder();
+
 }

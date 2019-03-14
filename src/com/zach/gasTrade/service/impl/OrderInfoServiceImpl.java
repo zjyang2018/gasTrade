@@ -145,6 +145,17 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			orderInfo.setOrderId(orderInfoVo.getOrderId());
 			orderInfo = orderInfoDao.getOrderInfoBySelective(orderInfo);
 			if (orderInfo != null) {
+				if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getCustomerAddress())) {
+					orderInfo.setCustomerAddress(orderInfoVo.getCustomerAddress());
+				}
+				if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getRemark())) {
+					orderInfo.setRemark(orderInfoVo.getRemark());
+				}
+				if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getCustomerAddress())
+						|| StringUtil.isNotNullAndNotEmpty(orderInfoVo.getRemark())) {
+					orderInfo.setUpdateTime(new Date());
+					orderInfoDao.update(orderInfo);
+				}
 				// 生成支付url
 				return this.payService.pay(orderInfoVo.getOrderId(), orderInfo.getAmount());
 			}
@@ -184,6 +195,19 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		}
 		// 生成支付url
 		return this.payService.pay(orderId, product.getAmount());
+	}
+
+	/**
+	 * 自动分配订单
+	 * 
+	 */
+	public void autoAllotDeliveryOrder() {
+		OrderInfoVo orderInfoVo = new OrderInfoVo();
+		orderInfoVo.setAllotStatus("10");
+		List<OrderInfoVo> list = orderInfoDao.getOrderInfoList(orderInfoVo);
+		for (OrderInfoVo bean : list) {
+			autoAllotDeliveryOrder(bean);
+		}
 	}
 
 	/**

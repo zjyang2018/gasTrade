@@ -23,8 +23,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.common.utils.DateTimeUtils;
 import com.common.utils.StringUtil;
+import com.common.wx.TokenUtil;
+import com.common.wx.WeiXinUtils;
+import com.common.wx.bean.AccessToken;
+import com.common.wx.bean.TemplateData;
+import com.common.wx.bean.TemplateMessage;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
@@ -67,10 +73,10 @@ public class OrderInfoController {
 
 	@Autowired
 	private DeliveryUserService deliveryUserService;
-	
+
 	@Autowired
 	private ProductService productService;
-	
+
 	@Autowired
 	private AdminUserService adminUserService;
 
@@ -212,31 +218,32 @@ public class OrderInfoController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 订单生成
+	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/orderInfo/orderGenerate",method = RequestMethod.POST)
+	@RequestMapping(value = "/orderInfo/orderGenerate", method = RequestMethod.POST)
 	@ResponseBody
-	public Result orderGenerate(HttpServletRequest request,@RequestBody OrderInfoVo filterMask) {
+	public Result orderGenerate(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
 		DataResult result = DataResult.initResult();
-				
-		try{
+
+		try {
 			CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto = orderInfoService.orderGenerate(filterMask);
 			result.setData(customerOrderGenerateInfoDto);
-		}catch (RuntimeException e){
+		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
-			logger.error("系统异常,"+e.getMessage(),e);
-		}catch (Exception e){
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试",e);
+			logger.error("系统异常,请稍后重试", e);
 		}
-		
+
 		return result;
 	}
 
@@ -437,7 +444,7 @@ public class OrderInfoController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 签收详情
 	 * 
@@ -460,7 +467,7 @@ public class OrderInfoController {
 			CustomerUserVo customerUserVo = new CustomerUserVo();
 			customerUserVo.setId(orderInfo.getCustomerUserId());
 			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-			
+
 			CustomerOrderInfoDto customerOrderInfoDto = new CustomerOrderInfoDto();
 			customerOrderInfoDto.setOrderId(orderInfo.getOrderId());
 			customerOrderInfoDto.setProductName(orderInfo.getProductName());
@@ -482,7 +489,7 @@ public class OrderInfoController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 公众号——客户端——订单详情
 	 * 
@@ -505,7 +512,7 @@ public class OrderInfoController {
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
 			ProductVo product = productService.getProductBySelective(productVo);
-			
+
 			OrderDetailDto orderDetailDto = new OrderDetailDto();
 			orderDetailDto.setOrderId(orderInfo.getOrderId());
 			orderDetailDto.setProductName(orderInfo.getProductName());
@@ -513,7 +520,7 @@ public class OrderInfoController {
 			orderDetailDto.setSpec(product.getProductDesc());
 			orderDetailDto.setPayAmount(orderInfo.getAmount());
 			orderDetailDto.setPayTime(orderInfo.getPayTime());
-			
+
 			result.setData(orderDetailDto);
 
 		} catch (RuntimeException e) {
@@ -527,7 +534,7 @@ public class OrderInfoController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 公众号——客户端——派送详情
 	 * 
@@ -550,19 +557,19 @@ public class OrderInfoController {
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
 			ProductVo product = productService.getProductBySelective(productVo);
-			
+
 			CustomerUserVo customerUserVo = new CustomerUserVo();
 			customerUserVo.setId(orderInfo.getCustomerUserId());
 			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-			
+
 			AdminUserVo adminUserVo = new AdminUserVo();
 			adminUserVo.setId(product.getCreateUserId());
 			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-			
+
 			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
 			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
 			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
-			
+
 			DeliveryDetailDto deliveryDetailDto = new DeliveryDetailDto();
 			deliveryDetailDto.setOrderId(orderInfo.getOrderId());
 			deliveryDetailDto.setProductName(orderInfo.getProductName());
@@ -573,7 +580,7 @@ public class OrderInfoController {
 			deliveryDetailDto.setDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
 			deliveryDetailDto.setProductAddress(adminUser.getAddress());
 			deliveryDetailDto.setCustomerAddress(customerUser.getAddress());
-			
+
 			result.setData(deliveryDetailDto);
 
 		} catch (RuntimeException e) {
@@ -587,7 +594,7 @@ public class OrderInfoController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 公众号——客户端——确认签收
 	 * 
@@ -605,14 +612,14 @@ public class OrderInfoController {
 			result.setMsg("订单编号不能为空");
 			return result;
 		}
-		
+
 		Date nowTime = new Date();
-	
+
 		OrderInfoVo orderInfoVo = new OrderInfoVo();
 		orderInfoVo.setOrderId(orderId);
 		orderInfoVo.setDeliveryCompleteTime(nowTime);
 		orderInfoVo.setOrderStatus("60");
-		
+
 		try {
 			orderInfoService.update(orderInfoVo);
 
@@ -628,22 +635,68 @@ public class OrderInfoController {
 		return result;
 	}
 
-	
 	/**
-	 * 公众号——派送员端——我的订单
+	 * 公众号——客户端——确认签收
+	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/wxin/deliveryOrderInfo",method = RequestMethod.POST)
+	@RequestMapping(value = "/orderInfo/wxMsgSend", method = RequestMethod.POST)
 	@ResponseBody
-	public DataResult deliveryOrderInfo(HttpServletRequest request,@RequestBody Map<String,String> param,OrderInfoVo filterMask) {
-		PageResult result=PageResult.initResult();
+	public Result wxMsgSend(HttpServletRequest request, @RequestBody Map<String, String> param) {
+		Result result = Result.initResult();
+
+		try {
+			AccessToken access = TokenUtil.getWXToken();
+			TemplateMessage templateMessage = TemplateMessage.New();
+			templateMessage.setOpenId("oBD9n6PMmJ9znS2AX6AsP-pR_Tzo");
+			templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");
+			templateMessage.setUrl("");
+			templateMessage.setTopcolor("#696969");
+
+			Map<String, TemplateData> msgData = new HashMap<String, TemplateData>();
+			msgData.put("first", new TemplateData("尊敬的客户，您好，您的订单已支付完成。", "#696969"));
+			msgData.put("keyword1", new TemplateData("3194TK201903041213026613246939", "#696969"));
+			msgData.put("keyword2", new TemplateData("2019/03/12", "#696969"));
+			msgData.put("keyword3", new TemplateData("微信支付", "#696969"));
+			msgData.put("keyword4", new TemplateData("100.00", "#696969"));
+			msgData.put("remark", new TemplateData("查看详情", "#696969"));
+
+			templateMessage.setTemplateData(msgData);
+			// 推送消息
+			WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	/**
+	 * 公众号——派送员端——我的订单
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/wxin/deliveryOrderInfo", method = RequestMethod.POST)
+	@ResponseBody
+	public DataResult deliveryOrderInfo(HttpServletRequest request, @RequestBody Map<String, String> param,
+			OrderInfoVo filterMask) {
+		PageResult result = PageResult.initResult();
+		logger.info("派送员端——我的订单,请求参数:" + JSON.toJSONString(param));
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String allotDeliveryId = param.get("allotDeliveryId");
 		String status = param.get("status");
-		if(StringUtil.isNullOrEmpty(allotDeliveryId)) {
+		if (StringUtil.isNullOrEmpty(allotDeliveryId)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("派送员编号不能为空");
 			return result;
@@ -652,34 +705,28 @@ public class OrderInfoController {
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
 		int total = 0;
-		List<DeliveryOrderInfoDto> list =null;
-		try{
-		// 待接单
-		if("1".equals(status)) {
-			filterMask.setAllotStatus("10");
+		List<DeliveryOrderInfoDto> list = null;
+		try {
+			// 待接单
+			if ("1".equals(status)) {
+				filterMask.setAllotStatus("10");
+			} else if ("2".equals(status)) {
+				// 派送中
+				filterMask.setOrderStatus("50");
+			} else if ("3".equals(status)) {
+				// 已完成
+				filterMask.setOrderStatus("60");
+			}
 			total = orderInfoService.getOrderInfoNumber(filterMask);
 			list = orderInfoService.getDeliveryOrderInfoPage(filterMask);
-		}
-		// 派送中
-		if("2".equals(status)) {
-			filterMask.setOrderStatus("50");
-			total = orderInfoService.getOrderInfoNumber(filterMask);
-			list = orderInfoService.getDeliveryOrderInfoPage(filterMask);
-		}
-		// 已完成
-		if("3".equals(status)) {
-			filterMask.setOrderStatus("60");
-			total = orderInfoService.getOrderInfoNumber(filterMask);
-			list = orderInfoService.getDeliveryOrderInfoPage(filterMask);
-		}			
-		}catch (RuntimeException e){
+		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
-			logger.error("系统异常,"+e.getMessage(),e);
-		}catch (Exception e){
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试",e);
+			logger.error("系统异常,请稍后重试", e);
 		}
 		result.setAllCount(total);
 		result.setPageNum(pageNum);
@@ -687,21 +734,25 @@ public class OrderInfoController {
 		result.setData(list);
 		return result;
 	}
+
 	/**
 	 * 公众号——客户端——我的订单
+	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/wxin/customerOrderInfo",method = RequestMethod.POST)
+	@RequestMapping(value = "/wxin/customerOrderInfo", method = RequestMethod.POST)
 	@ResponseBody
-	public DataResult customerOrderInfo(HttpServletRequest request,@RequestBody Map<String,String> param,OrderInfoVo filterMask) {
-		PageResult result=PageResult.initResult();
+	public DataResult customerOrderInfo(HttpServletRequest request, @RequestBody Map<String, String> param,
+			OrderInfoVo filterMask) {
+		PageResult result = PageResult.initResult();
+		logger.info("公众号——客户端——我的订单,请求参数为:" + JSON.toJSONString(param));
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String customerUserId = param.get("customerUserId");
 		String status = param.get("status");
-		if(StringUtil.isNullOrEmpty(customerUserId)) {
+		if (StringUtil.isNullOrEmpty(customerUserId)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("客户编号不能为空");
 			return result;
@@ -710,34 +761,30 @@ public class OrderInfoController {
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
 		int total = 0;
-		List<CustomerOrderInfoDto> list =null;
-		try{
-		// 待支付
-		if("1".equals(status)) {
-			filterMask.setPayStatus("10");
+		List<CustomerOrderInfoDto> list = null;
+		try {
+			// 待支付
+			if ("1".equals(status)) {
+				filterMask.setPayStatus("10");
+
+			} else if ("2".equals(status)) {
+				// 派送中
+				filterMask.setOrderStatus("50");
+			} else if ("3".equals(status)) {
+				// 已完成
+				filterMask.setOrderStatus("60");
+			}
+			logger.info("公众号——客户端——我的订单,处理参数为:" + JSON.toJSONString(filterMask));
 			total = orderInfoService.getOrderInfoNumber(filterMask);
 			list = orderInfoService.getCustomerOrderInfoPage(filterMask);
-		}
-		// 派送中
-		if("2".equals(status)) {
-			filterMask.setOrderStatus("50");
-			total = orderInfoService.getOrderInfoNumber(filterMask);
-			list = orderInfoService.getCustomerOrderInfoPage(filterMask);
-		}
-		// 已完成
-		if("3".equals(status)) {
-			filterMask.setOrderStatus("60");
-			total = orderInfoService.getOrderInfoNumber(filterMask);
-			list = orderInfoService.getCustomerOrderInfoPage(filterMask);
-		}			
-		}catch (RuntimeException e){
+		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
-			logger.error("系统异常,"+e.getMessage(),e);
-		}catch (Exception e){
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试",e);
+			logger.error("系统异常,请稍后重试", e);
 		}
 		result.setAllCount(total);
 		result.setPageNum(pageNum);
@@ -745,7 +792,7 @@ public class OrderInfoController {
 		result.setData(list);
 		return result;
 	}
-	
+
 	/**
 	 * 公众号——派送端——派单详情
 	 * 
@@ -757,11 +804,11 @@ public class OrderInfoController {
 	@ResponseBody
 	public DataResult deliveryOrderDetail(HttpServletRequest request, @RequestBody Map<String, String> param) {
 		DataResult result = DataResult.initResult();
-		
+
 		String orderId = param.get("orderId");
 		// 1:派单详情;2:接单详情
 		String status = param.get("status");
-		
+
 		if (StringUtil.isNullOrEmpty(orderId)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("订单编号不能为空");
@@ -775,19 +822,19 @@ public class OrderInfoController {
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
 			ProductVo product = productService.getProductBySelective(productVo);
-			
+
 			CustomerUserVo customerUserVo = new CustomerUserVo();
 			customerUserVo.setId(orderInfo.getCustomerUserId());
 			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-			
+
 			AdminUserVo adminUserVo = new AdminUserVo();
 			adminUserVo.setId(product.getCreateUserId());
 			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-									
+
 			DeliveryOrderDetailDto deliveryOrderDetailDto = new DeliveryOrderDetailDto();
 			deliveryOrderDetailDto.setOrderId(orderInfo.getOrderId());
 			deliveryOrderDetailDto.setProductName(orderInfo.getProductName());
-			if("1".equals(status)) {
+			if ("1".equals(status)) {
 				deliveryOrderDetailDto.setStockQty(product.getStockQty());
 			}
 			deliveryOrderDetailDto.setCustomerName(customerUser.getName());
@@ -795,7 +842,7 @@ public class OrderInfoController {
 			deliveryOrderDetailDto.setCustomerAddress(customerUser.getAddress());
 			deliveryOrderDetailDto.setProductAddress(adminUser.getAddress());
 			deliveryOrderDetailDto.setRemark("");
-						
+
 			result.setData(deliveryOrderDetailDto);
 
 		} catch (RuntimeException e) {
@@ -809,7 +856,7 @@ public class OrderInfoController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 公众号——派送端——派单完成详情
 	 * 
@@ -832,11 +879,11 @@ public class OrderInfoController {
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
 			ProductVo product = productService.getProductBySelective(productVo);
-			
+
 			CustomerUserVo customerUserVo = new CustomerUserVo();
 			customerUserVo.setId(orderInfo.getCustomerUserId());
 			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-									
+
 			DeliveryOrderCompleteDetailDto deliveryOrderCompleteDetailDto = new DeliveryOrderCompleteDetailDto();
 			deliveryOrderCompleteDetailDto.setOrderId(orderInfo.getOrderId());
 			deliveryOrderCompleteDetailDto.setProductName(orderInfo.getProductName());
@@ -844,7 +891,7 @@ public class OrderInfoController {
 			deliveryOrderCompleteDetailDto.setCustomerName(customerUser.getName());
 			deliveryOrderCompleteDetailDto.setCustomerAddress(customerUser.getAddress());
 			deliveryOrderCompleteDetailDto.setRemark("");
-						
+
 			result.setData(deliveryOrderCompleteDetailDto);
 
 		} catch (RuntimeException e) {
@@ -858,4 +905,5 @@ public class OrderInfoController {
 		}
 		return result;
 	}
+
 }

@@ -3,7 +3,10 @@ package com.common.wx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.common.cache.CacheService;
+import com.common.context.SpringContextHolder;
 import com.common.http.HttpsUtil;
 import com.common.wx.bean.AccessToken;
 
@@ -18,26 +21,31 @@ public class TokenUtil {
 	 */
 
 	public static AccessToken getWXToken() {
-
-		String tokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="
-				+ WeiXinConstant.appId + "&secret=" + WeiXinConstant.appSecret;
-		JSONObject jsonObject = HttpsUtil.httpsRequest(tokenUrl, "GET", null);
-		System.out.println("获取微信token参数==>jsonObject:" + jsonObject);
-		log.info("获取微信token参数==>jsonObject:" + jsonObject);
-		AccessToken access_token = new AccessToken();
-		if (null != jsonObject) {
-			try {
-				access_token.setAccessToken(jsonObject.getString("access_token"));
-				access_token.setExpiresin(jsonObject.getInteger("expires_in"));
-			} catch (Exception e) {
-				access_token = null;
-				// 获取token失败
-				log.error("获取token失败 errcode:{} errmsg:{}", jsonObject.getInteger("errcode"),
-						jsonObject.getString("errmsg"));
+		// redis获取access_token
+		CacheService cacheService = SpringContextHolder.getBean("cacheService");
+		AccessToken accessToken = cacheService.get(WeiXinConstant.accessTokenKey);
+		log.info("redis获取到accessToken==>" + JSON.toJSONString(accessToken));
+		if (accessToken == null) {
+			String tokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="
+					+ WeiXinConstant.appId + "&secret=" + WeiXinConstant.appSecret;
+			JSONObject jsonObject = HttpsUtil.httpsRequest(tokenUrl, "GET", null);
+			log.info("获取微信token参数==>jsonObject:" + jsonObject);
+			accessToken = new AccessToken();
+			if (null != jsonObject) {
+				try {
+					accessToken.setAccessToken(jsonObject.getString("access_token"));
+					accessToken.setExpiresin(jsonObject.getInteger("expires_in"));
+					// 保存access_token
+					cacheService.add(WeiXinConstant.accessTokenKey, accessToken, accessToken.getExpiresin());
+				} catch (Exception e) {
+					accessToken = null;
+					// 获取token失败
+					log.error("获取token失败 errcode:{} errmsg:{}", jsonObject.getInteger("errcode"),
+							jsonObject.getString("errmsg"));
+				}
 			}
 		}
-
-		return access_token;
+		return accessToken;
 	}
 
 }

@@ -18,5 +18,5 @@ public class WeiXinConstant {
 	public static final String appSecret = "5a876f6ea9485126a6530386ff258d8d";
 
 	// redis保存key
-	public static final String accessTokenKey = "WX_ACCESS_TOKENKEY:";
+	public static final String accessTokenKey = "WX_ACCESS_TOKENKEY:20190312";
 }

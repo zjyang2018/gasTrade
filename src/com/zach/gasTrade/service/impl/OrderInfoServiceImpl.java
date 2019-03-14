@@ -8,12 +8,10 @@ package com.zach.gasTrade.service.impl;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.common.utils.MapHelper;
-import com.zach.gasTrade.dao.DeliveryLocationHistoryDao;
-import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +19,16 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.common.seq.SerialGenerator;
+import com.common.utils.DateTimeUtils;
+import com.common.utils.MapHelper;
+import com.common.utils.StringUtil;
+import com.common.wx.TokenUtil;
+import com.common.wx.WeiXinUtils;
+import com.common.wx.bean.AccessToken;
+import com.common.wx.bean.TemplateData;
+import com.common.wx.bean.TemplateMessage;
 import com.zach.gasTrade.dao.CustomerUserDao;
+import com.zach.gasTrade.dao.DeliveryLocationHistoryDao;
 import com.zach.gasTrade.dao.OrderInfoDao;
 import com.zach.gasTrade.dao.ProductDao;
 import com.zach.gasTrade.dto.CustomerOrderGenerateInfoDto;
@@ -34,6 +41,7 @@ import com.zach.gasTrade.netpay.PayService;
 import com.zach.gasTrade.netpay.UnoinPayUtil;
 import com.zach.gasTrade.service.OrderInfoService;
 import com.zach.gasTrade.vo.CustomerUserVo;
+import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 import com.zach.gasTrade.vo.OrderInfoVo;
 import com.zach.gasTrade.vo.ProductVo;
 
@@ -170,21 +178,21 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		return payUrl;
 	}
 
-
 	/**
 	 * 自动分配订单
 	 *
 	 * @param orderInfoVo
 	 */
-	public void autoAllotDeliveryOrder(OrderInfoVo orderInfoVo){
-		List<DeliveryLocationHistoryVo> list  = deliveryLocationHistoryDao.getDeliveryLocationHistoryByRecent();
+	public void autoAllotDeliveryOrder(OrderInfoVo orderInfoVo) {
+		List<DeliveryLocationHistoryVo> list = deliveryLocationHistoryDao.getDeliveryLocationHistoryByRecent();
 		String deliveryUserId = "";
 		double minDistance = 0.00;
-		for(DeliveryLocationHistoryVo bean : list){
-			double distance = MapHelper.GetPointDistance(bean.getLatitude()+","+bean.getLongitude(),orderInfoVo.getLatitude()+","+orderInfoVo.getLongitude());
-			if(minDistance > distance){
+		for (DeliveryLocationHistoryVo bean : list) {
+			double distance = MapHelper.GetPointDistance(bean.getLatitude() + "," + bean.getLongitude(),
+					orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude());
+			if (minDistance > distance) {
 				minDistance = distance;
-				deliveryUserId= bean.getDeliveryUserId();
+				deliveryUserId = bean.getDeliveryUserId();
 			}
 		}
 
@@ -243,13 +251,48 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			orderInfo.setPayNo(payNo);
 			orderInfo.setRealPayAmount(new BigDecimal(realPayAmountStr).divide(new BigDecimal(100)));
 			orderInfo.setPayStatus("20");
+			Date now = new Date();
 			orderInfo.setPayTime(new Date());
 			orderInfo.setOrderStatus("20");
-			orderInfo.setUpdateTime(new Date());
+			orderInfo.setUpdateTime(now);
 			int count = orderInfoDao.update(orderInfo);
 			if (count != 1) {
 				throw new RuntimeException("支付状态通知失败," + JSON.toJSONString(params));
 			}
+			CustomerUserVo param = new CustomerUserVo();
+			param.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUserVo = customerUserDao.getCustomerUserBySelective(param);
+			if (customerUserVo == null || StringUtil.isNull(customerUserVo.getWxOpenId())) {
+				logger.info("没有获取到用户微信openId,不推送消息,订单号为:" + orderId);
+				return checkRet;
+			}
+			// 推送微信消息
+			TemplateMessage templateMessage = TemplateMessage.New();
+			try {
+				AccessToken access = TokenUtil.getWXToken();
+
+				templateMessage.setOpenId(customerUserVo.getWxOpenId());
+				templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");
+				templateMessage.setUrl("");
+				templateMessage.setTopcolor("#696969");
+
+				Map<String, TemplateData> msgData = new HashMap<String, TemplateData>();
+				msgData.put("first", new TemplateData("尊敬的客户，您好，您的订单已支付完成。", "#696969"));
+				msgData.put("keyword1", new TemplateData(orderId, "#696969"));
+				msgData.put("keyword2",
+						new TemplateData(DateTimeUtils.dateToString(now, "yyyy-MM-dd hh:mm:ss"), "#696969"));
+				msgData.put("keyword3", new TemplateData("微信支付", "#696969"));
+				msgData.put("keyword4", new TemplateData(
+						new BigDecimal(realPayAmountStr).divide(new BigDecimal(100)).toPlainString(), "#696969"));
+				msgData.put("remark", new TemplateData("查看详情", "#696969"));
+
+				templateMessage.setTemplateData(msgData);
+				// 推送消息
+				WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
+			} catch (RuntimeException e) {
+				logger.error("微信支付成功通知推送失败,推送参数:" + JSON.toJSONString(templateMessage), e);
+			}
+
 		}
 		return checkRet;
 	}
@@ -288,31 +331,31 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	public CustomerOrderGenerateInfoDto orderGenerate(OrderInfoVo filterMask) {
 		// TODO Auto-generated method stub
 		String orderId = SerialGenerator.getSerialNum();
-    	Date nowTime = new Date();
-    	CustomerUserVo customerUserVo = new CustomerUserVo();
-    	customerUserVo.setId(filterMask.getCustomerUserId());
-    	CustomerUserVo customerUser = customerUserDao.getCustomerUserBySelective(customerUserVo);
-    	filterMask.setOrderId(orderId);
-    	filterMask.setPayStatus("10");
-    	filterMask.setAllotStatus("10");
-    	filterMask.setCustomerAddress(customerUser.getAddress());
-    	filterMask.setLongitude(customerUser.getLongitude());
-    	filterMask.setLatitude(customerUser.getLatitude());
-    	filterMask.setOrderStatus("10");
-    	filterMask.setRemark("");
-    	filterMask.setCreateTime(nowTime);
-    	filterMask.setUpdateTime(nowTime);
-    	    	
-    	int n = orderInfoDao.save(filterMask);
-        if(n==1) {
-        	CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto = new CustomerOrderGenerateInfoDto();
-        	customerOrderGenerateInfoDto.setOrderId(orderId);
-        	customerOrderGenerateInfoDto.setProductAmount(filterMask.getAmount());
-        	customerOrderGenerateInfoDto.setAddress(customerUser.getAddress());
-        	customerOrderGenerateInfoDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
-        	customerOrderGenerateInfoDto.setRemark("");
-        	return customerOrderGenerateInfoDto;
-        }
+		Date nowTime = new Date();
+		CustomerUserVo customerUserVo = new CustomerUserVo();
+		customerUserVo.setId(filterMask.getCustomerUserId());
+		CustomerUserVo customerUser = customerUserDao.getCustomerUserBySelective(customerUserVo);
+		filterMask.setOrderId(orderId);
+		filterMask.setPayStatus("10");
+		filterMask.setAllotStatus("10");
+		filterMask.setCustomerAddress(customerUser.getAddress());
+		filterMask.setLongitude(customerUser.getLongitude());
+		filterMask.setLatitude(customerUser.getLatitude());
+		filterMask.setOrderStatus("10");
+		filterMask.setRemark("");
+		filterMask.setCreateTime(nowTime);
+		filterMask.setUpdateTime(nowTime);
+
+		int n = orderInfoDao.save(filterMask);
+		if (n == 1) {
+			CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto = new CustomerOrderGenerateInfoDto();
+			customerOrderGenerateInfoDto.setOrderId(orderId);
+			customerOrderGenerateInfoDto.setProductAmount(filterMask.getAmount());
+			customerOrderGenerateInfoDto.setAddress(customerUser.getAddress());
+			customerOrderGenerateInfoDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
+			customerOrderGenerateInfoDto.setRemark("");
+			return customerOrderGenerateInfoDto;
+		}
 		return null;
 	}
 

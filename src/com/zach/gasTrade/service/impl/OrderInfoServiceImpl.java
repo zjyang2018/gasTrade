@@ -145,13 +145,17 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		customerUserVo.setId(customUserId);
 		CustomerUserVo customerUser = customerUserDao.getCustomerUserBySelective(customerUserVo);
 		if (customerUser == null) {
-			throw new RuntimeException("该用户不存在," + customerUser.getId());
+			throw new RuntimeException("该用户不存在," + customUserId);
 		}
 		ProductVo productParam = new ProductVo();
 		productParam.setProductId(orderInfoVo.getProductId());
 		ProductVo product = productDao.getProductBySelective(productParam);
 		if (product == null) {
 			throw new RuntimeException("该产品已下架," + orderInfoVo.getProductId());
+		}
+		if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getOrderId())) {
+			// 生成支付url
+			return this.payService.pay(orderInfoVo.getOrderId(), product.getAmount());
 		}
 		String orderId = UnoinPayUtil.genMerOrderId(PayService.msgSrcId);
 		orderInfoVo.setOrderId(orderId);
@@ -168,14 +172,12 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		orderInfoVo.setCreateTime(now);
 		orderInfoVo.setUpdateTime(now);
 
-		String payUrl = this.payService.pay(orderId, product.getAmount());
-
 		int count = orderInfoDao.save(orderInfoVo);
 		if (count != 1) {
 			throw new RuntimeException("用户下单失败," + JSON.toJSONString(orderInfoVo));
 		}
-
-		return payUrl;
+		// 生成支付url
+		return this.payService.pay(orderId, product.getAmount());
 	}
 
 	/**

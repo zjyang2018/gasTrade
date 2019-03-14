@@ -255,13 +255,13 @@ public class OrderInfoController {
 	 * @return Result
 	 */
 	@ApiOperation(value = "订单去支付", notes = "样例参数{\n" + "  \"productId\": \"6666666\",\n"
-			+ "  \"customerUserId\": \"6888888\"\n" + "}\\n返回参数字段说明:\\n")
+			+ "  \"orderId\": \"传订单ID则代表未支付订单\",\n" + "  \"customerUserId\": \"6888888\"\n" + "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/orderInfo/buy", method = RequestMethod.POST)
 	@ResponseBody
 	public DataResult buy(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody OrderInfoVo filterMask) {
 		DataResult result = DataResult.initResult();
-
+		logger.info("支付请求参数==>" + JSON.toJSONString(filterMask));
 		try {
 			String payUrl = orderInfoService.buy(filterMask);
 			logger.info("支付请求payUrl==>" + payUrl);

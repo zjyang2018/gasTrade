@@ -140,6 +140,15 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	 * @param orderInfoVo
 	 */
 	public String buy(OrderInfoVo orderInfoVo) {
+		if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getOrderId())) {
+			OrderInfoVo orderInfo = new OrderInfoVo();
+			orderInfo.setOrderId(orderInfoVo.getOrderId());
+			orderInfo = orderInfoDao.getOrderInfoBySelective(orderInfo);
+			if (orderInfo != null) {
+				// 生成支付url
+				return this.payService.pay(orderInfoVo.getOrderId(), orderInfo.getAmount());
+			}
+		}
 		String customUserId = orderInfoVo.getCustomerUserId();
 		CustomerUserVo customerUserVo = new CustomerUserVo();
 		customerUserVo.setId(customUserId);
@@ -153,10 +162,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		if (product == null) {
 			throw new RuntimeException("该产品已下架," + orderInfoVo.getProductId());
 		}
-		if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getOrderId())) {
-			// 生成支付url
-			return this.payService.pay(orderInfoVo.getOrderId(), product.getAmount());
-		}
+
 		String orderId = UnoinPayUtil.genMerOrderId(PayService.msgSrcId);
 		orderInfoVo.setOrderId(orderId);
 		orderInfoVo.setAmount(product.getAmount());

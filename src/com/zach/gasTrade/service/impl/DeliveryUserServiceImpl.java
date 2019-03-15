@@ -8,6 +8,7 @@ package com.zach.gasTrade.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,20 +28,20 @@ public class DeliveryUserServiceImpl implements DeliveryUserService{
 	
 	 /**
      * 总数
-     * @param deliveryUserVo
+     * @param map
      * @return
      */
-    public int getDeliveryUserCount(DeliveryUserVo deliveryUserVo){
-    	return deliveryUserDao.getDeliveryUserCount(deliveryUserVo);
+    public int getDeliveryUserCount(Map<String,Object> map){
+    	return deliveryUserDao.getDeliveryUserCount(map);
     }
     
     /**
      * 分页列表
-     * @param deliveryUserVo
+     * @param map
      * @return
      */
-	 public List<DeliveryUserVo> getDeliveryUserPage(DeliveryUserVo deliveryUserVo){
-		 return deliveryUserDao.getDeliveryUserPage(deliveryUserVo);
+	 public List<DeliveryUserVo> getDeliveryUserPage(Map<String,Object> map){
+		 return deliveryUserDao.getDeliveryUserPage(map);
 	 }
 
     /**

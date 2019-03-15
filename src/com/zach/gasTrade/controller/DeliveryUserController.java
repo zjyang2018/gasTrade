@@ -7,6 +7,7 @@
 package com.zach.gasTrade.controller;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,30 +49,36 @@ public class DeliveryUserController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "派送员创建账号列表", notes = "请求参数说明||pageNum:起始页码,pageSize:记录数,searchParam:搜索参数\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryUser/query_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
 			DeliveryUserVo filterMask) {
 		PageResult result = PageResult.initResult();
-
-		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
-		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
-		String searchParam = param.get("searchParam");
-		if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
-			String selectParam = searchParam.trim() + "%";
-			// searchParam以"1"开头则按手机号搜索
-			if (selectParam.startsWith("1")) {
-				filterMask.setPhoneNumber(selectParam);
-			} else {
-				filterMask.setName(selectParam);
-			}
-		}
-
-		filterMask.setPage(pageNum);
-		filterMask.setPageSize(pageSize);
 		try {
-			int total = deliveryUserService.getDeliveryUserCount(filterMask);
-			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(filterMask);
+			logger.info("派送员创建账号列表接口参数:" + JSON.toJSONString(param));
+			int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
+			int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
+			String searchParam = param.get("searchParam");
+			
+			Map<String, Object> map = new HashMap<>();
+			
+			if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
+				String selectParam = searchParam.trim() + "%";
+				// searchParam以"1"开头则按手机号搜索
+				if (selectParam.startsWith("1")) {
+					map.put("phoneNumber", selectParam);
+				} else {
+					map.put("name", selectParam);
+				}
+			}
+			
+			int startIndex = (pageNum - 1) * pageSize;
+			map.put("startIndex", startIndex);
+			map.put("pageSize", pageSize);
+			
+			int total = deliveryUserService.getDeliveryUserCount(map);
+			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(map);
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
@@ -102,6 +109,7 @@ public class DeliveryUserController {
 	public PageResult selectPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
 			DeliveryUserVo filterMask) {
 		PageResult result = PageResult.initResult();
+		logger.info("派送员管理接口参数:" + JSON.toJSONString(param));
 		try {
 			int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 			int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
@@ -109,29 +117,35 @@ public class DeliveryUserController {
 			String workStatus = param.get("workStatus");
 			String searchParam = param.get("searchParam");
 
+			Map<String, Object> map = new HashMap<>();
+
 			if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
 				String selectParam = searchParam.trim() + "%";
 				// searchParam以"1"开头则按手机号搜索
 				if (selectParam.startsWith("1")) {
-					filterMask.setPhoneNumber(selectParam);
+					map.put("phoneNumber", selectParam);
 				} else {
 					// 按性名搜索
-					filterMask.setName(selectParam);
+					map.put("name", selectParam);
 				}
 			}
 			if (StringUtil.isNotNullAndNotEmpty(workStatus)) {
-				filterMask.setWorkStatus(workStatus);
+				map.put("workStatus", workStatus);
 			}
 			if (StringUtil.isNotNullAndNotEmpty(time)) {
-				// 将字符串转换为日期时间格式的Date类型(yyyy-MM-dd HH:mm:ss)
-				Date dateTime = CalendarUtils.parseDateTime(time);
-				filterMask.setUpdateTime(dateTime);
+				// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+				if (time.indexOf(" ") != -1) {
+					time = time.substring(0, time.indexOf(" "));
+				}
+				map.put("createTime", time);
 			}
-			filterMask.setPage(pageNum);
-			filterMask.setPageSize(pageSize);
+			
+			int startIndex = (pageNum - 1) * pageSize;
+			map.put("startIndex", startIndex);
+			map.put("pageSize", pageSize);
 
-			int total = deliveryUserService.getDeliveryUserCount(filterMask);
-			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(filterMask);
+			int total = deliveryUserService.getDeliveryUserCount(map);
+			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(map);
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);

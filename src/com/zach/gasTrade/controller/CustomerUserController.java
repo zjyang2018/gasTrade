@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
@@ -28,6 +29,7 @@ import com.zach.gasTrade.service.CustomerUserService;
 import com.zach.gasTrade.vo.CustomerUserVo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "客户端用户相关api")
 @Controller
@@ -97,11 +99,12 @@ public class CustomerUserController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "用户添加", notes = "请求参数说明||name:姓名 ,wxName:微信昵称,sex:性别,phoneNumber:手机号码,address:联系地址,channel:渠道来源:10-微信公众号,20-客服录入,30-其它,remark:备注\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/customerUser/save", method = RequestMethod.POST)
 	@ResponseBody
 	public Result save(HttpServletRequest request, @RequestBody CustomerUserVo filterMask) {
 		Result result = Result.initResult();
-
+		logger.info("用户添加接口参数:" + JSON.toJSONString(filterMask));
 		try {
 			customerUserService.save(filterMask);
 
@@ -124,17 +127,18 @@ public class CustomerUserController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "用户编辑", notes = "请求参数说明||id:用户编号:必需参数 ,name:姓名 ,wxName:微信昵称,sex:性别,phoneNumber:手机号码,address:联系地址,channel:渠道来源:10-微信公众号,20-客服录入,30-其它,remark:备注\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/customerUser/edit", method = RequestMethod.POST)
 	@ResponseBody
 	public Result edit(HttpServletRequest request, @RequestBody CustomerUserVo filterMask) {
 		Result result = Result.initResult();
-		if (StringUtil.isNullOrEmpty(filterMask.getId())) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("客户编号不能为空");
-			return result;
-		}
-
+		logger.info("用户添加接口参数:" + JSON.toJSONString(filterMask));
 		try {
+
+			if (StringUtil.isNullOrEmpty(filterMask.getId())) {
+				throw new RuntimeException("用户编号不能为空");
+			}
+
 			customerUserService.update(filterMask);
 
 		} catch (RuntimeException e) {

@@ -67,11 +67,11 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	/**
 	 * 总数
 	 * 
-	 * @param orderListDto
+	 * @param map
 	 * @return
 	 */
-	public int getOrderInfoCount(OrderListDto orderListDto) {
-		return orderInfoDao.getOrderInfoCount(orderListDto);
+	public int getOrderInfoCount(Map<String, Object> map) {
+		return orderInfoDao.getOrderInfoCount(map);
 	}
 
 	/**
@@ -97,11 +97,11 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	/**
 	 * 分页列表
 	 * 
-	 * @param orderListDto
+	 * @param map
 	 * @return
 	 */
-	public List<OrderListDto> getOrderInfoPage(OrderListDto orderListDto) {
-		return orderInfoDao.getOrderInfoPage(orderListDto);
+	public List<OrderListDto> getOrderInfoPage(Map<String, Object> map) {
+		return orderInfoDao.getOrderInfoPage(map);
 	}
 
 	/**

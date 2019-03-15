@@ -25,18 +25,18 @@ public interface OrderInfoDao {
 	/**
 	 * 总数
 	 * 
-	 * @param orderListDto
+	 * @param map
 	 * @return
 	 */
-	public int getOrderInfoCount(OrderListDto orderListDto);
+	public int getOrderInfoCount(Map<String, Object> map);
 
 	/**
 	 * 分页列表
 	 * 
-	 * @param orderListDto
+	 * @param map
 	 * @return
 	 */
-	public List<OrderListDto> getOrderInfoPage(OrderListDto orderListDto);
+	public List<OrderListDto> getOrderInfoPage(Map<String, Object> map);
 
 	/**
 	 * 列表

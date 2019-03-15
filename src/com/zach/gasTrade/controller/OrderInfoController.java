@@ -87,65 +87,78 @@ public class OrderInfoController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "pc端订单列表", notes = "请求参数说明||pageNum:页码 ,pageSize:每页条数 ,orderId:订单编号,payStatus:支付状态:10-未支付,20-已支付,"
+			+ "searchCustomerParam:按客户姓名或手机号搜索,searchDeliveryParam:按派送员姓名或手机号搜索,"
+			+ "allotStatus:分配状态:10-未分配，20-已分配,orderStatus:订单状态:10-未支付,20-已支付,30-已分配,40-已接单,50-派送中,60-派送完成,payTime:支付时间\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/orderInfo/query_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
 			OrderListDto filterMask) {
 		PageResult result = PageResult.initResult();
-
+		logger.info("pc端订单列表接口参数:" + JSON.toJSONString(param));
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String orderId = param.get("orderId");
+		String payStatus = param.get("payStatus");
+		String searchCustomerParam = param.get("searchCustomerParam");
+		String searchDeliveryParam = param.get("searchDeliveryParam");
+		String allotStatus = param.get("allotStatus");
+		String orderStatus = param.get("orderStatus");
+		String payTime = param.get("payTime");
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		
 		if (StringUtil.isNotNullAndNotEmpty(orderId)) {
 			String id = orderId.trim() + "%";
-			filterMask.setOrderId(id);
+			map.put("orderId", id);
 		}
 
-		String payStatus = param.get("payStatus");
 		if (StringUtil.isNotNullAndNotEmpty(payStatus)) {
-			filterMask.setPayStatus(payStatus);
+			map.put("payStatus", payStatus);
 		}
-		String searchCustomerParam = param.get("searchCustomerParam");
+		
 		if (StringUtil.isNotNullAndNotEmpty(searchCustomerParam)) {
 			String selectCustomerParam = searchCustomerParam.trim() + "%";
 			// selectCustomerParam以"1"开头则按手机号搜索
 			if (selectCustomerParam.startsWith("1")) {
-				filterMask.setCustomerPhoneNumber(selectCustomerParam);
+				map.put("customerPhoneNumber", selectCustomerParam);
 			} else {
-				filterMask.setCustomerName(selectCustomerParam);
+				map.put("customerName", selectCustomerParam);
 			}
 		}
-
-		String searchDeliveryParam = param.get("searchDeliveryParam");
+	
 		if (StringUtil.isNotNullAndNotEmpty(searchDeliveryParam)) {
 			String selectDeliveryParam = searchDeliveryParam.trim() + "%";
 			// selectDeliveryParam以"1"开头则按手机号搜索
 			if (selectDeliveryParam.startsWith("1")) {
-				filterMask.setDeliveryPhoneNumber(selectDeliveryParam);
+				map.put("deliveryPhoneNumber", selectDeliveryParam);
 			} else {
-				filterMask.setDeliveryName(selectDeliveryParam);
+				map.put("deliveryName", selectDeliveryParam);
 			}
 		}
-
-		String allotStatus = param.get("allotStatus");
+	
 		if (StringUtil.isNotNullAndNotEmpty(allotStatus)) {
-			filterMask.setAllotStatus(allotStatus);
+			map.put("allotStatus", allotStatus);
 		}
-		String orderStatus = param.get("orderStatus");
+		
 		if (StringUtil.isNotNullAndNotEmpty(orderStatus)) {
-			filterMask.setOrderStatus(orderStatus);
+			map.put("orderStatus", orderStatus);
 		}
-		String payTime = param.get("payTime");
+		
 		if (StringUtil.isNotNullAndNotEmpty(payTime)) {
-			Date payTimeToDate = DateTimeUtils.stringToDate(payTime, new Date().toString());
-			filterMask.setPayTime(payTimeToDate);
+			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+			if (payTime.indexOf(" ") != -1) {
+				payTime = payTime.substring(0, payTime.indexOf(" "));
+			}
+			map.put("payTime", payTime);
 		}
 
-		filterMask.setPage(pageNum);
-		filterMask.setPageSize(pageSize);
+		int startIndex = (pageNum - 1) * pageSize;
+		map.put("startIndex", startIndex);
+		map.put("pageSize", pageSize);
 		try {
-			int total = orderInfoService.getOrderInfoCount(filterMask);
-			List<OrderListDto> list = orderInfoService.getOrderInfoPage(filterMask);
+			int total = orderInfoService.getOrderInfoCount(map);
+			List<OrderListDto> list = orderInfoService.getOrderInfoPage(map);
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
@@ -170,29 +183,39 @@ public class OrderInfoController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "派送监控", notes = "请求参数说明||pageNum:页码 ,pageSize:每页条数 ,orderId:订单编号,startTime:开始日期,endTime:结束日期\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/orderInfo/orderMonitorList", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getOrderMonitorList(HttpServletRequest request, @RequestBody Map<String, String> param) {
 		PageResult result = PageResult.initResult();
+		logger.info("派送监控接口参数:" + JSON.toJSONString(param));
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String id = param.get("orderId");
+		String startTime = param.get("startTime");
+		String endTime = param.get("endTime");
+
 		if (StringUtil.isNotNullAndNotEmpty(id)) {
 			String orderId = id.trim() + "%";
 			map.put("orderId", orderId);
 		}
 
-		String startTime = param.get("startTime");
 		if (StringUtil.isNotNullAndNotEmpty(startTime)) {
-			Date startDate = DateTimeUtils.stringToDate(startTime, new Date().toString());
-			map.put("startDate", startDate);
+			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+			if (startTime.indexOf(" ") != -1) {
+				startTime = startTime.substring(0, startTime.indexOf(" "));
+			}
+			map.put("startDate", startTime);
 		}
-		String endTime = param.get("endTime");
+
 		if (StringUtil.isNotNullAndNotEmpty(endTime)) {
-			Date endDate = DateTimeUtils.stringToDate(endTime, new Date().toString());
-			map.put("endDate", endDate);
+			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+			if (endTime.indexOf(" ") != -1) {
+				endTime = endTime.substring(0, endTime.indexOf(" "));
+			}
+			map.put("endDate", endTime);
 		}
 
 		int startIndex = (pageNum - 1) * pageSize;
@@ -396,17 +419,16 @@ public class OrderInfoController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "订单详情", notes = "请求参数说明||orderId:订单编号\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/orderInfo/info", method = RequestMethod.POST)
 	@ResponseBody
 	public DataResult info(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
 		DataResult result = DataResult.initResult();
-		if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("商品编号不能为空");
-			return result;
-		}
-
+		logger.info("订单详情接口参数==>" + JSON.toJSONString(filterMask));
 		try {
+			if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+				throw new RuntimeException("订单编号不能为空");
+			}
 			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
 			CustomerUserVo customerUserVo = new CustomerUserVo();
 			customerUserVo.setId(orderInfo.getCustomerUserId());

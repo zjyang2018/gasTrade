@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.dao;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
@@ -17,17 +18,17 @@ public interface DeliveryUserDao {
 	
 	 /**
      * 总数
-     * @param deliveryUserVo
+     * @param map
      * @return
      */
-	 public int getDeliveryUserCount(DeliveryUserVo deliveryUserVo);
+	 public int getDeliveryUserCount(Map<String,Object> map);
 	 
 	 /**
      * 分页列表
-     * @param deliveryUserVo
+     * @param map
      * @return
      */
-	 public List<DeliveryUserVo> getDeliveryUserPage(DeliveryUserVo deliveryUserVo);
+	 public List<DeliveryUserVo> getDeliveryUserPage(Map<String,Object> map);
 	 
 	 /**
      * 列表

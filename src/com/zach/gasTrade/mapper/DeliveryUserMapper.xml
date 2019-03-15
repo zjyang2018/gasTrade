@@ -29,7 +29,7 @@
 	
 	
    <!--查询记录数-->
-   <select id="getDeliveryUserCount" parameterType="com.zach.gasTrade.vo.DeliveryUserVo" resultType="java.lang.Integer" >                                             
+   <select id="getDeliveryUserCount" parameterType="java.util.Map" resultType="java.lang.Integer" >                                             
      	<![CDATA[
 	    select count(1)
 	    from delivery_user
@@ -72,7 +72,7 @@
 		            and frozen_reason = #{frozenReason}
 		       </if>
 	    	   <if  test="createTime !=null ">
-		            and create_time = #{createTime}
+		            and DATE_FORMAT(create_time,'%Y-%m-%d') = #{createTime}
 		       </if>
 	    	   <if  test="updateTime !=null ">
 		            and update_time = #{updateTime}
@@ -130,7 +130,7 @@
 	    </where>
      </select>
    
-     <select id="getDeliveryUserPage"  parameterType="com.zach.gasTrade.vo.DeliveryUserVo" resultMap="DeliveryUserResultMap">   
+     <select id="getDeliveryUserPage"  parameterType="java.util.Map" resultMap="DeliveryUserResultMap">   
           select                                             
 	      <include refid="DeliveryUserQuery" />
 	      from delivery_user
@@ -172,7 +172,7 @@
 		            and frozen_reason = #{frozenReason}
 		       </if>
 	    	   <if  test="createTime !=null ">
-		            and create_time = #{createTime}
+	    	        and DATE_FORMAT(create_time,'%Y-%m-%d') = #{createTime}
 		       </if>
 	    	   <if  test="updateTime !=null ">
 		            and update_time = #{updateTime}

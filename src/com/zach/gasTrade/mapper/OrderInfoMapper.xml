@@ -132,12 +132,12 @@
 
 
 	<!--查询记录数 -->
-	<select id="getOrderInfoCount" parameterType="com.zach.gasTrade.dto.OrderListDto"
+	<select id="getOrderInfoCount" parameterType="java.util.Map"
 		resultType="java.lang.Integer">                                             
      	<![CDATA[
 	    select count(1)
 	    from order_info AS o
-        left join customer_user AS c on c.id=o.customer_user_id
+        left join customer_user AS c on o.customer_user_id=c.id
         left join delivery_user AS d on o.allot_delivery_id=d.id
 	    ]]>
 		<where>
@@ -145,13 +145,13 @@
 				and o.order_id like #{orderId}
 			</if>
 			<if test="payStatus !=null ">
-				and pay_status = #{payStatus}
+				and o.pay_status = #{payStatus}
 			</if>
 			<if test="payTime !=null ">
-				and pay_time = #{payTime}
+			    and DATE_FORMAT(o.pay_time,'%Y-%m-%d') = #{payTime}
 			</if>
 			<if test="allotStatus !=null ">
-				and allot_status = #{allotStatus}
+				and o.allot_status = #{allotStatus}
 			</if>
 			<if test="customerName !=null ">
 				and c.name like #{customerName}
@@ -166,7 +166,7 @@
 				and d.phone_number like #{deliveryPhoneNumber}
 			</if>
 			<if test="orderStatus !=null ">
-				and order_status = #{orderStatus}
+				and o.order_status = #{orderStatus}
 			</if>
 		</where>
 	</select>
@@ -245,19 +245,20 @@
 		</where>
 	</select>
 
-	<!--监控订单数量统计 -->
+	<!--派单监控数量统计 -->
 	<select id="getDeliveryMonitorCount" parameterType="java.util.Map"
 		resultType="java.lang.Integer">
 		select count(1)
 		from order_info
-		where create_time = #{createTime} between #{startTime} and #{endTime}
 		<where>
 			<if test="orderId !=null ">
-				and o.order_id like #{orderId}
+				and order_id like #{orderId}
 			</if>
 			<if test="startTime !=null ">
-				and delivery_order_time between #{startTime} and
-				ifnull(#{endTime},now())
+			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') <![CDATA[>]]> #{startTime}
+			</if>
+			<if test="endTime !=null ">
+			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') <![CDATA[<]]> #{endTime}
 			</if>
 		</where>
 	</select>
@@ -269,15 +270,17 @@
 		customer_phone_number,d.name AS delivery_name,d.phone_number AS
 		delivery_phone_number,o.delivery_order_time AS delivery_order_time
 		from order_info AS o
-		left join customer_user AS c on c.id=o.customer_user_id
+		left join customer_user AS c on o.customer_user_id=c.id
 		left join delivery_user AS d on o.allot_delivery_id=d.id
 		<where>
 			<if test="orderId !=null ">
 				and o.order_id like #{orderId}
 			</if>
 			<if test="startTime !=null ">
-				and delivery_order_time between #{startTime} and
-				ifnull(#{endTime},now())
+			    and DATE_FORMAT(o.delivery_order_time,'%Y-%m-%d') <![CDATA[>=]]> #{startTime}
+			</if>
+			<if test="endTime !=null ">
+			    and DATE_FORMAT(o.delivery_order_time,'%Y-%m-%d') <![CDATA[<=]]> #{endTime}
 			</if>
 		</where>
 		order by o.update_time
@@ -408,7 +411,7 @@
 		</where>
 	</select>
 
-	<select id="getOrderInfoPage" parameterType="com.zach.gasTrade.dto.OrderListDto"
+	<select id="getOrderInfoPage" parameterType="java.util.Map"
 		resultMap="OrderListDtoResultMap">
 		select
 		o.order_id AS order_id,o.amount AS amount,sum(o.amount) AS
@@ -418,20 +421,20 @@
 		delivery_phone_number,o.order_status AS order_status,o.pay_time AS
 		pay_time,o.delivery_order_time AS delivery_order_time
 		from order_info AS o
-		left join customer_user AS c on c.id=o.customer_user_id
+		left join customer_user AS c on o.customer_user_id=c.id
 		left join delivery_user AS d on o.allot_delivery_id=d.id
 		<where>
 			<if test="orderId !=null ">
 				and o.order_id like #{orderId}
 			</if>
 			<if test="payStatus !=null ">
-				and pay_status = #{payStatus}
+				and o.pay_status = #{payStatus}
 			</if>
 			<if test="payTime !=null ">
-				and pay_time = #{payTime}
+			    and DATE_FORMAT(o.pay_time,'%Y-%m-%d') = #{payTime}
 			</if>
 			<if test="allotStatus !=null ">
-				and allot_status = #{allotStatus}
+				and o.allot_status = #{allotStatus}
 			</if>
 			<if test="customerName !=null ">
 				and c.name like #{customerName}
@@ -446,7 +449,7 @@
 				and d.phone_number like #{deliveryPhoneNumber}
 			</if>
 			<if test="orderStatus !=null ">
-				and order_status = #{orderStatus}
+				and o.order_status = #{orderStatus}
 			</if>
 		</where>
 		order by o.update_time

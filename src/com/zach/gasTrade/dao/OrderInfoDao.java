@@ -101,5 +101,13 @@ public interface OrderInfoDao {
 	public List<CustomerOrderInfoDto> getCustomerOrderInfoPage(OrderInfoVo filterMask);
 
 	public List<DeliveryOrderInfoDto> getDeliveryOrderInfoPage(OrderInfoVo filterMask);
+	
+	/**
+	 * 订单金额汇总
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public double getOrderTotalAmount(Map<String, Object> map);
 
 }

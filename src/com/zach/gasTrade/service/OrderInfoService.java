@@ -131,5 +131,12 @@ public interface OrderInfoService {
 	 * 
 	 */
 	public void autoAllotDeliveryOrder();
+	/**
+	 * 订单金额汇总
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public double getOrderTotalAmount(Map<String, Object> map);
 
 }

@@ -476,6 +476,44 @@
 		order by o.update_time
 		limit #{startIndex},#{pageSize}
 	</select>
+	
+	<!-- 订单金额汇总 -->
+	<select id="getOrderTotalAmount" parameterType="java.util.Map"
+		resultMap="java.lang.Double">
+		select sum(o.amount) AS total_amount	
+		from order_info AS o
+		left join customer_user AS c on o.customer_user_id=c.id
+		left join delivery_user AS d on o.allot_delivery_id=d.id
+		<where>
+			<if test="orderId !=null ">
+				and o.order_id like #{orderId}
+			</if>
+			<if test="payStatus !=null ">
+				and o.pay_status = #{payStatus}
+			</if>
+			<if test="payTime !=null ">
+			    and DATE_FORMAT(o.pay_time,'%Y-%m-%d') = #{payTime}
+			</if>
+			<if test="allotStatus !=null ">
+				and o.allot_status = #{allotStatus}
+			</if>
+			<if test="customerName !=null ">
+				and c.name like #{customerName}
+			</if>
+			<if test="customerPhoneNumber !=null ">
+				and c.phone_number like #{customerPhoneNumber}
+			</if>
+			<if test="deliveryName !=null ">
+				and d.name like #{deliveryName}
+			</if>
+			<if test="deliveryPhoneNumber !=null ">
+				and d.phone_number like #{deliveryPhoneNumber}
+			</if>
+			<if test="orderStatus !=null ">
+				and o.order_status = #{orderStatus}
+			</if>
+		</where>
+	</select>
 
 	<select id="getOrderInfoBySelective" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
 		resultMap="OrderInfoResultMap">

@@ -158,11 +158,15 @@ public class OrderInfoController {
 		try {
 			int total = orderInfoService.getOrderInfoCount(map);
 			List<OrderListDto> list = orderInfoService.getOrderInfoPage(map);
+			double orderTotalAmount = orderInfoService.getOrderTotalAmount(map);
+			Map<String,Object> resultMap = new HashMap<>();
+			resultMap.put("orderTotalAmount", orderTotalAmount);
+			resultMap.put("list", list);
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
 			result.setPageSize(pageSize);
-			result.setData(list);
+			result.setData(resultMap);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

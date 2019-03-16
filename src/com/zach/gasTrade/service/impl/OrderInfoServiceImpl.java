@@ -432,5 +432,16 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		}
 		return null;
 	}
+	
+	/**
+	 * 订单金额汇总
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public double getOrderTotalAmount(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+				return orderInfoDao.getOrderTotalAmount(map);
+	}
 
 }

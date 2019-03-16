@@ -6,7 +6,6 @@
 
 package com.zach.gasTrade.controller;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.common.utils.CalendarUtils;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.PageResult;
@@ -60,9 +58,9 @@ public class DeliveryUserController {
 			int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 			int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 			String searchParam = param.get("searchParam");
-			
-			Map<String, Object> map = new HashMap<>();
-			
+
+			Map<String, Object> map = new HashMap<String, Object>();
+
 			if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
 				String selectParam = searchParam.trim() + "%";
 				// searchParam以"1"开头则按手机号搜索
@@ -72,11 +70,11 @@ public class DeliveryUserController {
 					map.put("name", selectParam);
 				}
 			}
-			
+
 			int startIndex = (pageNum - 1) * pageSize;
 			map.put("startIndex", startIndex);
 			map.put("pageSize", pageSize);
-			
+
 			int total = deliveryUserService.getDeliveryUserCount(map);
 			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(map);
 
@@ -117,7 +115,7 @@ public class DeliveryUserController {
 			String workStatus = param.get("workStatus");
 			String searchParam = param.get("searchParam");
 
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = new HashMap<String, Object>();
 
 			if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
 				String selectParam = searchParam.trim() + "%";
@@ -139,7 +137,7 @@ public class DeliveryUserController {
 				}
 				map.put("createTime", time);
 			}
-			
+
 			int startIndex = (pageNum - 1) * pageSize;
 			map.put("startIndex", startIndex);
 			map.put("pageSize", pageSize);

@@ -185,14 +185,15 @@ public class OrderDeliveryRecordController {
 	public DataResult info(HttpServletRequest request, @RequestBody OrderDeliveryRecordVo filterMask) {
 		logger.info("订单派送进度详情参数:" + JSON.toJSONString(filterMask));
 		DataResult result = DataResult.initResult();
-		Map<String,Object> map = new HashMap<>();
-		List<String> orderDeliveryProgress = new ArrayList<>();
+		Map<String, Object> map = new HashMap<String, Object>();
+		List<String> orderDeliveryProgress = new ArrayList<String>();
 		try {
 			if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
 				throw new RuntimeException("订单编号不能为空");
-			}			
-			OrderDeliveryRecordVo orderDeliveryRecord = orderDeliveryRecordService.getOrderDeliveryRecordBySelective(filterMask);
-			if(orderDeliveryRecord==null) {
+			}
+			OrderDeliveryRecordVo orderDeliveryRecord = orderDeliveryRecordService
+					.getOrderDeliveryRecordBySelective(filterMask);
+			if (orderDeliveryRecord == null) {
 				result.setCode(1);
 				result.setMsg("订单暂未分配,请稍等");
 				return result;
@@ -208,42 +209,45 @@ public class OrderDeliveryRecordController {
 			String deliveryUserName = deliveryUser.getName();
 			String deliveryUserPhoneNumber = deliveryUser.getPhoneNumber();
 			String allotTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getAllotTime());
-			
+
 			String msg1 = "订单已自动分配给派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") " + allotTime;
 			orderDeliveryProgress.add(msg1);
-			
+
 			// 判断派送员是否接单
-			if("40".equals(order_status)) {
+			if ("40".equals(order_status)) {
 				String acceptTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getAcceptTime());
 				String msg2 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已接单 " + acceptTime;
 				orderDeliveryProgress.add(msg2);
 			}
 			// 订单派送中
-			if("50".equals(order_status)) {
+			if ("50".equals(order_status)) {
 				String deliveryTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getDeliveryTime());
-				String msg3 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已取货物, 正在派送  " + deliveryTime;
+				String msg3 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已取货物, 正在派送  "
+						+ deliveryTime;
 				orderDeliveryProgress.add(msg3);
 			}
 			// 订单派送完成
-			if("60".equals(order_status)) {
+			if ("60".equals(order_status)) {
 				String completeTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getCompleteTime());
-				String msg4 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已到达目的地, 且客户签收！  " + completeTime;
+				String msg4 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已到达目的地, 且客户签收！  "
+						+ completeTime;
 				orderDeliveryProgress.add(msg4);
 			}
 			// 判断是移动端还是PC端访问
 			String userAgent = request.getHeader("user-agent");
 			// 移动端
-			if(userAgent.indexOf("Android")!=-1||userAgent.indexOf("iPhone")!=-1||userAgent.indexOf("iPad")!=-1) {
+			if (userAgent.indexOf("Android") != -1 || userAgent.indexOf("iPhone") != -1
+					|| userAgent.indexOf("iPad") != -1) {
 				map.put("startLocation", orderDeliveryRecord.getStartLocation());
 				map.put("endLocation", orderDeliveryRecord.getEndLocation());
-			}else {
+			} else {
 				// PC端
 				map.put("startLocation", orderDeliveryRecord.getStartLocation());
 				map.put("endLocation", orderDeliveryRecord.getEndLocation());
 				map.put("moveLocation", orderDeliveryRecord.getMoveLocation());
 			}
 			map.put("orderDeliveryProgress", orderDeliveryProgress);
-			
+
 			result.setData(map);
 
 		} catch (RuntimeException e) {

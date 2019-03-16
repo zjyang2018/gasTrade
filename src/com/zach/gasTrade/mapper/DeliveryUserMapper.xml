@@ -7,6 +7,7 @@
 	 <resultMap id="DeliveryUserResultMap" type="com.zach.gasTrade.vo.DeliveryUserVo">
          <result property="id" column="id"/>
          <result property="name" column="name"/>
+         <result property="wxOpenId" column="wx_open_id"/>
          <result property="phoneNumber" column="phone_number"/>
          <result property="loginName" column="login_name"/>
          <result property="password" column="password"/>
@@ -24,7 +25,7 @@
      
     <!-- 公用查询sql-->
     <sql id="DeliveryUserQuery">
-	    id ,name ,phone_number ,login_name ,password ,equip_no ,idcard_no ,address ,remark ,account_status ,work_status ,frozen_reason ,create_time ,update_time 
+	    id ,name,wx_open_id ,phone_number ,login_name ,password ,equip_no ,idcard_no ,address ,remark ,account_status ,work_status ,frozen_reason ,create_time ,update_time 
 	</sql>
 	
 	
@@ -37,6 +38,9 @@
         <where>
 	    	   <if  test="id !=null ">
 		            and id = #{id}
+		       </if>
+		       <if  test="wxOpenId !=null ">
+		            and wx_open_id = #{wxOpenId}
 		       </if>
 	    	   <if  test="name !=null ">
 		            and name like #{name}
@@ -91,6 +95,9 @@
 	    	   <if  test="name !=null ">
 		            and name = #{name}
 		       </if>
+		       <if  test="wxOpenId !=null ">
+		            and wx_open_id = #{wxOpenId}
+		       </if>
 	    	   <if  test="phoneNumber !=null ">
 		            and phone_number = #{phoneNumber}
 		       </if>
@@ -137,6 +144,9 @@
 	      <where>
 	    	   <if  test="id !=null ">
 		            and id = #{id}
+		       </if>
+		       <if  test="wxOpenId !=null ">
+		            and wx_open_id = #{wxOpenId}
 		       </if>
 	    	   <if  test="name !=null ">
 		            and name like #{name}
@@ -189,6 +199,9 @@
 	      <where>
 	    	   <if  test="id !=null ">
 		            and id = #{id}
+		       </if>
+		       <if  test="wxOpenId !=null ">
+		            and wx_open_id = #{wxOpenId}
 		       </if>
 	    	   <if  test="name !=null ">
 		            and name = #{name}
@@ -246,6 +259,9 @@
         	<if test="name !=null "> 
         	name = #{name} ,
         	</if> 
+        	<if test="wxOpenId !=null "> 
+        	wx_open_id = #{wxOpenId} ,
+        	</if> 
         	<if test="phoneNumber !=null "> 
         	phone_number = #{phoneNumber} ,
         	</if> 
@@ -292,6 +308,9 @@
 	        <if test="id !=null ">
 	        	id ,
 	        </if>	
+	        <if test="wxOpenId !=null ">
+	        	wx_open_id ,
+	        </if>
 	        <if test="name !=null ">
 	        	name ,
 	        </if>	
@@ -334,6 +353,9 @@
         ) VALUES (
 	        <if test="id !=null ">
 	        	#{id} ,
+	        </if>
+	        <if test="wxOpenId !=null ">
+	        	#{wxOpenId} ,
 	        </if>	
 	        <if test="name !=null ">
 	        	#{name} ,

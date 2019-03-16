@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.common.utils.DateTimeUtils;
 import com.common.utils.StringUtil;
 import com.common.wx.TokenUtil;
 import com.common.wx.WeiXinUtils;
@@ -105,9 +104,9 @@ public class OrderInfoController {
 		String allotStatus = param.get("allotStatus");
 		String orderStatus = param.get("orderStatus");
 		String payTime = param.get("payTime");
-		
+
 		Map<String, Object> map = new HashMap<String, Object>();
-		
+
 		if (StringUtil.isNotNullAndNotEmpty(orderId)) {
 			String id = orderId.trim() + "%";
 			map.put("orderId", id);
@@ -116,7 +115,7 @@ public class OrderInfoController {
 		if (StringUtil.isNotNullAndNotEmpty(payStatus)) {
 			map.put("payStatus", payStatus);
 		}
-		
+
 		if (StringUtil.isNotNullAndNotEmpty(searchCustomerParam)) {
 			String selectCustomerParam = searchCustomerParam.trim() + "%";
 			// selectCustomerParam以"1"开头则按手机号搜索
@@ -126,7 +125,7 @@ public class OrderInfoController {
 				map.put("customerName", selectCustomerParam);
 			}
 		}
-	
+
 		if (StringUtil.isNotNullAndNotEmpty(searchDeliveryParam)) {
 			String selectDeliveryParam = searchDeliveryParam.trim() + "%";
 			// selectDeliveryParam以"1"开头则按手机号搜索
@@ -136,15 +135,15 @@ public class OrderInfoController {
 				map.put("deliveryName", selectDeliveryParam);
 			}
 		}
-	
+
 		if (StringUtil.isNotNullAndNotEmpty(allotStatus)) {
 			map.put("allotStatus", allotStatus);
 		}
-		
+
 		if (StringUtil.isNotNullAndNotEmpty(orderStatus)) {
 			map.put("orderStatus", orderStatus);
 		}
-		
+
 		if (StringUtil.isNotNullAndNotEmpty(payTime)) {
 			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
 			if (payTime.indexOf(" ") != -1) {
@@ -377,6 +376,7 @@ public class OrderInfoController {
 	@RequestMapping(value = "/orderInfo/edit", method = RequestMethod.POST)
 	@ResponseBody
 	public Result edit(HttpServletRequest request, @RequestBody Map<String, String> param) {
+		logger.info("订单修改参数:" + JSON.toJSONString(param));
 		Result result = Result.initResult();
 		String orderId = param.get("orderId");
 		if (StringUtil.isNullOrEmpty(orderId)) {
@@ -386,18 +386,20 @@ public class OrderInfoController {
 		}
 		String deliveryName = param.get("deliveryName");
 		String editReason = param.get("editReason");
-
-		OrderInfoVo orderInfoVo = new OrderInfoVo();
-		orderInfoVo.setOrderId(orderId);
-		orderInfoVo.setEditReason(editReason);
-
-		DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
-		deliveryUserVo.setName(deliveryName);
-		DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
-
-		orderInfoVo.setAllotDeliveryId(deliveryUser.getId());
-
 		try {
+
+			OrderInfoVo orderInfoVo = new OrderInfoVo();
+			orderInfoVo.setOrderId(orderId);
+			orderInfoVo.setEditReason(editReason);
+
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setName(deliveryName);
+			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			if (deliveryUser == null) {
+				throw new RuntimeException("该用户不存在," + deliveryName);
+			}
+			orderInfoVo.setAllotDeliveryId(deliveryUser.getId());
+
 			orderInfoService.update(orderInfoVo);
 
 		} catch (RuntimeException e) {

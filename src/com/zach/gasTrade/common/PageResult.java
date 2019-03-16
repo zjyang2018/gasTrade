@@ -1,5 +1,6 @@
-package  com.zach.gasTrade.common;
+package com.zach.gasTrade.common;
 
+@SuppressWarnings("rawtypes")
 public class PageResult extends DataResult {
 	public PageResult() {
 		super();
@@ -39,10 +40,10 @@ public class PageResult extends DataResult {
 	}
 
 	public int getPageCount() {
-		if(allCount%pageSize==0) {
-			return (int) (allCount/pageSize);
-		}else {
-			return (int) (allCount/pageSize+1);
+		if (allCount % pageSize == 0) {
+			return (int) (allCount / pageSize);
+		} else {
+			return (int) (allCount / pageSize + 1);
 		}
 	}
 

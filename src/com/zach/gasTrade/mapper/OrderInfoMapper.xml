@@ -427,12 +427,20 @@
 	<select id="getOrderInfoPage" parameterType="java.util.Map"
 		resultMap="OrderListDtoResultMap">
 		select
-		o.order_id AS order_id,o.amount AS amount,sum(o.amount) AS
-		total_amount,o.pay_status AS pay_status,c.name AS
-		customer_name,c.phone_number AS customer_phone_number,o.allot_status
-		AS allot_status,d.name AS delivery_name,d.phone_number AS
-		delivery_phone_number,o.order_status AS order_status,o.pay_time AS
-		pay_time,o.delivery_order_time AS delivery_order_time
+			o.order_id AS order_id,
+			o.amount AS amount,
+			<!-- 
+			sum(o.amount) AS total_amount,
+			-->
+			o.pay_status AS pay_status,
+			c.name AS customer_name,
+			c.phone_number AS customer_phone_number,
+			o.allot_status AS allot_status,
+			d.name AS delivery_name,
+			d.phone_number AS delivery_phone_number,
+			o.order_status AS order_status,
+			o.pay_time AS pay_time,
+			o.delivery_order_time AS delivery_order_time
 		from order_info AS o
 		left join customer_user AS c on o.customer_user_id=c.id
 		left join delivery_user AS d on o.allot_delivery_id=d.id

@@ -8,6 +8,8 @@
 		<result property="customerName" column="customer_name" />
 		<result property="customerPhoneNumber" column="customer_phone_number" />
 		<result property="productName" column="product_name" />
+		<result property="productDesc" column="product_desc" />
+		<result property="remark" column="remark" />
 		<result property="imagePath" column="image_path" />
 	</resultMap>
 
@@ -15,6 +17,7 @@
 	<resultMap id="CustomerOrderInfoDtoResultMap" type="com.zach.gasTrade.dto.CustomerOrderInfoDto">
 		<result property="orderId" column="order_id" />
 		<result property="productName" column="product_name" />
+		<result property="productDesc" column="product_desc" />
 		<result property="imagePath" column="image_path" />
 		<result property="deliveryName" column="delivery_name" />
 		<result property="deliveryPhoneNumber" column="delivery_phone_number" />
@@ -290,9 +293,14 @@
 	<select id="getDeliveryOrderInfoPage" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
 		resultMap="DeliveryOrderInfoDtoResultMap">
 		select
-		o.order_id AS order_id,c.name AS customer_name,c.phone_number AS
-		customer_phone_number, o.product_name AS product_name,p.image_path AS
-		image_path
+			o.order_id AS order_id,
+			o.remark,
+			c.name AS customer_name,
+			c.phone_number AS
+			customer_phone_number,
+			o.product_name AS product_name,
+			p.product_desc,
+			p.image_path AS image_path
 		from order_info AS o
 		left join customer_user AS c on c.id=o.customer_user_id
 		left join product AS p on p.product_id=o.product_id
@@ -316,9 +324,14 @@
 	<select id="getCustomerOrderInfoPage" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
 		resultMap="CustomerOrderInfoDtoResultMap">
 		select
-		o.order_id AS order_id,o.product_name AS product_name,p.image_path AS
-		image_path,d.name AS delivery_name,d.phone_number AS
-		delivery_phone_number,o.delivery_complete_time AS delivery_complete_time,c.name AS customer_name
+			o.order_id AS order_id,
+			o.product_name AS product_name,
+			p.product_desc,
+			p.image_path AS image_path,
+			d.name AS delivery_name,
+			d.phone_number AS delivery_phone_number,
+			o.delivery_complete_time AS delivery_complete_time,
+			c.name AS customer_name
 		from order_info AS o
 		left join customer_user AS c on o.customer_user_id=c.id
 		left join delivery_user AS d on o.allot_delivery_id=d.id

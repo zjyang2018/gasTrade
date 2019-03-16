@@ -16,6 +16,11 @@ public class DeliveryOrderInfoDto extends PaginatedHelper implements java.io.Ser
 	private java.lang.String productName;
 
 	/**
+	 * productDesc
+	 */
+	private java.lang.String productDesc;
+
+	/**
 	 * imagePath
 	 */
 	private java.lang.String imagePath;
@@ -24,6 +29,11 @@ public class DeliveryOrderInfoDto extends PaginatedHelper implements java.io.Ser
 	 * 客户姓名
 	 */
 	private java.lang.String customerName;
+
+	/**
+	 * 订单备注
+	 */
+	private java.lang.String remark;
 	/**
 	 * 客户手机号
 	 */
@@ -68,6 +78,22 @@ public class DeliveryOrderInfoDto extends PaginatedHelper implements java.io.Ser
 
 	public void setCustomerPhoneNumber(java.lang.String customerPhoneNumber) {
 		this.customerPhoneNumber = customerPhoneNumber;
+	}
+
+	public java.lang.String getProductDesc() {
+		return productDesc;
+	}
+
+	public void setProductDesc(java.lang.String productDesc) {
+		this.productDesc = productDesc;
+	}
+
+	public java.lang.String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(java.lang.String remark) {
+		this.remark = remark;
 	}
 
 }

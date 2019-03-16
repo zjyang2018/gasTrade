@@ -18,6 +18,11 @@ public class CustomerOrderInfoDto extends PaginatedHelper implements java.io.Ser
 	private java.lang.String productName;
 
 	/**
+	 * 产品描述
+	 */
+	private java.lang.String productDesc;
+
+	/**
 	 * imagePath
 	 */
 	private java.lang.String imagePath;
@@ -117,6 +122,14 @@ public class CustomerOrderInfoDto extends PaginatedHelper implements java.io.Ser
 
 	public void setCustomerName(java.lang.String customerName) {
 		this.customerName = customerName;
+	}
+
+	public java.lang.String getProductDesc() {
+		return productDesc;
+	}
+
+	public void setProductDesc(java.lang.String productDesc) {
+		this.productDesc = productDesc;
 	}
 
 }

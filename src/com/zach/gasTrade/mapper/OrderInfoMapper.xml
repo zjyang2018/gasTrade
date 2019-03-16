@@ -255,10 +255,10 @@
 				and order_id like #{orderId}
 			</if>
 			<if test="startTime !=null ">
-			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') <![CDATA[>]]> #{startTime}
+			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
 			</if>
 			<if test="endTime !=null ">
-			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') <![CDATA[<]]> #{endTime}
+			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &lt;= #{endTime}
 			</if>
 		</where>
 	</select>
@@ -277,10 +277,10 @@
 				and o.order_id like #{orderId}
 			</if>
 			<if test="startTime !=null ">
-			    and DATE_FORMAT(o.delivery_order_time,'%Y-%m-%d') <![CDATA[>=]]> #{startTime}
+			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
 			</if>
 			<if test="endTime !=null ">
-			    and DATE_FORMAT(o.delivery_order_time,'%Y-%m-%d') <![CDATA[<=]]> #{endTime}
+			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &lt;= #{endTime}
 			</if>
 		</where>
 		order by o.update_time

@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.Transactional;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,8 +29,10 @@ import com.common.wx.WeiXinUtils;
 import com.common.wx.bean.AccessToken;
 import com.common.wx.bean.TemplateData;
 import com.common.wx.bean.TemplateMessage;
+import com.zach.gasTrade.dao.AdminUserDao;
 import com.zach.gasTrade.dao.CustomerUserDao;
 import com.zach.gasTrade.dao.DeliveryLocationHistoryDao;
+import com.zach.gasTrade.dao.OrderDeliveryRecordDao;
 import com.zach.gasTrade.dao.OrderInfoDao;
 import com.zach.gasTrade.dao.ProductDao;
 import com.zach.gasTrade.dto.CustomerOrderGenerateInfoDto;
@@ -40,8 +44,10 @@ import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.netpay.PayService;
 import com.zach.gasTrade.netpay.UnoinPayUtil;
 import com.zach.gasTrade.service.OrderInfoService;
+import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
+import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
 import com.zach.gasTrade.vo.OrderInfoVo;
 import com.zach.gasTrade.vo.ProductVo;
 
@@ -60,9 +66,16 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 
 	@Autowired
 	private CustomerUserDao customerUserDao;
+	
+	@Autowired
+	private AdminUserDao adminUserDao;
 
 	@Autowired
 	private DeliveryLocationHistoryDao deliveryLocationHistoryDao;
+	
+	@Autowired
+	private OrderDeliveryRecordDao orderDeliveryRecordDao;
+	
 
 	/**
 	 * 总数
@@ -215,25 +228,53 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	 *
 	 * @param orderInfoVo
 	 */
+	@Transactional
 	public void autoAllotDeliveryOrder(OrderInfoVo orderInfoVo) {
-		List<DeliveryLocationHistoryVo> list = deliveryLocationHistoryDao.getDeliveryLocationHistoryByRecent();
-		String deliveryUserId = "";
-		double minDistance = 0.00;
-		for (DeliveryLocationHistoryVo bean : list) {
-			double distance = MapHelper.GetPointDistance(bean.getLatitude() + "," + bean.getLongitude(),
-					orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude());
-			if (minDistance > distance) {
-				minDistance = distance;
-				deliveryUserId = bean.getDeliveryUserId();
+		logger.info("自动分配订单参数:" + JSON.toJSONString(orderInfoVo));
+		try {
+			List<DeliveryLocationHistoryVo> list = deliveryLocationHistoryDao.getDeliveryLocationHistoryByRecent();
+			String deliveryUserId = "";
+			String moveLocation = "";
+			double minDistance = 0.00;
+			for (DeliveryLocationHistoryVo bean : list) {
+				double distance = MapHelper.GetPointDistance(bean.getLatitude() + "," + bean.getLongitude(),
+						orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude());
+				if (minDistance > distance) {
+					minDistance = distance;
+					deliveryUserId = bean.getDeliveryUserId();
+					moveLocation = bean.getLatitude() + "," + bean.getLongitude();
+				}
 			}
-		}
 
-		orderInfoVo.setAllotDeliveryId(deliveryUserId);
-		orderInfoVo.setAllotStatus("20");
-		Date now = new Date();
-		orderInfoVo.setAllotTime(now);
-		orderInfoVo.setUpdateTime(now);
-		orderInfoDao.update(orderInfoVo);
+			orderInfoVo.setAllotDeliveryId(deliveryUserId);
+			orderInfoVo.setAllotStatus("20");
+			orderInfoVo.setOrderStatus("30");
+			Date now = new Date();
+			orderInfoVo.setAllotTime(now);
+			orderInfoVo.setUpdateTime(now);
+			orderInfoDao.update(orderInfoVo);
+			// 添加订单派送记录
+			OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
+			orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
+			orderDeliveryRecordVo.setAllotTime(now);
+			
+			ProductVo productVo = new ProductVo();
+			productVo.setProductId(orderInfoVo.getProductId());
+			ProductVo product = productDao.getProductBySelective(productVo);
+			AdminUserVo adminUserVo = new AdminUserVo();
+			adminUserVo.setId(product.getCreateUserId());
+			AdminUserVo adminUser = adminUserDao.getAdminUserBySelective(adminUserVo);
+			String startLocation = adminUser.getAddress();
+			String endLocation = orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude();
+			orderDeliveryRecordVo.setEndLocation(endLocation);
+			orderDeliveryRecordVo.setMoveLocation(moveLocation);
+			orderDeliveryRecordVo.setMoveLocation(startLocation);
+			orderDeliveryRecordDao.save(orderDeliveryRecordVo);
+		} catch (Exception e) {
+			// TODO: handle exception
+			logger.error("自动分配订单异常," + JSON.toJSONString(orderInfoVo), e);
+			throw  new RuntimeException(e.getMessage());
+		}	
 	}
 
 	/**

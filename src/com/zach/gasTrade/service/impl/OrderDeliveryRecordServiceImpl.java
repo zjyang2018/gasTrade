@@ -62,13 +62,6 @@ public class OrderDeliveryRecordServiceImpl implements OrderDeliveryRecordServic
     	String id = SerialGenerator.getUUID();
     	Date nowTime = new Date();
     	orderDeliveryRecordVo.setId(id);
-    	orderDeliveryRecordVo.setAcceptTime(null);
-    	orderDeliveryRecordVo.setAcceptDesc("");
-    	orderDeliveryRecordVo.setDeliveryTime(null);
-    	orderDeliveryRecordVo.setDeliveryDesc("");
-    	orderDeliveryRecordVo.setCompleteTime(null);
-    	orderDeliveryRecordVo.setCompleteDesc("");
-    	orderDeliveryRecordVo.setEndLocation("");
     	orderDeliveryRecordVo.setCreateTime(nowTime);
     	
     	return orderDeliveryRecordDao.save(orderDeliveryRecordVo);

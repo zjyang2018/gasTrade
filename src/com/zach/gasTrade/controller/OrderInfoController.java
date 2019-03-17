@@ -7,6 +7,7 @@
 package com.zach.gasTrade.controller;
 
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -158,8 +159,11 @@ public class OrderInfoController {
 		try {
 			int total = orderInfoService.getOrderInfoCount(map);
 			List<OrderListDto> list = orderInfoService.getOrderInfoPage(map);
-			double orderTotalAmount = orderInfoService.getOrderTotalAmount(map);
-			Map<String,Object> resultMap = new HashMap<>();
+			BigDecimal orderTotalAmount = orderInfoService.getOrderTotalAmount(map);
+			if (orderTotalAmount == null) {
+				orderTotalAmount = BigDecimal.ZERO.setScale(2);
+			}
+			Map<String, Object> resultMap = new HashMap<String, Object>();
 			resultMap.put("orderTotalAmount", orderTotalAmount);
 			resultMap.put("list", list);
 

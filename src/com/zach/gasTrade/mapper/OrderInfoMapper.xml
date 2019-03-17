@@ -479,7 +479,7 @@
 	
 	<!-- 订单金额汇总 -->
 	<select id="getOrderTotalAmount" parameterType="java.util.Map"
-		resultMap="java.lang.Double">
+		resultType="java.math.BigDecimal">
 		select sum(o.amount) AS total_amount	
 		from order_info AS o
 		left join customer_user AS c on o.customer_user_id=c.id

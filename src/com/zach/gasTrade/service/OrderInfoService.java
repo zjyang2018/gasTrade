@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -131,12 +132,13 @@ public interface OrderInfoService {
 	 * 
 	 */
 	public void autoAllotDeliveryOrder();
+
 	/**
 	 * 订单金额汇总
 	 * 
 	 * @param map
 	 * @return
 	 */
-	public double getOrderTotalAmount(Map<String, Object> map);
+	public BigDecimal getOrderTotalAmount(Map<String, Object> map);
 
 }

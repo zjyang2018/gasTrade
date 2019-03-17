@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.dao;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -101,13 +102,13 @@ public interface OrderInfoDao {
 	public List<CustomerOrderInfoDto> getCustomerOrderInfoPage(OrderInfoVo filterMask);
 
 	public List<DeliveryOrderInfoDto> getDeliveryOrderInfoPage(OrderInfoVo filterMask);
-	
+
 	/**
 	 * 订单金额汇总
 	 * 
 	 * @param map
 	 * @return
 	 */
-	public double getOrderTotalAmount(Map<String, Object> map);
+	public BigDecimal getOrderTotalAmount(Map<String, Object> map);
 
 }

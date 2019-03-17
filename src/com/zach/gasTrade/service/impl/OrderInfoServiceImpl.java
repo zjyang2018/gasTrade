@@ -66,16 +66,15 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 
 	@Autowired
 	private CustomerUserDao customerUserDao;
-	
+
 	@Autowired
 	private AdminUserDao adminUserDao;
 
 	@Autowired
 	private DeliveryLocationHistoryDao deliveryLocationHistoryDao;
-	
+
 	@Autowired
 	private OrderDeliveryRecordDao orderDeliveryRecordDao;
-	
 
 	/**
 	 * 总数
@@ -257,7 +256,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
 			orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
 			orderDeliveryRecordVo.setAllotTime(now);
-			
+
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfoVo.getProductId());
 			ProductVo product = productDao.getProductBySelective(productVo);
@@ -273,8 +272,8 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		} catch (Exception e) {
 			// TODO: handle exception
 			logger.error("自动分配订单异常," + JSON.toJSONString(orderInfoVo), e);
-			throw  new RuntimeException(e.getMessage());
-		}	
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 
 	/**
@@ -432,16 +431,16 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 订单金额汇总
 	 * 
 	 * @param map
 	 * @return
 	 */
-	public double getOrderTotalAmount(Map<String, Object> map) {
+	public BigDecimal getOrderTotalAmount(Map<String, Object> map) {
 		// TODO Auto-generated method stub
-				return orderInfoDao.getOrderTotalAmount(map);
+		return orderInfoDao.getOrderTotalAmount(map);
 	}
 
 }

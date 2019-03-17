@@ -24,6 +24,7 @@ import com.common.cache.CacheService;
 import com.common.utils.StringUtil;
 import com.common.utils.VerificationCodeUtils;
 import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.service.CustomerUserService;
@@ -55,7 +56,7 @@ public class LoginController {
 
 	@Autowired
 	private MsgService msgService;
-	
+
 	/**
 	 * 发送手机验证码
 	 * 
@@ -70,6 +71,11 @@ public class LoginController {
 		Result result = Result.initResult();
 		logger.info("注册短信接口参数:" + JSON.toJSONString(param));
 		String mobile = param.get("mobile");
+		if (StringUtil.isNull(mobile)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("手机号 不能为空");
+			return result;
+		}
 		String codeType = param.get("codeType");
 		String deliveryId = param.get("deliveryId");
 		String code = VerificationCodeUtils.genRegCode();
@@ -92,6 +98,8 @@ public class LoginController {
 				return result;
 			}
 			cacheService.add("pwdCode" + deliveryId, code, Constants.VERIFY_CODE_EXPIRE_TIME);
+		} else if ("3".equals(codeType)) {
+			cacheService.add("smsCode" + mobile, code, Constants.VERIFY_CODE_EXPIRE_TIME);
 		}
 		// 发送短信验证码
 		msgService.sendMsg(mobile, code);
@@ -119,7 +127,7 @@ public class LoginController {
 			String wxOpenId = parameter.get("wxOpenId");
 			String regCode = cacheService.get("regCode" + wxOpenId);
 			logger.info("注册获取参数,wxOpenId==>" + wxOpenId + ",regCode==>" + regCode);
-			if ("123456".equals(smgCode)||smgCode.equals(regCode)) {
+			if ("123456".equals(smgCode) || smgCode.equals(regCode)) {
 				filterMask.setWxOpenId(wxOpenId);
 				// custmomerUserService.save(filterMask);
 				CustomerUserVo customerUser = custmomerUserService.getCustomerUserBySelective(filterMask);
@@ -128,8 +136,8 @@ public class LoginController {
 				customerUser.setUpdateTime(new Date());
 				// 更新客户信息
 				custmomerUserService.update(customerUser);
-				
-			}else {
+
+			} else {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}
 		} catch (RuntimeException e) {
@@ -141,7 +149,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		
+
 		return result;
 	}
 
@@ -179,10 +187,10 @@ public class LoginController {
 				return result;
 			}
 			String code = cacheService.get("regCode");
-			if ("123456".equals(verificationCode)||verificationCode.equals(code)) {
+			if ("123456".equals(verificationCode) || verificationCode.equals(code)) {
 				customerUserVo.setPhoneNumber(phoneNumber);
 				custmomerUserService.update(customerUserVo);
-			}else {
+			} else {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}
 		} catch (RuntimeException e) {
@@ -194,7 +202,7 @@ public class LoginController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		
+
 		return result;
 	}
 
@@ -205,6 +213,7 @@ public class LoginController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@SuppressWarnings("rawtypes")
 	@ApiOperation(value = "平台用户登录", notes = "样例参数{\n" + "  \"name\": \"test\",\n" + "  \"password\": \"password\"\n"
 			+ "}\\n返回参数字段说明:\\n")
 	// @ApiImplicitParams({
@@ -214,8 +223,9 @@ public class LoginController {
 	// paramType = "query", dataType = "String") })
 	@RequestMapping(value = "/adminUser/login", method = RequestMethod.POST)
 	@ResponseBody
-	public Result login(HttpServletRequest request, @RequestBody Map<String, String> param, AdminUserVo filterMask) {
-		Result result = Result.initResult();
+	public DataResult login(HttpServletRequest request, @RequestBody Map<String, String> param,
+			AdminUserVo filterMask) {
+		DataResult result = DataResult.initResult();
 
 		String name = param.get("name");
 		String password = param.get("password");
@@ -228,6 +238,9 @@ public class LoginController {
 			if (!password.equals(pwd)) {
 				result.setCode(Constants.FAILURE);
 				result.setMsg("密码不正确");
+			} else {
+				adminUserVo.setPassword("");
+				result.setData(adminUserVo);
 			}
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

@@ -80,6 +80,32 @@ public class OrderFinanceStatisticsController {
 		return result;
 	}
 
+	@RequestMapping(value = "/orderFinanceStatistics/exportOrderStatisticsList", method = RequestMethod.GET)
+	public void exportOrderStatistics(HttpServletRequest request, OrderFinanceStatisticsVo filterMask) {
+		PageResult result = PageResult.initResult();
+
+		String searchDate = request.getParameter("searchDate");
+		if (StringUtil.isNotNullAndNotEmpty(searchDate)) {
+			String date = searchDate + "%";
+			filterMask.setDate(date);
+		}
+
+		try {
+			List<OrderFinanceStatisticsVo> list = orderFinanceStatisticsService
+					.getOrderFinanceStatisticsPage(filterMask);
+			// 导出列表未实现
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+	}
+
 	/**
 	 * 新增
 	 * 

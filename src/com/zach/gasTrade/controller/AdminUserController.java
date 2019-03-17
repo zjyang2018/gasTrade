@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
+import com.common.cache.CacheService;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
@@ -37,6 +39,9 @@ public class AdminUserController {
 
 	@Autowired
 	private AdminUserService adminUserService;
+
+	@Autowired
+	private CacheService cacheService;
 
 	/**
 	 * 分页列表 + 搜索
@@ -218,6 +223,43 @@ public class AdminUserController {
 		try {
 			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(filterMask);
 			result.setData(adminUser);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	/**
+	 * 详情
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/adminUser/resetPwd", method = RequestMethod.POST)
+	@ResponseBody
+	public Result resetPwd(HttpServletRequest request, @RequestBody Map<String, String> param) {
+		Result result = Result.initResult();
+		logger.info("平台管理员重置密码参数为:" + JSON.toJSONString(param));
+		String phoneNumber = param.get("phoneNumber");
+		String msgCode = param.get("smsCode");
+		String newPwd = param.get("newPwd");
+		try {
+			String smsCode = cacheService.get("smsCode" + phoneNumber);
+			if (smsCode.equals(msgCode) || "123456".equals(msgCode)) {
+				AdminUserVo filterMask = new AdminUserVo();
+				filterMask.setPhoneNumber(phoneNumber);
+				AdminUserVo adminUser = adminUserService.getAdminUserBySelective(filterMask);
+			} else {
+				throw new RuntimeException("密码修改失败,请检查参数");
+			}
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

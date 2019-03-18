@@ -6,14 +6,18 @@
 
 package com.zach.gasTrade.controller;
 
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -112,7 +116,8 @@ public class OrderDeliveryRecordController {
 	 * @return PageResult
 	 */
 	@RequestMapping(value = "/orderDeliveryRecord/exportDeliveryCountList", method = RequestMethod.GET)
-	public void exportDeliveryCountList(HttpServletRequest request, @RequestBody Map<String, String> param) {
+	public void exportDeliveryCountList(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody Map<String, String> param) {
 		PageResult result = PageResult.initResult();
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -126,12 +131,33 @@ public class OrderDeliveryRecordController {
 			// 声明一个工作薄
 			HSSFWorkbook wb = new HSSFWorkbook();
 			HSSFRow row = ExcelUtils.constructDeliverStatisticsHeader(wb);
-			HSSFSheet sheet = wb.getSheet("订单统计");
+			HSSFSheet sheet = wb.getSheet("派送统计");
 			int index = 0;
 
 			for (OrderDeliveryCountDto bean : list) {
+				// 构造导出列表数据
+				row = sheet.createRow(index + 1);
+				row.createCell(0).setCellValue(index + 1);
+				row.createCell(1).setCellValue(new HSSFRichTextString(bean.getDeliveryName()));
 
+				row.createCell(2).setCellValue(new HSSFRichTextString(String.valueOf(bean.getDayCompleteTime())));
+
+				row.createCell(3).setCellValue(new HSSFRichTextString(String.valueOf(bean.getDayAcceptTime())));
+
+				row.createCell(4).setCellValue(new HSSFRichTextString(String.valueOf(bean.getMonthCompleteTime())));
+
+				row.createCell(5)
+						.setCellValue(new HSSFRichTextString(String.valueOf(bean.getAccumulatedCompleteTime())));
 			}
+
+			OutputStream output = response.getOutputStream();
+			String titleName = "派送统计";
+			String excelName = URLEncoder.encode(titleName, "utf-8");
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-disposition", "attachment; filename=" + excelName + ".xls");
+			response.flushBuffer();
+			wb.write(output);
+			output.close();
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

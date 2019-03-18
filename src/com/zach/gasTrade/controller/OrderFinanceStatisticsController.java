@@ -6,6 +6,8 @@
 
 package com.zach.gasTrade.controller;
 
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -150,6 +152,15 @@ public class OrderFinanceStatisticsController {
 					row.createCell(7).setCellValue(new HSSFRichTextString("0.00"));
 				}
 			}
+
+			OutputStream output = response.getOutputStream();
+			String titleName = "订单统计";
+			String excelName = URLEncoder.encode(titleName, "utf-8");
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-disposition", "attachment; filename=" + excelName + ".xls");
+			response.flushBuffer();
+			wb.write(output);
+			output.close();
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

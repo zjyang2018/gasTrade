@@ -33,6 +33,7 @@
      
 	  <!-- 自定义查询sql结果与java model映射-->
 	 <resultMap id="OrderDeliveryCountDtoResultMap" type="com.zach.gasTrade.dto.OrderDeliveryCountDto">
+	     <result property="deliveryId" column="id"/>
          <result property="deliveryName" column="delivery_name"/>
          <result property="dayCompleteTime" column="day_complete_time"/>
          <result property="dayAcceptTime" column="day_accept_time"/>
@@ -48,38 +49,124 @@
 	
     
     <!--派送统计-->
-   <select id="getDeliveryUserCount" resultType="java.lang.Integer" >                                             
+   <select id="getOrderDeliveryStatisticsCount" resultType="java.lang.Integer" >                                             
 	    select count(1)
-	    from order_info AS o
-        left join delivery_user AS d on o.allot_delivery_id=d.id
+	    from delivery_user ud
         <where>
-	    	   <if  test="deliveryName !=null ">
-		            and d.name = #{deliveryName}
-		       </if>
-		       and d.account_status = "10"
+            ud.account_status = "10"
+    	   <if  test="deliveryName !=null ">
+	            and ud.name = #{deliveryName}
+	       </if>
 		</where>
    </select> 
    
-   <!--派送统计list-->
-    <select id="getOrderDeliveryPage"  parameterType="java.util.Map" resultMap="OrderDeliveryCountDtoResultMap">   
-	      select d.name as delivery_name,dct.day_complete_time as day_complete_time,dat.day_accept_time as day_accept_time,mct.month_complete_time as month_complete_time,count(delivery_complete_time) as accumulated_complete_time 
-	      from order_info AS o
-          left join delivery_user AS d on o.allot_delivery_id=d.id
-          left join (select allot_delivery_id,count(delivery_complete_time) as day_complete_time from order_info where  datediff(delivery_complete_time ,Now()) = 0
-    group by allot_delivery_id)	AS dct on o.allot_delivery_id=dct.allot_delivery_id
-    	  left join (select allot_delivery_id,count(delivery_order_time) as day_accept_time from order_info where  datediff(delivery_order_time ,Now()) = 0
-    group by allot_delivery_id) as dat on o.allot_delivery_id=dat.allot_delivery_id
-    	  left join (select allot_delivery_id,count(delivery_complete_time) as month_complete_time from order_info where  DATE_FORMAT(delivery_complete_time, '%Y%m') = DATE_FORMAT( CURDATE( ) , '%Y%m' )
-    group by allot_delivery_id) as mct on o.allot_delivery_id=mct.allot_delivery_id
+   <!--派送统计list page-->
+    <select id="getOrderDeliveryStatisticsPage"  parameterType="java.util.Map" resultMap="OrderDeliveryCountDtoResultMap">   
+	    SELECT
+			ud.id,
+			ud. NAME,
+			IFNULL(tb1.day_complete_time, 0) day_complete_time,
+			IFNULL(tb2.day_accept_time, 0) day_accept_time,
+			IFNULL(tb3.month_complete_time, 0) month_complete_time,
+			IFNULL(tb4.accumulated_complete_time,0) accumulated_complete_time
+		FROM
+			delivery_user ud
+		LEFT JOIN 
+		(
+		select o.allot_delivery_id,
+						count(o.order_id) day_complete_time
+		from order_info o 
+			where DATE_FORMAT(o.delivery_complete_time,'%Y%m%d') = DATE_FORMAT(CURDATE(), '%Y%m%d') 
+						and o.order_status='60'
+		GROUP BY o.allot_delivery_id
+		) tb1 ON ud.id = tb1.allot_delivery_id
+		LEFT JOIN 
+		(
+		select o.allot_delivery_id,
+						count(o.order_id) day_accept_time
+		from order_info o 
+			where DATE_FORMAT(o.delivery_order_time,'%Y%m%d') = DATE_FORMAT(CURDATE(), '%Y%m%d')
+				and o.order_status='40'
+		GROUP BY o.allot_delivery_id
+		) tb2 ON ud.id = tb2.allot_delivery_id
+		LEFT JOIN 
+		(
+		select o.allot_delivery_id,
+						count(o.order_id) month_complete_time
+		from order_info o 
+			where DATE_FORMAT(o.delivery_complete_time,'%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')
+		GROUP BY o.allot_delivery_id
+		) tb3 ON ud.id = tb3.allot_delivery_id
+		LEFT JOIN 
+		(
+		select o.allot_delivery_id,
+						count(o.order_id) accumulated_complete_time
+		from order_info o 
+			where o.order_status='60'
+		GROUP BY o.allot_delivery_id
+		) tb4 ON ud.id = tb4.allot_delivery_id
     	<where>
-	    	   <if  test="deliveryName !=null ">
-		            and d.name = #{deliveryName}
-		       </if>
-		       and d.account_status = "10"
+    	   ud.account_status = "10"
+    	   <if  test="deliveryName !=null ">
+	            and ud.name = #{deliveryName}
+	       </if>
 		</where>
-    	group by o.allot_delivery_id
-	    order by o.update_time
+	    order by ud.create_time
 	    limit #{startIndex},#{pageSize}
+     </select>
+     
+     <!--派送统计list-->
+    <select id="getOrderDeliveryStatisticsList"  parameterType="java.util.Map" resultMap="OrderDeliveryCountDtoResultMap">   
+	    SELECT
+			ud.id,
+			ud. NAME,
+			IFNULL(tb1.day_complete_time, 0) day_complete_time,
+			IFNULL(tb2.day_accept_time, 0) day_accept_time,
+			IFNULL(tb3.month_complete_time, 0) month_complete_time,
+			IFNULL(tb4.accumulated_complete_time,0) accumulated_complete_time
+		FROM
+			delivery_user ud
+		LEFT JOIN 
+		(
+		select o.allot_delivery_id,
+						count(o.order_id) day_complete_time
+		from order_info o 
+			where DATE_FORMAT(o.delivery_complete_time,'%Y%m%d') = DATE_FORMAT(CURDATE(), '%Y%m%d') 
+						and o.order_status='60'
+		GROUP BY o.allot_delivery_id
+		) tb1 ON ud.id = tb1.allot_delivery_id
+		LEFT JOIN 
+		(
+		select o.allot_delivery_id,
+						count(o.order_id) day_accept_time
+		from order_info o 
+			where DATE_FORMAT(o.delivery_order_time,'%Y%m%d') = DATE_FORMAT(CURDATE(), '%Y%m%d')
+				and o.order_status='40'
+		GROUP BY o.allot_delivery_id
+		) tb2 ON ud.id = tb2.allot_delivery_id
+		LEFT JOIN 
+		(
+		select o.allot_delivery_id,
+						count(o.order_id) month_complete_time
+		from order_info o 
+			where DATE_FORMAT(o.delivery_complete_time,'%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')
+		GROUP BY o.allot_delivery_id
+		) tb3 ON ud.id = tb3.allot_delivery_id
+		LEFT JOIN 
+		(
+		select o.allot_delivery_id,
+						count(o.order_id) accumulated_complete_time
+		from order_info o 
+			where o.order_status='60'
+		GROUP BY o.allot_delivery_id
+		) tb4 ON ud.id = tb4.allot_delivery_id
+    	<where>
+    	   ud.account_status = "10"
+    	   <if  test="deliveryName !=null ">
+	            and ud.name = #{deliveryName}
+	       </if>
+		</where>
+	    order by ud.create_time
      </select>
      
 	

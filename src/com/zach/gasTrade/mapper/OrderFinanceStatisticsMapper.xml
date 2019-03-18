@@ -36,6 +36,12 @@
 	    	   <if  test="date !=null ">
 		            and date = #{date}
 		       </if>
+		       <if  test="startDate !=null ">
+		            and STR_TO_DATE(date,"%Y-%m-%d") &gt;= STR_TO_DATE(#{startDate},"%Y-%m-%d")
+		       </if>
+		       <if  test="endDate !=null ">
+		            and STR_TO_DATE(date,"%Y-%m-%d") &lt;= STR_TO_DATE(#{endDate},"%Y-%m-%d")
+		       </if>
 	    	   <if  test="buyerCount !=null ">
 		            and buyer_count = #{buyerCount}
 		       </if>
@@ -70,6 +76,12 @@
 		       </if>
 	    	   <if  test="date !=null ">
 		            and date = #{date}
+		       </if>
+		       <if  test="startDate !=null ">
+		            and STR_TO_DATE(date,"%Y-%m-%d") &gt;= STR_TO_DATE(#{startDate},"%Y-%m-%d")
+		       </if>
+		       <if  test="endDate !=null ">
+		            and STR_TO_DATE(date,"%Y-%m-%d") &lt;= STR_TO_DATE(#{endDate},"%Y-%m-%d")
 		       </if>
 	    	   <if  test="buyerCount !=null ">
 		            and buyer_count = #{buyerCount}
@@ -108,6 +120,12 @@
 		       </if>
 	    	   <if  test="date !=null ">
 		            and date = #{date}
+		       </if>
+		       <if  test="startDate !=null ">
+		            and STR_TO_DATE(date,"%Y-%m-%d") &gt;= STR_TO_DATE(#{startDate},"%Y-%m-%d")
+		       </if>
+		       <if  test="endDate !=null ">
+		            and STR_TO_DATE(date,"%Y-%m-%d") &lt;= STR_TO_DATE(#{endDate},"%Y-%m-%d")
 		       </if>
 	    	   <if  test="buyerCount !=null ">
 		            and buyer_count = #{buyerCount}

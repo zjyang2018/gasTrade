@@ -14,6 +14,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +29,7 @@ import com.common.utils.CalendarUtils;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
+import com.zach.gasTrade.common.ExcelUtils;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.OrderDeliveryCountDto;
@@ -81,8 +85,8 @@ public class OrderDeliveryRecordController {
 		map.put("startIndex", startIndex);
 		map.put("pageSize", pageSize);
 		try {
-			int total = orderDeliveryRecordService.getDeliveryUserCount(map);
-			List<OrderDeliveryCountDto> list = orderDeliveryRecordService.getOrderDeliveryPage(map);
+			int total = orderDeliveryRecordService.getOrderDeliveryStatisticsCount(map);
+			List<OrderDeliveryCountDto> list = orderDeliveryRecordService.getOrderDeliveryStatisticsPage(map);
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
@@ -98,6 +102,46 @@ public class OrderDeliveryRecordController {
 			logger.error("系统异常,请稍后重试", e);
 		}
 		return result;
+	}
+
+	/**
+	 * 派送统计列表导出
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return PageResult
+	 */
+	@RequestMapping(value = "/orderDeliveryRecord/exportDeliveryCountList", method = RequestMethod.GET)
+	public void exportDeliveryCountList(HttpServletRequest request, @RequestBody Map<String, String> param) {
+		PageResult result = PageResult.initResult();
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		String name = param.get("deliveryName");
+		if (StringUtil.isNotNullAndNotEmpty(name)) {
+			String deliveryName = name + "%";
+			map.put("deliveryName", deliveryName);
+		}
+		try {
+			List<OrderDeliveryCountDto> list = orderDeliveryRecordService.getOrderDeliveryStatisticsList(map);
+			// 声明一个工作薄
+			HSSFWorkbook wb = new HSSFWorkbook();
+			HSSFRow row = ExcelUtils.constructDeliverStatisticsHeader(wb);
+			HSSFSheet sheet = wb.getSheet("订单统计");
+			int index = 0;
+
+			for (OrderDeliveryCountDto bean : list) {
+
+			}
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
 	}
 
 	/**

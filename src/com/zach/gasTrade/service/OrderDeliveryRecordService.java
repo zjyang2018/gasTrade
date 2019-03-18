@@ -15,18 +15,20 @@ import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
 
 public interface OrderDeliveryRecordService {
 	/**
-     * 派送监控总数
-     * @param orderDeliveryRecordVo
-     * @return
-     */
-	 public int getDeliveryMonitorCount(OrderDeliveryRecordVo orderDeliveryRecordVo);
-	 	 
-	 /**
-     * 派送监控分页列表
-     * @param orderDeliveryRecordVo
-     * @return
-     */
-	 public List<DeliveryMonitorDto> getDeliveryMonitorPage(OrderDeliveryRecordVo orderDeliveryRecordVo);
+	 * 派送监控总数
+	 * 
+	 * @param orderDeliveryRecordVo
+	 * @return
+	 */
+	public int getDeliveryMonitorCount(OrderDeliveryRecordVo orderDeliveryRecordVo);
+
+	/**
+	 * 派送监控分页列表
+	 * 
+	 * @param orderDeliveryRecordVo
+	 * @return
+	 */
+	public List<DeliveryMonitorDto> getDeliveryMonitorPage(OrderDeliveryRecordVo orderDeliveryRecordVo);
 
 	/**
 	 * 根据条件查询一条信息
@@ -63,7 +65,7 @@ public interface OrderDeliveryRecordService {
 	 * @param map
 	 * @return
 	 */
-	public int getDeliveryUserCount(Map<String, Object> map);
+	public int getOrderDeliveryStatisticsCount(Map<String, Object> map);
 
 	/**
 	 * 派送统计分页列表
@@ -71,6 +73,14 @@ public interface OrderDeliveryRecordService {
 	 * @param map
 	 * @return
 	 */
-	public List<OrderDeliveryCountDto> getOrderDeliveryPage(Map<String, Object> map);
+	public List<OrderDeliveryCountDto> getOrderDeliveryStatisticsPage(Map<String, Object> map);
+
+	/**
+	 * 派送统计列表
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public List<OrderDeliveryCountDto> getOrderDeliveryStatisticsList(Map<String, Object> map);
 
 }

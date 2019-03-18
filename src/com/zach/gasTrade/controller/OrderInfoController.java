@@ -212,7 +212,7 @@ public class OrderInfoController {
 		if (StringUtil.isNotNullAndNotEmpty(startTime)) {
 			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
 			if (startTime.indexOf(" ") != -1) {
-				startTime = startTime.substring(0, startTime.indexOf(" "));
+				startTime = startTime.substring(0, 10);
 			}
 			map.put("startDate", startTime);
 		}
@@ -220,7 +220,7 @@ public class OrderInfoController {
 		if (StringUtil.isNotNullAndNotEmpty(endTime)) {
 			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
 			if (endTime.indexOf(" ") != -1) {
-				endTime = endTime.substring(0, endTime.indexOf(" "));
+				endTime = endTime.substring(0, 10);
 			}
 			map.put("endDate", endTime);
 		}
@@ -228,6 +228,8 @@ public class OrderInfoController {
 		int startIndex = (pageNum - 1) * pageSize;
 		map.put("startIndex", startIndex);
 		map.put("pageSize", pageSize);
+
+		logger.info("派送监控接口处理参数:" + JSON.toJSONString(map));
 
 		try {
 			int total = orderInfoService.getDeliveryMonitorCount(map);

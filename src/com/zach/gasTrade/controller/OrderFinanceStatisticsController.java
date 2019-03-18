@@ -10,8 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.ExcelUtils;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.OrderFinanceStatisticsService;
@@ -51,10 +57,14 @@ public class OrderFinanceStatisticsController {
 
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
-		String searchDate = param.get("searchDate");
-		if (StringUtil.isNotNullAndNotEmpty(searchDate)) {
-			String date = searchDate + "%";
-			filterMask.setDate(date);
+		String searchStartDate = param.get("searchStartDate");
+		String searchEndDate = request.getParameter("searchEndDate");
+		if (StringUtil.isNotNullAndNotEmpty(searchStartDate)) {
+			// filterMask.setDate(searchDate.substring(0, 10));
+			filterMask.setStartDate(searchStartDate.substring(0, 10));
+		}
+		if (StringUtil.isNotNullAndNotEmpty(searchEndDate)) {
+			filterMask.setEndDate(searchEndDate.substring(0, 10));
 		}
 
 		filterMask.setPage(pageNum);
@@ -81,19 +91,65 @@ public class OrderFinanceStatisticsController {
 	}
 
 	@RequestMapping(value = "/orderFinanceStatistics/exportOrderStatisticsList", method = RequestMethod.GET)
-	public void exportOrderStatistics(HttpServletRequest request, OrderFinanceStatisticsVo filterMask) {
+	public void exportOrderStatistics(HttpServletRequest request, HttpServletResponse response,
+			OrderFinanceStatisticsVo filterMask) {
 		PageResult result = PageResult.initResult();
 
-		String searchDate = request.getParameter("searchDate");
-		if (StringUtil.isNotNullAndNotEmpty(searchDate)) {
-			String date = searchDate + "%";
-			filterMask.setDate(date);
+		String searchStartDate = request.getParameter("searchStartDate");
+		String searchEndDate = request.getParameter("searchEndDate");
+		if (StringUtil.isNotNullAndNotEmpty(searchStartDate)) {
+			// filterMask.setDate(searchDate.substring(0, 10));
+			filterMask.setStartDate(searchStartDate.substring(0, 10));
+		}
+		if (StringUtil.isNotNullAndNotEmpty(searchEndDate)) {
+			filterMask.setEndDate(searchEndDate.substring(0, 10));
 		}
 
 		try {
 			List<OrderFinanceStatisticsVo> list = orderFinanceStatisticsService
-					.getOrderFinanceStatisticsPage(filterMask);
-			// 导出列表未实现
+					.getOrderFinanceStatisticsList(filterMask);
+			// 声明一个工作薄
+			HSSFWorkbook wb = new HSSFWorkbook();
+			HSSFRow row = ExcelUtils.constructOrderStatisticsHeader(wb);
+			HSSFSheet sheet = wb.getSheet("订单统计");
+			int index = 0;
+			for (OrderFinanceStatisticsVo bean : list) {
+				// 构造导出列表数据
+				row = sheet.createRow(index + 1);
+				row.createCell(0).setCellValue(index + 1);
+				row.createCell(1).setCellValue(new HSSFRichTextString(bean.getDate()));
+				if (bean.getBuyerCount() != null) {
+					row.createCell(2).setCellValue(new HSSFRichTextString(String.valueOf(bean.getBuyerCount())));
+				} else {
+					row.createCell(2).setCellValue(new HSSFRichTextString("0"));
+				}
+				if (bean.getOrderCount() != null) {
+					row.createCell(3).setCellValue(new HSSFRichTextString(String.valueOf(bean.getOrderCount())));
+				} else {
+					row.createCell(3).setCellValue(new HSSFRichTextString("0"));
+				}
+				if (bean.getPayOrderCount() != null) {
+					row.createCell(4).setCellValue(new HSSFRichTextString(String.valueOf(bean.getPayOrderCount())));
+				} else {
+					row.createCell(4).setCellValue(new HSSFRichTextString("0"));
+				}
+				if (bean.getDeliveryOrderCount() != null) {
+					row.createCell(5)
+							.setCellValue(new HSSFRichTextString(String.valueOf(bean.getDeliveryOrderCount())));
+				} else {
+					row.createCell(5).setCellValue(new HSSFRichTextString("0"));
+				}
+				if (bean.getAvgAmount() != null) {
+					row.createCell(6).setCellValue(new HSSFRichTextString(bean.getAvgAmount().toPlainString()));
+				} else {
+					row.createCell(6).setCellValue(new HSSFRichTextString("0.00"));
+				}
+				if (bean.getOrderAmount() != null) {
+					row.createCell(7).setCellValue(new HSSFRichTextString(bean.getOrderAmount().toPlainString()));
+				} else {
+					row.createCell(7).setCellValue(new HSSFRichTextString("0.00"));
+				}
+			}
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

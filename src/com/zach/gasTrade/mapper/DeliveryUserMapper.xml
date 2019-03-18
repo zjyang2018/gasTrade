@@ -137,7 +137,7 @@
 	    </where>
      </select>
      
-   <select id="getDeliveryUserList"  parameterType="java.util.Map" resultMap="DeliveryUserResultMap">   
+   <select id="selectDeliveryUserList"  parameterType="java.util.Map" resultMap="DeliveryUserResultMap">   
           select                                             
 	      	id ,name,phone_number ,login_name ,address,account_status ,work_status
 	      from delivery_user
@@ -147,7 +147,6 @@
 	      		or phone_number = #{selectParam}
 	      		or login_name = #{selectParam} )
 		    </if>
-	    </where>
      </select>
    
      <select id="getDeliveryUserPage"  parameterType="java.util.Map" resultMap="DeliveryUserResultMap">   

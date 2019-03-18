@@ -207,5 +207,12 @@
 		 from delivery_location_history as b where not exists(select 1 from delivery_location_history c where c.delivery_user_id= b.delivery_user_id
 		and b.create_time &lt; c.create_time)
 	</select>
+	
+	<select id="queryAllDeliveryNewLocationList"  resultType="com.zach.gasTrade.dto.DeliveryNewLocationDto">
+		select
+		<include refid="DeliveryLocationHistoryQuery" />
+		 from delivery_location_history as b where not exists(select 1 from delivery_location_history c where c.delivery_user_id= b.delivery_user_id
+		and b.create_time &lt; c.create_time)
+	</select>
 </mapper>
 

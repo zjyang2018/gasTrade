@@ -6,6 +6,9 @@
 
 package com.zach.gasTrade.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -33,14 +36,13 @@ public class DeliveryLocationHistoryController {
 	private DeliveryLocationHistoryService deliveryLocationHistoryService;
 
 	/**
-	 * 鏌ヨ
+	 * 根据条件查询
 	 * 
 	 * @param country
 	 * @param result
 	 * @return
 	 */
-	@ApiOperation(value = "鏌ヨ娲鹃�佸憳鍦板潃", notes = "鏍蜂緥鍙傛暟{\n" + "  \"deliveryUserId\": \"6666666\"\n"
-			+ "}\\n杩斿洖鍙傛暟瀛楁璇存槑:\\n")
+	@ApiOperation(value = "历史位置查询", notes = "请求参数说明{\n" + "  \"deliveryUserId\": \"6666666\"\n" + "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryLocationHistory/query")
 	@ResponseBody
 	public Result query(HttpServletRequest request, @RequestBody DeliveryLocationHistoryVo filterMask)
@@ -48,7 +50,7 @@ public class DeliveryLocationHistoryController {
 		DataResult result = DataResult.initResult();
 
 		try {
-			// 鏌ヨ
+			// 查询
 			DeliveryLocationHistoryVo deliveryLocationHistory = deliveryLocationHistoryService
 					.getDeliveryLocationHistoryBySelective(filterMask);
 			result.setData(deliveryLocationHistory);
@@ -67,13 +69,46 @@ public class DeliveryLocationHistoryController {
 	}
 
 	/**
-	 * 鏂板
+	 * 获取所有派送员最新记录列表
 	 * 
 	 * @param country
 	 * @param result
 	 * @return
 	 */
-	@ApiOperation(value = "淇濆瓨娲鹃�佸憳鍦板潃", notes = "")
+	@ApiOperation(value = "获取所有派送员最新记录列表", notes = "请求参数说明:\\n返回参数字段说明:\\n")
+	@RequestMapping(value = "/deliveryLocationHistory/allDeliveryLocationList")
+	@ResponseBody
+	public DataResult queryAllDeliveryLocationList(HttpServletRequest request, Map<String, Object> filterMask)
+			throws Exception {
+		DataResult result = DataResult.initResult();
+
+		try {
+			// 查询
+			List<DeliveryLocationHistoryVo> list = deliveryLocationHistoryService
+					.queryAllDeliveryLocationList(filterMask);
+
+			result.setData(list);
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+
+	}
+
+	/**
+	 * 保存
+	 * 
+	 * @param country
+	 * @param result
+	 * @return
+	 */
+	@ApiOperation(value = "位置信息添加接口", notes = "")
 	@RequestMapping(value = "/deliveryLocationHistory/save")
 	@ResponseBody
 	public Result save(HttpServletRequest request, @RequestBody DeliveryLocationHistoryVo filterMask) {
@@ -97,20 +132,20 @@ public class DeliveryLocationHistoryController {
 	}
 
 	/**
-	 * 淇敼
+	 * 修改
 	 * 
 	 * @param country
 	 * @param result
 	 * @return
 	 */
-	@ApiOperation(value = "鏇存柊娲鹃�佸憳鍦板潃", notes = "鏍蜂緥鍙傛暟")
+	@ApiOperation(value = "位置更新接口", notes = "请求参数说明")
 	@RequestMapping(value = "/deliveryLocationHistory/edit")
 	@ResponseBody
 	public Result edit(HttpServletRequest request, @RequestBody DeliveryLocationHistoryVo filterMask) {
 		Result result = Result.initResult();
 
 		try {
-			// 鏇存柊
+			// 位置更新
 			deliveryLocationHistoryService.update(filterMask);
 
 		} catch (RuntimeException e) {
@@ -126,19 +161,18 @@ public class DeliveryLocationHistoryController {
 	}
 
 	/**
-	 * 鍒犻櫎
+	 * 删除
 	 * 
 	 * @return
 	 */
-	@ApiOperation(value = "鍒犻櫎娲鹃�佸憳鍦板潃", notes = "鏍蜂緥鍙傛暟{\n" + "  \"deliveryUserId\": \"6666666\"\n"
-			+ "}\\n杩斿洖鍙傛暟瀛楁璇存槑:\\n")
+	@ApiOperation(value = "位置信息删除接口", notes = "请求参数说明{\n" + "  \"deliveryUserId\": \"6666666\"\n" + "}\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryLocationHistory/delete")
 	@ResponseBody
 	public Result delete(HttpServletRequest request, DeliveryLocationHistoryVo filterMask) {
 		Result result = Result.initResult();
 
 		try {
-			// 鍒犻櫎
+			// 删除
 			deliveryLocationHistoryService.delete(filterMask);
 
 		} catch (RuntimeException e) {

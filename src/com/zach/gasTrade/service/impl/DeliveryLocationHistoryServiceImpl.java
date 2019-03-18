@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.common.seq.SerialGenerator;
 import com.zach.gasTrade.dao.DeliveryLocationHistoryDao;
+import com.zach.gasTrade.dto.DeliveryNewLocationDto;
 import com.zach.gasTrade.service.DeliveryLocationHistoryService;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 
@@ -102,7 +103,7 @@ public class DeliveryLocationHistoryServiceImpl implements DeliveryLocationHisto
 	}
 
 	@Override
-	public List<DeliveryLocationHistoryVo> queryAllDeliveryLocationList(Map<String, Object> param) {
+	public List<DeliveryNewLocationDto> queryAllDeliveryLocationList(Map<String, Object> param) {
 		// TODO Auto-generated method stub
 		return deliveryLocationHistoryDao.queryAllDeliveryNewLocationList(param);
 	}

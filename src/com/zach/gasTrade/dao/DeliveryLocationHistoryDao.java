@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
+import com.zach.gasTrade.dto.DeliveryNewLocationDto;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 
 @Repository("deliveryLocationHistoryDao")
@@ -84,6 +85,6 @@ public interface DeliveryLocationHistoryDao {
 	 * 
 	 * @return
 	 */
-	public List<DeliveryLocationHistoryVo> queryAllDeliveryNewLocationList(Map<String, Object> param);
+	public List<DeliveryNewLocationDto> queryAllDeliveryNewLocationList(Map<String, Object> param);
 
 }

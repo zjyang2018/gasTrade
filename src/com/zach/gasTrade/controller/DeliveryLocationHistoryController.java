@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,11 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.Result;
+import com.zach.gasTrade.dto.DeliveryNewLocationDto;
 import com.zach.gasTrade.service.DeliveryLocationHistoryService;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 
@@ -69,14 +72,14 @@ public class DeliveryLocationHistoryController {
 	}
 
 	/**
-	 * 获取所有派送员最新记录列表
+	 * 获取所有派送员最新位置
 	 * 
 	 * @param country
 	 * @param result
 	 * @return
 	 */
-	@ApiOperation(value = "获取所有派送员最新记录列表", notes = "请求参数说明:\\n返回参数字段说明:\\n")
-	@RequestMapping(value = "/deliveryLocationHistory/allDeliveryLocationList")
+	@ApiOperation(value = "获取所有派送员最新位置", notes = "请求参数说明:\\n返回参数字段说明:\\n")
+	@RequestMapping(value = "/deliveryLocationHistory/allDeliveryLocationList", method = RequestMethod.GET)
 	@ResponseBody
 	public DataResult queryAllDeliveryLocationList(HttpServletRequest request, Map<String, Object> filterMask)
 			throws Exception {
@@ -84,10 +87,23 @@ public class DeliveryLocationHistoryController {
 
 		try {
 			// 查询
-			List<DeliveryLocationHistoryVo> list = deliveryLocationHistoryService
-					.queryAllDeliveryLocationList(filterMask);
+			List<DeliveryNewLocationDto> list = deliveryLocationHistoryService.queryAllDeliveryLocationList(filterMask);
+			int workingCount = 0;
+			int freeCount = 0;
+			for (DeliveryNewLocationDto bean : list) {
+				if ("10".equals(bean.getWorkStatus())) {
+					workingCount++;
+				} else if ("20".equals(bean.getWorkStatus())) {
+					freeCount++;
+					bean.setCustomerAddress("暂无");
+				}
+			}
+			Map<String, Object> resultData = new HashMap<String, Object>();
+			resultData.put("list", list);
+			resultData.put("workingCount", workingCount);
+			resultData.put("freeCount", freeCount);
 
-			result.setData(list);
+			result.setData(resultData);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

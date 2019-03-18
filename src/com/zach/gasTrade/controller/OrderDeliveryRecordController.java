@@ -123,8 +123,7 @@ public class OrderDeliveryRecordController {
 
 		String name = param.get("deliveryName");
 		if (StringUtil.isNotNullAndNotEmpty(name)) {
-			String deliveryName = name + "%";
-			map.put("deliveryName", deliveryName);
+			map.put("deliveryName", name);
 		}
 		try {
 			List<OrderDeliveryCountDto> list = orderDeliveryRecordService.getOrderDeliveryStatisticsList(map);

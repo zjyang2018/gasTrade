@@ -10,101 +10,76 @@ public class DeliveryNewLocationDto extends PaginatedHelper implements java.io.S
 	private static final long serialVersionUID = 1610618394195985338L;
 	// 属性
 	/**
-	 * orderId
+	 * deliveryId
 	 */
-	private java.lang.String orderId;
+	private String deliveryId;
 	/**
-	 * productName
+	 * 派送员名称
 	 */
-	private java.lang.String productName;
+	private String deliveryName;
 	/**
-	 * 库存数量
+	 * 工作状态
 	 */
-	private java.lang.Integer stockQty;
+	private String workStatus;
 	/**
-	 * 客户姓名
+	 * 当前位置经纬度
 	 */
-	private java.lang.String customerName;
+	private String currentLoaction;
 	/**
-	 * 客户电话
+	 * 当前位置地址
 	 */
-	private java.lang.String customerPhoneNumber;
+	private String currentLoactionAddress;
 	/**
-	 * 客户地址
+	 * 客户地址(目的地)
 	 */
-	private java.lang.String customerAddress;
-	/**
-	 * 商家地址
-	 */
-	private java.lang.String productAddress;
-	/**
-	 * 备注
-	 */
-	private java.lang.String remark;
+	private String customerAddress;
 
-	// getter setter方法
-	public java.lang.String getOrderId() {
-		return orderId;
+	public String getDeliveryId() {
+		return deliveryId;
 	}
 
-	public void setOrderId(java.lang.String orderId) {
-		this.orderId = orderId;
+	public void setDeliveryId(String deliveryId) {
+		this.deliveryId = deliveryId;
 	}
 
-	public java.lang.String getProductName() {
-		return productName;
+	public String getDeliveryName() {
+		return deliveryName;
 	}
 
-	public void setProductName(java.lang.String productName) {
-		this.productName = productName;
+	public void setDeliveryName(String deliveryName) {
+		this.deliveryName = deliveryName;
 	}
 
-	public java.lang.Integer getStockQty() {
-		return stockQty;
+	public String getWorkStatus() {
+		return workStatus;
 	}
 
-	public void setStockQty(java.lang.Integer stockQty) {
-		this.stockQty = stockQty;
+	public void setWorkStatus(String workStatus) {
+		this.workStatus = workStatus;
 	}
 
-	public java.lang.String getCustomerName() {
-		return customerName;
+	public String getCurrentLoaction() {
+		return currentLoaction;
 	}
 
-	public void setCustomerName(java.lang.String customerName) {
-		this.customerName = customerName;
+	public void setCurrentLoaction(String currentLoaction) {
+		this.currentLoaction = currentLoaction;
 	}
 
-	public java.lang.String getCustomerPhoneNumber() {
-		return customerPhoneNumber;
+	public String getCurrentLoactionAddress() {
+		return currentLoactionAddress;
 	}
 
-	public void setCustomerPhoneNumber(java.lang.String customerPhoneNumber) {
-		this.customerPhoneNumber = customerPhoneNumber;
+	public void setCurrentLoactionAddress(String currentLoactionAddress) {
+		this.currentLoactionAddress = currentLoactionAddress;
 	}
 
-	public java.lang.String getCustomerAddress() {
+	public String getCustomerAddress() {
 		return customerAddress;
 	}
 
-	public void setCustomerAddress(java.lang.String customerAddress) {
+	public void setCustomerAddress(String customerAddress) {
 		this.customerAddress = customerAddress;
-	}
-
-	public java.lang.String getProductAddress() {
-		return productAddress;
-	}
-
-	public void setProductAddress(java.lang.String productAddress) {
-		this.productAddress = productAddress;
-	}
-
-	public java.lang.String getRemark() {
-		return remark;
-	}
-
-	public void setRemark(java.lang.String remark) {
-		this.remark = remark;
 	}
 
 }

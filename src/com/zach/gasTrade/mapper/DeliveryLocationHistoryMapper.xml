@@ -210,8 +210,14 @@
 	
 	<select id="queryAllDeliveryNewLocationList"  resultType="com.zach.gasTrade.dto.DeliveryNewLocationDto">
 		select
-		<include refid="DeliveryLocationHistoryQuery" />
-		 from delivery_location_history as b where not exists(select 1 from delivery_location_history c where c.delivery_user_id= b.delivery_user_id
+			b.delivery_user_id deliveryId,
+			b.location currentLoaction,
+			d.work_status workStatus,
+			o.customer_address  customerAddress
+		 from delivery_location_history as b
+		 	join delivery_user d on b.delivery_user_id = d.id
+		 	left join order_info o on b.delivery_user_id = o.allot_delivery_id and o.order_status in ('40','50')
+		  where not exists(select 1 from delivery_location_history c where c.delivery_user_id= b.delivery_user_id
 		and b.create_time &lt; c.create_time)
 	</select>
 </mapper>

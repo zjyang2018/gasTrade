@@ -9,6 +9,7 @@ package com.zach.gasTrade.service;
 import java.util.List;
 import java.util.Map;
 
+import com.zach.gasTrade.dto.DeliveryNewLocationDto;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 
 public interface DeliveryLocationHistoryService {
@@ -44,7 +45,7 @@ public interface DeliveryLocationHistoryService {
 	 * @param deliveryLocationHistoryVo
 	 * @return
 	 */
-	public List<DeliveryLocationHistoryVo> queryAllDeliveryLocationList(Map<String, Object> param);
+	public List<DeliveryNewLocationDto> queryAllDeliveryLocationList(Map<String, Object> param);
 
 	/**
 	 * 根据条件查询一条信息

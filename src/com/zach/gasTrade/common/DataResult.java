@@ -1,8 +1,8 @@
 package com.zach.gasTrade.common;
 
-public class DataResult<T> extends Result {
+public class DataResult extends Result {
 
-	private T data;
+	private Object data;
 
 	public DataResult() {
 
@@ -20,7 +20,7 @@ public class DataResult<T> extends Result {
 		return data;
 	}
 
-	public void setData(T data) {
+	public void setData(Object data) {
 		this.data = data;
 	}
 

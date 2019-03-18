@@ -257,6 +257,12 @@ public class AdminUserController {
 				AdminUserVo filterMask = new AdminUserVo();
 				filterMask.setPhoneNumber(phoneNumber);
 				AdminUserVo adminUser = adminUserService.getAdminUserBySelective(filterMask);
+				if (adminUser == null) {
+					throw new RuntimeException("该手机对应的账号不存在," + phoneNumber);
+				}
+
+				adminUser.setPassword(newPwd);
+				adminUserService.update(adminUser);
 			} else {
 				throw new RuntimeException("密码修改失败,请检查参数");
 			}

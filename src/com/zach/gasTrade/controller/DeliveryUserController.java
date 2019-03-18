@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
+import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.DeliveryUserDto;
@@ -148,6 +149,44 @@ public class DeliveryUserController {
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
 			result.setPageSize(pageSize);
+			result.setData(list);
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	/**
+	 * 分页列表 + 搜索(人员管理)
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return PageResult
+	 */
+	@ApiOperation(value = "派送员管理", notes = "请求参数说明||searchParam:搜索参数\\n返回参数字段说明:\\n")
+	@RequestMapping(value = "/deliveryUser/queryDeliveryUserList", method = RequestMethod.GET)
+	@ResponseBody
+	public DataResult queryDeliveryUserList(HttpServletRequest request, DeliveryUserVo filterMask) {
+		DataResult result = DataResult.initResult();
+		try {
+			String searchParam = request.getParameter("searchParam");
+
+			Map<String, Object> map = new HashMap<String, Object>();
+
+			if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
+				String selectParam = searchParam.trim();
+				// 按性名、手机号、登录名搜索
+				map.put("selectParam", selectParam);
+			}
+
+			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserList(map);
+
 			result.setData(list);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

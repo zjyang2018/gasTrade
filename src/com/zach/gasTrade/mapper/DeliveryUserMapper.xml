@@ -136,6 +136,19 @@
 		       </if>
 	    </where>
      </select>
+     
+   <select id="getDeliveryUserList"  parameterType="java.util.Map" resultMap="DeliveryUserResultMap">   
+          select                                             
+	      	id ,name,phone_number ,login_name ,address,account_status ,work_status
+	      from delivery_user
+	      	where account_status='10'
+	      	<if  test="selectParam !=null ">
+	          and (name like  CONCAT('%',#{selectParam},'%')
+	      		or phone_number = #{selectParam}
+	      		or login_name = #{selectParam} )
+		    </if>
+	    </where>
+     </select>
    
      <select id="getDeliveryUserPage"  parameterType="java.util.Map" resultMap="DeliveryUserResultMap">   
           select                                             

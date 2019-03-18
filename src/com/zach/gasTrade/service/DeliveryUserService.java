@@ -12,53 +12,66 @@ import java.util.Map;
 import com.zach.gasTrade.dto.DeliveryUserDto;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 
-public interface DeliveryUserService{
+public interface DeliveryUserService {
 	/**
-     * 总数
-     * @param map
-     * @return
-     */
-	 public int getDeliveryUserCount(Map<String,Object> map);
-	 
-	 /**
-     * 分页列表
-     * @param map
-     * @return
-     */
-	 public List<DeliveryUserVo> getDeliveryUserPage(Map<String,Object> map);
-	 
-	 /**
-     * 列表
-     * @param deliveryUserVo
-     * @return
-     */
-	 public List<DeliveryUserVo> getDeliveryUserList(DeliveryUserVo deliveryUserVo);
-	 
-	 /**
-     * 根据条件查询一条信息
-     * @param deliveryUserVo
-     * @return
-     */
-	 public DeliveryUserVo getDeliveryUserBySelective(DeliveryUserVo deliveryUserVo);
-	 
-	 /**
+	 * 总数
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public int getDeliveryUserCount(Map<String, Object> map);
+
+	/**
+	 * 分页列表
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public List<DeliveryUserVo> getDeliveryUserPage(Map<String, Object> map);
+
+	/**
+	 * 列表
+	 * 
+	 * @param deliveryUserVo
+	 * @return
+	 */
+	public List<DeliveryUserVo> getDeliveryUserList(DeliveryUserVo deliveryUserVo);
+
+	/**
+	 * 列表
+	 * 
+	 * @param deliveryUserVo
+	 * @return
+	 */
+	public List<DeliveryUserVo> getDeliveryUserList(Map<String, Object> map);
+
+	/**
+	 * 根据条件查询一条信息
+	 * 
+	 * @param deliveryUserVo
+	 * @return
+	 */
+	public DeliveryUserVo getDeliveryUserBySelective(DeliveryUserVo deliveryUserVo);
+
+	/**
 	 * 保存
+	 * 
 	 * @param deliveryUserVo
 	 */
-    public int save(DeliveryUserDto deliveryUserDto);
-    
-    /**
+	public int save(DeliveryUserDto deliveryUserDto);
+
+	/**
 	 * 更新
+	 * 
 	 * @param deliveryUserVo
 	 */
-    public int update(DeliveryUserVo deliveryUserVo);
-    
-    /**
+	public int update(DeliveryUserVo deliveryUserVo);
+
+	/**
 	 * 删除
+	 * 
 	 * @param deliveryUserVo
 	 */
-    public int delete(DeliveryUserVo deliveryUserVo);
-    
+	public int delete(DeliveryUserVo deliveryUserVo);
 
 }
-

@@ -31,6 +31,7 @@ import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.vo.AdminUserVo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "平台用户相关api")
 @Controller
@@ -107,24 +108,22 @@ public class AdminUserController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "平台管理员新增", notes = "请求参数说明||name:员工姓名,sex:性别 ,workStatus:在职状态:10-在职,20-离职,phoneNumber:手机号码,"
+			+ "idcardNo:身份证号码,address:联系地址,loginName:登录账号,initialPassword:初始密码,comfirmPassword:确认密码,remark:备注\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/adminUser/save", method = RequestMethod.POST)
 	@ResponseBody
 	public Result save(HttpServletRequest request, @RequestBody AdminUserDto filterMask) {
 		Result result = Result.initResult();
-
+		logger.info("平台管理员新增接口参数:" + JSON.toJSONString(filterMask));
+		try {
 		String initialPassword = filterMask.getInitialPassword();
 		String confirmPassword = filterMask.getComfirmPassword();
+		String address = filterMask.getAddress();
 		if (!initialPassword.equals(confirmPassword)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("确认密码输入不正确");
-			return result;
+			throw new RuntimeException("两次密码输入不一致，请重新输入");
 		}
-
-		filterMask.setPassword(initialPassword);
-
-		try {
+		filterMask.setPassword(initialPassword);	
 			adminUserService.save(filterMask);
-
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

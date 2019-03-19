@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.controller;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,10 @@ import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.DeliveryUserDto;
 import com.zach.gasTrade.service.DeliveryUserService;
+import com.zach.gasTrade.service.OrderInfoService;
+import com.zach.gasTrade.service.ProductService;
 import com.zach.gasTrade.vo.DeliveryUserVo;
+import com.zach.gasTrade.vo.OrderInfoVo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,6 +44,12 @@ public class DeliveryUserController {
 
 	@Autowired
 	private DeliveryUserService deliveryUserService;
+
+	@Autowired
+	private OrderInfoService orderInfoService;
+
+	@Autowired
+	private ProductService prodcutService;
 
 	/**
 	 * 分页列表 + 搜索
@@ -299,6 +309,39 @@ public class DeliveryUserController {
 			// 更新数据库
 			deliveryUserService.update(filterMask);
 
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	/**
+	 * 确认接单
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@ApiOperation(value = "确认接单", notes = "请求参数说明||orderId:订单编号,allotDeliveryId:派送员编号\\n返回参数字段说明:\\n")
+	@RequestMapping(value = "/deliveryUser/accept_order", method = RequestMethod.POST)
+	@ResponseBody
+	public Result accpetOrder(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
+		Result result = Result.initResult();
+		logger.info("确认接单接口参数:" + JSON.toJSONString(filterMask));
+		try {
+			if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+				throw new RuntimeException("订单编号不能为空");
+			}
+			filterMask.setDeliveryOrderTime(new Date());
+			// 订单状态设为已接单
+			filterMask.setOrderStatus("40");
+			orderInfoService.update(filterMask);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

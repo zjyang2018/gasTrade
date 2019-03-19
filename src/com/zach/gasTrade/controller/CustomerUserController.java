@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.common.utils.MapHelper;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
@@ -106,6 +108,12 @@ public class CustomerUserController {
 		Result result = Result.initResult();
 		logger.info("用户添加接口参数:" + JSON.toJSONString(filterMask));
 		try {
+			String address = filterMask.getAddress();
+			JSONObject jsonObject = MapHelper.addressToPoint(address);
+			if(jsonObject==null||jsonObject.getInteger("confidence")<16) {
+				throw new RuntimeException("地址输入详细，请重新输入");
+			}
+		
 			customerUserService.save(filterMask);
 
 		} catch (RuntimeException e) {
@@ -137,6 +145,12 @@ public class CustomerUserController {
 
 			if (StringUtil.isNullOrEmpty(filterMask.getId())) {
 				throw new RuntimeException("用户编号不能为空");
+			}
+			
+			String address = filterMask.getAddress();
+			JSONObject jsonObject = MapHelper.addressToPoint(address);
+			if(jsonObject==null||jsonObject.getInteger("confidence")<16) {
+				throw new RuntimeException("地址输入详细，请重新输入");
 			}
 
 			customerUserService.update(filterMask);

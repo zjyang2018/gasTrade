@@ -297,8 +297,8 @@ public class OrderInfoController {
 		try {
 			String payUrl = orderInfoService.buy(filterMask);
 			logger.info("支付请求payUrl==>" + payUrl);
-			response.sendRedirect(payUrl);
-			// result.setData(orderInfoService.save(filterMask));
+			// response.sendRedirect(payUrl);
+			result.setData(payUrl);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

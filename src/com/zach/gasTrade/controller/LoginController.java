@@ -129,14 +129,22 @@ public class LoginController {
 			logger.info("注册获取参数,wxOpenId==>" + wxOpenId + ",regCode==>" + regCode);
 			if ("123456".equals(smgCode) || smgCode.equals(regCode)) {
 				filterMask.setWxOpenId(wxOpenId);
-				// custmomerUserService.save(filterMask);
+				// 根据wxOpenId查询客户信息
 				CustomerUserVo customerUser = custmomerUserService.getCustomerUserBySelective(filterMask);
-				customerUser.setChannel("10");
-				customerUser.setPhoneNumber(parameter.get("phoneNumber"));
-				customerUser.setUpdateTime(new Date());
-				// 更新客户信息
-				custmomerUserService.update(customerUser);
-
+				// 客户信息不存在，则新增
+				if(null == customerUser) {
+					filterMask.setChannel("10");
+					filterMask.setPhoneNumber(parameter.get("phoneNumber"));
+					filterMask.setUpdateTime(new Date());
+					// 新增客户信息
+					custmomerUserService.save(filterMask);
+				}else {
+					customerUser.setChannel("10");
+					customerUser.setPhoneNumber(parameter.get("phoneNumber"));
+					customerUser.setUpdateTime(new Date());
+					// 更新客户信息
+					custmomerUserService.update(customerUser);
+				}	
 			} else {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}

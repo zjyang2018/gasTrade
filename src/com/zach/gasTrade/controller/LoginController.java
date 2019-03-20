@@ -131,20 +131,20 @@ public class LoginController {
 				filterMask.setWxOpenId(wxOpenId);
 				// 根据wxOpenId查询客户信息
 				CustomerUserVo customerUser = custmomerUserService.getCustomerUserBySelective(filterMask);
-				// 客户信息不存在，则新增
-				if(null == customerUser) {
-					filterMask.setChannel("10");
-					filterMask.setPhoneNumber(parameter.get("phoneNumber"));
-					filterMask.setUpdateTime(new Date());
-					// 新增客户信息
-					custmomerUserService.save(filterMask);
+				if(customerUser==null) {
+					customerUser = new CustomerUserVo();
+					customerUser.setChannel("10");
+					customerUser.setPhoneNumber(parameter.get("phoneNumber"));
+					customerUser.setUpdateTime(new Date());
+					// 更新客户信息
+					custmomerUserService.save(customerUser);
 				}else {
 					customerUser.setChannel("10");
 					customerUser.setPhoneNumber(parameter.get("phoneNumber"));
 					customerUser.setUpdateTime(new Date());
 					// 更新客户信息
 					custmomerUserService.update(customerUser);
-				}	
+				}
 			} else {
 				throw new RuntimeException("短信验证码无效,请重新获取");
 			}

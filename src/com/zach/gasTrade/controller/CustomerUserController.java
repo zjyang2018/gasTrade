@@ -185,6 +185,7 @@ public class CustomerUserController {
 		// paramer.put("isRegister", "false");
 		try {
 			Map<String, Object> returnData = customerUserService.getWeiXinUserInfo(code);
+			logger.info("获取到微信授权wxOpenId结果为:" + JSON.toJSONString(returnData));
 			result.setData(returnData);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

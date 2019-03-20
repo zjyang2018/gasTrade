@@ -119,7 +119,7 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 		CustomerUserVo customerUser = this.getCustomerUserBySelective(customerUserVo);
 		if (customerUser != null && StringUtil.isNotNullAndNotEmpty(customerUser.getPhoneNumber())) {
 			returnData.put("isRegister", true);
-			this.save(customerUserVo);
+			//this.save(customerUserVo);
 		} else {
 			returnData.put("isRegister", false);
 		}

@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,6 +192,39 @@ public class DeliveryLocationHistoryController {
 		try {
 			// 删除
 			deliveryLocationHistoryService.delete(filterMask);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+	
+	/**
+	 * 接收微信公众号上报地理位置
+	 * 
+	 * @return
+	 */
+	@ApiOperation(value = "接收微信公众号上报地理位置接口", notes = "请求参数说明")
+	@RequestMapping(value = "/weixin/accept")
+	@ResponseBody
+	public Result acceptWeiXinMsg(HttpServletRequest request, HttpServletResponse response) {
+		Result result = Result.initResult();
+
+		try {
+			if("POST".equals(request.getMethod().toUpperCase())) {
+				ServletInputStream in = request.getInputStream();
+				
+			}else {
+				
+			}
+			// 删除
+			//deliveryLocationHistoryService.delete(filterMask);
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

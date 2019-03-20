@@ -75,7 +75,7 @@ public class TokenUtil {
 					ticket = jsonObject.getString("ticket");
 					int expiresin = jsonObject.getInteger("expires_in");
 					// 保存ticket
-					cacheService.add(WeiXinConstant.ticket, ticket, expiresin);
+					cacheService.add(WeiXinConstant.ticket, ticket, expiresin*1000);
 				} catch (Exception e) {
 					// 获取token失败
 					log.error("获取ticket失败 errcode:{} errmsg:{}", jsonObject.getInteger("errcode"),

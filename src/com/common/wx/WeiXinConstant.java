@@ -19,4 +19,7 @@ public class WeiXinConstant {
 
 	// redis保存key
 	public static final String accessTokenKey = "WX_ACCESS_TOKENKEY:20190312";
+	
+	// redis保存key
+	public static final String ticket = "WX_TICKETKEY:20190312";
 }

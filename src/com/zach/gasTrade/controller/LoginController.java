@@ -134,6 +134,7 @@ public class LoginController {
 				if(customerUser==null) {
 					customerUser = new CustomerUserVo();
 					customerUser.setChannel("10");
+					customerUser.setWxOpenId(wxOpenId);
 					customerUser.setPhoneNumber(parameter.get("phoneNumber"));
 					customerUser.setUpdateTime(new Date());
 					// 更新客户信息

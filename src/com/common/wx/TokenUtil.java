@@ -1,5 +1,6 @@
 package com.common.wx;
 
+import java.security.MessageDigest;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -10,7 +11,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.common.cache.CacheService;
 import com.common.context.SpringContextHolder;
 import com.common.http.HttpsUtil;
-import com.common.seq.SerialGenerator;
 import com.common.utils.StringUtil;
 import com.common.wx.bean.AccessToken;
 
@@ -56,6 +56,7 @@ public class TokenUtil {
 	 * 获取jsapiTicket jsapi_ticket是公众号用于调用微信JS接口的临时票据。正常情况下，jsapi_ticket的有效期为7200秒，
 	 * 通过access_token来获取。由于获取jsapi_ticket的api调用次数非常有限，频繁刷新jsapi_ticket会导致api调用受限，
 	 * 影响自身业务，开发者必须在自己的服务全局缓存jsapi_ticket 。
+	 * 
 	 * @return
 	 */
 	public static String getWXTicket() {
@@ -86,20 +87,47 @@ public class TokenUtil {
 		}
 		return ticket;
 	}
-	
+
 	/**
 	 * 生成签名的随机串
+	 * 
 	 * @return
 	 */
 	public static String getNonceStr() {
 		return UUID.randomUUID().toString();
 	}
-	
+
 	/**
 	 * 生成签名的时间戳
+	 * 
 	 * @return
 	 */
 	public static String getTimeStamp() {
 		return Long.toString(System.currentTimeMillis() / 1000);
+	}
+
+	/**
+	 * 将字符串进行sha1加密
+	 * 
+	 * @return
+	 */
+	public static String getSha1(String str) {
+		char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+		try {
+			MessageDigest mdTemp = MessageDigest.getInstance("SHA1");
+			mdTemp.update(str.getBytes("UTF-8"));
+			byte[] md = mdTemp.digest();
+			int j = md.length;
+			char buf[] = new char[j * 2];
+			int k = 0;
+			for (int i = 0; i < j; i++) {
+				byte byte0 = md[i];
+				buf[k++] = hexDigits[byte0 >>> 4 & 0xf];
+				buf[k++] = hexDigits[byte0 & 0xf];
+			}
+			return new String(buf);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

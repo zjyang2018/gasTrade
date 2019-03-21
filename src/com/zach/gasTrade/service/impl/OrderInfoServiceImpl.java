@@ -274,6 +274,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			orderDeliveryRecordVo.setEndLocation(endLocation);
 			orderDeliveryRecordVo.setMoveLocation(moveLocation);
 			orderDeliveryRecordVo.setMoveLocation(startLocation);
+			orderDeliveryRecordVo.setCreateTime(now);
 			orderDeliveryRecordDao.save(orderDeliveryRecordVo);
 		} catch (Exception e) {
 			// TODO: handle exception

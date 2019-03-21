@@ -22,12 +22,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.common.utils.XmlUtilCommon;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.DeliveryNewLocationDto;
 import com.zach.gasTrade.service.DeliveryLocationHistoryService;
+import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
+import com.zach.gasTrade.vo.DeliveryUserVo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,6 +42,9 @@ public class DeliveryLocationHistoryController {
 
 	@Autowired
 	private DeliveryLocationHistoryService deliveryLocationHistoryService;
+	
+	@Autowired
+	private DeliveryUserService deliveryUserService;
 
 	/**
 	 * 根据条件查询
@@ -204,7 +210,7 @@ public class DeliveryLocationHistoryController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 接收微信公众号上报地理位置
 	 * 
@@ -213,19 +219,40 @@ public class DeliveryLocationHistoryController {
 	@ApiOperation(value = "接收微信公众号上报地理位置接口", notes = "请求参数说明")
 	@RequestMapping(value = "/weixin/accept")
 	@ResponseBody
-	public Result acceptWeiXinMsg(HttpServletRequest request, HttpServletResponse response) {
+	public String acceptWeiXinMsg(HttpServletRequest request, HttpServletResponse response) {
 		Result result = Result.initResult();
 
 		try {
-			if("POST".equals(request.getMethod().toUpperCase())) {
+			if ("POST".equals(request.getMethod().toUpperCase())) {
 				ServletInputStream in = request.getInputStream();
-				
-			}else {
-				
-			}
-			// 删除
-			//deliveryLocationHistoryService.delete(filterMask);
+				String xmlStr = XmlUtilCommon.getXmlString(in);
+				logger.info("接收微信参数==>" + xmlStr);
+				Map<String, String> xmlMap = XmlUtilCommon.toMap(xmlStr.getBytes(), "utf-8");
+				if ("event".equalsIgnoreCase(xmlMap.get("MsgType"))
+						&& "LOCATION".equalsIgnoreCase(xmlMap.get("Event"))) {
+					logger.info("接收微信公众号地理位置消息==>" + xmlStr);
+					String fromWXOpenId = xmlMap.get("FromUserName");
+					//查询派送员信息
+					DeliveryUserVo deliveryUserVo= new DeliveryUserVo();
+					deliveryUserVo.setWxOpenId(fromWXOpenId);
+					DeliveryUserVo deliveryUser=deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+					if(deliveryUser==null) {
+						return "success";
+					}
+					//地理位置经度
+					String longitude = xmlMap.get("Longitude");
+					//地理位置纬度
+					String latitude = xmlMap.get("Latitude");
+					DeliveryLocationHistoryVo filterMask = new DeliveryLocationHistoryVo();
+					filterMask.setDeliveryUserId(deliveryUser.getId());
+					filterMask.setLongitude(longitude);
+					filterMask.setLatitude(latitude);
+					filterMask.setLocation(longitude+","+latitude);
+					deliveryLocationHistoryService.save(filterMask);
+				}
+			} else {
 
+			}
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
@@ -235,6 +262,6 @@ public class DeliveryLocationHistoryController {
 			result.setMsg("系统异常,请稍后重试");
 			logger.error("系统异常,请稍后重试", e);
 		}
-		return result;
+		return "success";
 	}
 }

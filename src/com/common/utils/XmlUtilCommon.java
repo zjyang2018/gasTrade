@@ -16,7 +16,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
 
-public class XmlUtil {
+public class XmlUtilCommon {
 	
 	public static String getXmlString(InputStream in) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

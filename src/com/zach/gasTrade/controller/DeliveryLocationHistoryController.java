@@ -42,7 +42,7 @@ public class DeliveryLocationHistoryController {
 
 	@Autowired
 	private DeliveryLocationHistoryService deliveryLocationHistoryService;
-	
+
 	@Autowired
 	private DeliveryUserService deliveryUserService;
 
@@ -228,26 +228,26 @@ public class DeliveryLocationHistoryController {
 				String xmlStr = XmlUtilCommon.getXmlString(in);
 				logger.info("接收微信参数==>" + xmlStr);
 				Map<String, String> xmlMap = XmlUtilCommon.toMap(xmlStr.getBytes(), "utf-8");
-				if ("event".equalsIgnoreCase(xmlMap.get("MsgType"))
-						&& "LOCATION".equalsIgnoreCase(xmlMap.get("Event"))) {
+				if ("LOCATION".equalsIgnoreCase(xmlMap.get("MsgType")) || ("event".equalsIgnoreCase(xmlMap.get("MsgType"))
+						&& "LOCATION".equalsIgnoreCase(xmlMap.get("Event")))) {
 					logger.info("接收微信公众号地理位置消息==>" + xmlStr);
 					String fromWXOpenId = xmlMap.get("FromUserName");
-					//查询派送员信息
-					DeliveryUserVo deliveryUserVo= new DeliveryUserVo();
+					// 查询派送员信息
+					DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
 					deliveryUserVo.setWxOpenId(fromWXOpenId);
-					DeliveryUserVo deliveryUser=deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
-					if(deliveryUser==null) {
+					DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+					if (deliveryUser == null) {
 						return "success";
 					}
-					//地理位置经度
+					// 地理位置经度
 					String longitude = xmlMap.get("Longitude");
-					//地理位置纬度
+					// 地理位置纬度
 					String latitude = xmlMap.get("Latitude");
 					DeliveryLocationHistoryVo filterMask = new DeliveryLocationHistoryVo();
 					filterMask.setDeliveryUserId(deliveryUser.getId());
 					filterMask.setLongitude(longitude);
 					filterMask.setLatitude(latitude);
-					filterMask.setLocation(longitude+","+latitude);
+					filterMask.setLocation(longitude + "," + latitude);
 					deliveryLocationHistoryService.save(filterMask);
 				}
 			} else {

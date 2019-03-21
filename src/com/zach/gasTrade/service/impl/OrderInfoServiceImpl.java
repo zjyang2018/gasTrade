@@ -260,6 +260,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			orderInfoDao.update(orderInfoVo);
 			// 添加订单派送记录
 			OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
+			orderDeliveryRecordVo.setId(SerialGenerator.getUUID());
 			orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
 			orderDeliveryRecordVo.setAllotTime(now);
 

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.common.utils.XmlUtilCommon;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
@@ -228,10 +229,11 @@ public class DeliveryLocationHistoryController {
 				String xmlStr = XmlUtilCommon.getXmlString(in);
 				logger.info("接收微信参数==>" + xmlStr);
 				Map<String, String> xmlMap = XmlUtilCommon.toMap(xmlStr.getBytes(), "utf-8");
-				if ("LOCATION".equalsIgnoreCase(xmlMap.get("MsgType")) || ("event".equalsIgnoreCase(xmlMap.get("MsgType"))
-						&& "LOCATION".equalsIgnoreCase(xmlMap.get("Event")))) {
+				logger.info("获取微信推送参数==>" + JSON.toJSONString(xmlMap));
+				if ("location".equalsIgnoreCase(xmlMap.get("msgtype")) || ("event".equalsIgnoreCase(xmlMap.get("msgtype"))
+						&& "location".equalsIgnoreCase(xmlMap.get("event")))) {
 					logger.info("接收微信公众号地理位置消息==>" + xmlStr);
-					String fromWXOpenId = xmlMap.get("FromUserName");
+					String fromWXOpenId = xmlMap.get("fromusername");
 					// 查询派送员信息
 					DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
 					deliveryUserVo.setWxOpenId(fromWXOpenId);
@@ -240,9 +242,9 @@ public class DeliveryLocationHistoryController {
 						return "success";
 					}
 					// 地理位置经度
-					String longitude = xmlMap.get("Longitude");
+					String longitude = xmlMap.get("longitude");
 					// 地理位置纬度
-					String latitude = xmlMap.get("Latitude");
+					String latitude = xmlMap.get("latitude");
 					DeliveryLocationHistoryVo filterMask = new DeliveryLocationHistoryVo();
 					filterMask.setDeliveryUserId(deliveryUser.getId());
 					filterMask.setLongitude(longitude);

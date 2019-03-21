@@ -26,7 +26,7 @@ public class TokenUtil {
 
 	public static AccessToken getWXToken() {
 		// redis获取access_token
-		CacheService cacheService = SpringContextHolder.getBean("cacheService");
+		CacheService cacheService = SpringContextHolder.getBean("redisCacheService");
 		AccessToken accessToken = cacheService.get(WeiXinConstant.accessTokenKey);
 		log.info("redis获取到accessToken==>" + JSON.toJSONString(accessToken));
 		if (accessToken == null) {
@@ -61,7 +61,7 @@ public class TokenUtil {
 	 */
 	public static String getWXTicket() {
 		// redis获取ticket
-		CacheService cacheService = SpringContextHolder.getBean("cacheService");
+		CacheService cacheService = SpringContextHolder.getBean("redisCacheService");
 		String ticket = cacheService.get(WeiXinConstant.ticket);
 		log.info("redis获取到ticket==>" + ticket);
 		if (StringUtil.isNullOrEmpty(ticket)) {

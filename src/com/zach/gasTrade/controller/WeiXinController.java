@@ -24,7 +24,6 @@ public class WeiXinController {
 	private Logger logger = Logger.getLogger(getClass());
 	
 	@ApiOperation(value = "加载微信公众号js配置 接口", notes = "请求方式:GET\\n返回参数字段说明||appId:公众号appId,timestamp:随机时间戳 ,nonceStr:随机字符串,signature:签名字符串\\n")
-	@ResponseBody
 	@RequestMapping(value = "/weixin/loadConfig", method = RequestMethod.GET)
 	public DataResult wxsdk_config(HttpServletRequest request) {
 		DataResult result = DataResult.initResult();
@@ -38,7 +37,7 @@ public class WeiXinController {
 		// System.out.println("accessToken:"+accessToken+"\njsapi_ticket:"+jsapi_ticket+"\n时间戳："+timestamp+"\n随机字符串："+noncestr);
 		// 5、将参数排序并拼接字符串
 		 String str = "jsapi_ticket=" + jsapi_ticket + "&noncestr=" + noncestr +
-		 "×tamp=" + timestamp + "&url=" + url;
+		 "timestamp=" + timestamp + "&url=" + url;
 		// 6、将字符串进行sha1加密
 		 logger.info("sha1加密==前==字符串==>" + str);
 		 String signature = TokenUtil.getSha1(str);

@@ -236,6 +236,12 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			String moveLocation = "";
 			double minDistance = 0.00;
 			for (DeliveryLocationHistoryVo bean : list) {
+				//空坐标过滤掉 
+				if (StringUtil.isNull(orderInfoVo.getLatitude()) || StringUtil.isNull(orderInfoVo.getLongitude())
+						|| StringUtil.isNull(bean.getLatitude())
+						|| StringUtil.isNull(bean.getLongitude())) {
+					continue;
+				}
 				double distance = MapHelper.GetPointDistance(bean.getLatitude() + "," + bean.getLongitude(),
 						orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude());
 				if (minDistance > distance) {

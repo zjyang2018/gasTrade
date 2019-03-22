@@ -39,7 +39,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "派送员历史位置相关api")
 @Controller
-public class DeliveryLocationHistoryController {
+public class DeliveryLocationHistoryController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired
@@ -230,8 +230,9 @@ public class DeliveryLocationHistoryController {
 				logger.info("接收微信参数==>" + xmlStr);
 				Map<String, String> xmlMap = XmlUtilCommon.toMap(xmlStr.getBytes(), "utf-8");
 				logger.info("获取微信推送参数==>" + JSON.toJSONString(xmlMap));
-				if ("location".equalsIgnoreCase(xmlMap.get("msgtype")) || ("event".equalsIgnoreCase(xmlMap.get("msgtype"))
-						&& "location".equalsIgnoreCase(xmlMap.get("event")))) {
+				if ("location".equalsIgnoreCase(xmlMap.get("msgtype"))
+						|| ("event".equalsIgnoreCase(xmlMap.get("msgtype"))
+								&& "location".equalsIgnoreCase(xmlMap.get("event")))) {
 					logger.info("接收微信公众号地理位置消息==>" + xmlStr);
 					String fromWXOpenId = xmlMap.get("fromusername");
 					// 查询派送员信息
@@ -252,20 +253,20 @@ public class DeliveryLocationHistoryController {
 					filterMask.setLocation(longitude + "," + latitude);
 					deliveryLocationHistoryService.save(filterMask);
 				}
-			} else if("GET".equals(request.getMethod().toUpperCase())) {
-				//微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp，nonce参数
-		        String signature = request.getParameter("signature");
-		        //时间戳
-		        String timestamp = request.getParameter("timestamp");
-		        //随机数
-		        String nonce = request.getParameter("nonce");
-		        //随机字符串
-		        String echostr = request.getParameter("echostr");
-		        boolean checkSign = WeiXinSignUtil.checkSignature(signature, timestamp, nonce);
-		        if(checkSign) {
-		        	return echostr;
-		        }
-		        return "failure";
+			} else if ("GET".equals(request.getMethod().toUpperCase())) {
+				// 微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp，nonce参数
+				String signature = request.getParameter("signature");
+				// 时间戳
+				String timestamp = request.getParameter("timestamp");
+				// 随机数
+				String nonce = request.getParameter("nonce");
+				// 随机字符串
+				String echostr = request.getParameter("echostr");
+				boolean checkSign = WeiXinSignUtil.checkSignature(signature, timestamp, nonce);
+				if (checkSign) {
+					return echostr;
+				}
+				return "failure";
 			}
 		} catch (RuntimeException e) {
 			logger.error("系统异常," + e.getMessage(), e);

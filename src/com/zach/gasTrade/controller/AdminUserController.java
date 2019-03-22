@@ -35,7 +35,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "平台用户相关api")
 @Controller
-public class AdminUserController {
+public class AdminUserController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired
@@ -116,13 +116,13 @@ public class AdminUserController {
 		Result result = Result.initResult();
 		logger.info("平台管理员新增接口参数:" + JSON.toJSONString(filterMask));
 		try {
-		String initialPassword = filterMask.getInitialPassword();
-		String confirmPassword = filterMask.getComfirmPassword();
-		String address = filterMask.getAddress();
-		if (!initialPassword.equals(confirmPassword)) {
-			throw new RuntimeException("两次密码输入不一致，请重新输入");
-		}
-		filterMask.setPassword(initialPassword);	
+			String initialPassword = filterMask.getInitialPassword();
+			String confirmPassword = filterMask.getComfirmPassword();
+			String address = filterMask.getAddress();
+			if (!initialPassword.equals(confirmPassword)) {
+				throw new RuntimeException("两次密码输入不一致，请重新输入");
+			}
+			filterMask.setPassword(initialPassword);
 			adminUserService.save(filterMask);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

@@ -35,7 +35,6 @@ import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
-import com.zach.gasTrade.dto.CustomerOrderGenerateInfoDto;
 import com.zach.gasTrade.dto.CustomerOrderInfoDto;
 import com.zach.gasTrade.dto.DeliveryDetailDto;
 import com.zach.gasTrade.dto.DeliveryMonitorDto;
@@ -62,7 +61,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "订单相关api")
 @Controller
-public class OrderInfoController {
+public class OrderInfoController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired
@@ -251,33 +250,36 @@ public class OrderInfoController {
 		return result;
 	}
 
-	/**
-	 * 订单生成
-	 * 
-	 * @param request
-	 * @param filterMask
-	 * @return Result
-	 */
-	@RequestMapping(value = "/orderInfo/orderGenerate", method = RequestMethod.POST)
-	@ResponseBody
-	public Result orderGenerate(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
-		DataResult result = DataResult.initResult();
-
-		try {
-			CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto = orderInfoService.orderGenerate(filterMask);
-			result.setData(customerOrderGenerateInfoDto);
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-
-		return result;
-	}
+	// /**
+	// * 订单生成
+	// *
+	// * @param request
+	// * @param filterMask
+	// * @return Result
+	// */
+	// @RequestMapping(value = "/orderInfo/orderGenerate", method =
+	// RequestMethod.POST)
+	// @ResponseBody
+	// public Result orderGenerate(HttpServletRequest request, @RequestBody
+	// OrderInfoVo filterMask) {
+	// DataResult result = DataResult.initResult();
+	//
+	// try {
+	// CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto =
+	// orderInfoService.orderGenerate(filterMask);
+	// result.setData(customerOrderGenerateInfoDto);
+	// } catch (RuntimeException e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg(e.getMessage());
+	// logger.error("系统异常," + e.getMessage(), e);
+	// } catch (Exception e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("系统异常,请稍后重试");
+	// logger.error("系统异常,请稍后重试", e);
+	// }
+	//
+	// return result;
+	// }
 
 	/**
 	 * 订单下单

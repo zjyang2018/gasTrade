@@ -38,7 +38,7 @@ import io.swagger.annotations.Api;
 
 @Api(tags = "财务统计相关api")
 @Controller
-public class OrderFinanceStatisticsController {
+public class OrderFinanceStatisticsController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired

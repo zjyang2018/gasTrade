@@ -9,6 +9,7 @@ package com.zach.gasTrade.service;
 import java.util.List;
 import java.util.Map;
 
+import com.zach.gasTrade.dto.UserDto;
 import com.zach.gasTrade.vo.CustomerUserVo;
 
 public interface CustomerUserService {
@@ -70,5 +71,12 @@ public interface CustomerUserService {
 	 * 
 	 * @param customerUserVo
 	 */
-	public Map<String, Object> getWeiXinUserInfo(String code);
+	public Map<String, Object> getWeiXinUserBaseInfo(String code);
+
+	/**
+	 * 根据wxOpenId获取用户信息
+	 * 
+	 * @param customerUserVo
+	 */
+	public UserDto getUserInfo(String wxOpenId);
 }

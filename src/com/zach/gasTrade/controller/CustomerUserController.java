@@ -24,7 +24,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.common.utils.MapHelper;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
-import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.service.CustomerUserService;
@@ -35,7 +34,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "客户端用户相关api")
 @Controller
-public class CustomerUserController {
+public class CustomerUserController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired
@@ -110,10 +109,10 @@ public class CustomerUserController {
 		try {
 			String address = filterMask.getAddress();
 			JSONObject jsonObject = MapHelper.addressToPoint(address);
-			if(jsonObject==null||jsonObject.getInteger("confidence")<16) {
+			if (jsonObject == null || jsonObject.getInteger("confidence") < 16) {
 				throw new RuntimeException("地址输入详细，请重新输入");
 			}
-		
+
 			customerUserService.save(filterMask);
 
 		} catch (RuntimeException e) {
@@ -146,10 +145,10 @@ public class CustomerUserController {
 			if (StringUtil.isNullOrEmpty(filterMask.getId())) {
 				throw new RuntimeException("用户编号不能为空");
 			}
-			
+
 			String address = filterMask.getAddress();
 			JSONObject jsonObject = MapHelper.addressToPoint(address);
-			if(jsonObject==null||jsonObject.getInteger("confidence")<16) {
+			if (jsonObject == null || jsonObject.getInteger("confidence") < 16) {
 				throw new RuntimeException("地址输入详细，请重新输入");
 			}
 
@@ -167,63 +166,4 @@ public class CustomerUserController {
 		return result;
 	}
 
-	/**
-	 * 微信回调授权获取openId
-	 * 
-	 * @param request
-	 * @param filterMask
-	 * @return Result
-	 */
-	@RequestMapping(value = "/weixin/getWeiXinUserInfo", method = RequestMethod.GET)
-	@ResponseBody
-	public DataResult getWeiXinUserInfo(HttpServletRequest request) {
-		DataResult result = DataResult.initResult();
-		String code = request.getParameter("code");
-		logger.info("获取到微信授权code:" + code);
-		// Map<String, String> paramer = new HashMap<String, String>();
-		// paramer.put("code", "code");
-		// paramer.put("isRegister", "false");
-		try {
-			Map<String, Object> returnData = customerUserService.getWeiXinUserInfo(code);
-			logger.info("获取到微信授权wxOpenId结果为:" + JSON.toJSONString(returnData));
-			result.setData(returnData);
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
-	
-	/**
-	 * 个人中心查询客户信息
-	 * 
-	 * @param request
-	 * @param filterMask
-	 * @return Result
-	 */
-	@RequestMapping(value = "/weixin/getCustomerUserInfo", method = RequestMethod.GET)
-	@ResponseBody
-	public DataResult getCustomerUserInfo(HttpServletRequest request,CustomerUserVo filterMask) {
-		DataResult result = DataResult.initResult();
-		String wxOpenId = request.getParameter("wxOpenId");
-		logger.info("查询客户信息参数,wxOpenId:" + wxOpenId);
-		try {
-			filterMask.setWxOpenId(wxOpenId);
-			result.setData(customerUserService.getCustomerUserBySelective(filterMask));
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
 }

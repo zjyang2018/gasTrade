@@ -50,7 +50,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "订单派送记录相关api")
 @Controller
-public class OrderDeliveryRecordController {
+public class OrderDeliveryRecordController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired

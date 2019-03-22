@@ -39,7 +39,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "派送员用户相关api")
 @Controller
-public class DeliveryUserController {
+public class DeliveryUserController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired

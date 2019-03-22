@@ -39,7 +39,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "登录相关api")
 @Controller
-public class LoginController {
+public class LoginController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired
@@ -131,7 +131,7 @@ public class LoginController {
 				filterMask.setWxOpenId(wxOpenId);
 				// 根据wxOpenId查询客户信息
 				CustomerUserVo customerUser = custmomerUserService.getCustomerUserBySelective(filterMask);
-				if(customerUser==null) {
+				if (customerUser == null) {
 					customerUser = new CustomerUserVo();
 					customerUser.setChannel("10");
 					customerUser.setWxOpenId(wxOpenId);
@@ -139,7 +139,7 @@ public class LoginController {
 					customerUser.setUpdateTime(new Date());
 					// 更新客户信息
 					custmomerUserService.save(customerUser);
-				}else {
+				} else {
 					customerUser.setChannel("10");
 					customerUser.setPhoneNumber(parameter.get("phoneNumber"));
 					customerUser.setUpdateTime(new Date());

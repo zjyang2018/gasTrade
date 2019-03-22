@@ -43,7 +43,7 @@ import io.swagger.annotations.Api;
 
 @Api(tags = "产品相关api")
 @Controller
-public class ProductController {
+public class ProductController extends CommonController {
 	private Logger logger = Logger.getLogger(getClass());
 
 	@Autowired

@@ -137,12 +137,14 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 		if (StringUtil.isNull(user.getUserType())) {
 			returnData.put("userType", "3");
 		} else if ("1".equals(user.getUserType())) {
+			returnData.put("userType", "1");
 			if (StringUtil.isNotNullAndNotEmpty(user.getCustomerUser().getPhoneNumber())) {
 				returnData.put("isRegister", true);
 			} else {
 				returnData.put("isRegister", false);
 			}
 		} else if ("2".equals(user.getUserType())) {
+			returnData.put("userType", "2");
 			if (StringUtil.isNotNullAndNotEmpty(user.getDeliveryUser().getLoginName())) {
 				returnData.put("isLogin", true);
 			} else {

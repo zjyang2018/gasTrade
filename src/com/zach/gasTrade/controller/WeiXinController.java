@@ -30,7 +30,8 @@ public class WeiXinController {
 	public DataResult wxsdk_config(HttpServletRequest request) {
 		DataResult result = DataResult.initResult();
 		// 1、获取请求url
-		String url = request.getRequestURI();
+		//String url = request.getRequestURI();
+		String url ="http://www.yourtk.com";
 		// 2、获取Ticket
 		String jsapi_ticket = TokenUtil.getWXTicket();
 		// 3、时间戳和随机字符串
@@ -39,7 +40,7 @@ public class WeiXinController {
 		// System.out.println("accessToken:"+accessToken+"\njsapi_ticket:"+jsapi_ticket+"\n时间戳："+timestamp+"\n随机字符串："+noncestr);
 		// 5、将参数排序并拼接字符串
 		 String str = "jsapi_ticket=" + jsapi_ticket + "&noncestr=" + noncestr +
-		 "timestamp=" + timestamp+"url=" + url;
+		 "×tamp=" + timestamp+"url=" + url;
 		// 6、将字符串进行sha1加密
 		 logger.info("sha1加密==前==字符串==>" + str);
 		 String signature = WeiXinSignUtil.sha1Hex(str);

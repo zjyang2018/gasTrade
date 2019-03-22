@@ -64,7 +64,7 @@ public class TokenUtil {
 		CacheService cacheService = SpringContextHolder.getBean("redisCacheService");
 		String ticket = cacheService.get(WeiXinConstant.ticket);
 		log.info("redis获取到ticket==>" + ticket);
-		if (StringUtil.isNullOrEmpty(ticket)) {
+		if (StringUtil.isNull(ticket)) {
 			AccessToken accessToken = TokenUtil.getWXToken();
 			String acess_token = JSONObject.toJSONString(accessToken);
 			String urlStr = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + acess_token
@@ -75,8 +75,10 @@ public class TokenUtil {
 				try {
 					ticket = jsonObject.getString("ticket");
 					int expiresin = jsonObject.getInteger("expires_in");
-					// 保存ticket
-					cacheService.add(WeiXinConstant.ticket, ticket, expiresin*1000);
+					if(StringUtil.isNotNullAndNotEmpty(ticket)) {
+						// 保存ticket
+						cacheService.add(WeiXinConstant.ticket, ticket, expiresin);
+					}
 				} catch (Exception e) {
 					// 获取token失败
 					log.error("获取ticket失败 errcode:{} errmsg:{}", jsonObject.getInteger("errcode"),

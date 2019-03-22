@@ -198,4 +198,32 @@ public class CustomerUserController {
 		}
 		return result;
 	}
+	
+	/**
+	 * 个人中心查询客户信息
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/weixin/getCustomerUserInfo", method = RequestMethod.GET)
+	@ResponseBody
+	public DataResult getCustomerUserInfo(HttpServletRequest request,CustomerUserVo filterMask) {
+		DataResult result = DataResult.initResult();
+		String wxOpenId = request.getParameter("wxOpenId");
+		logger.info("查询客户信息参数,wxOpenId:" + wxOpenId);
+		try {
+			filterMask.setWxOpenId(wxOpenId);
+			result.setData(customerUserService.getCustomerUserBySelective(filterMask));
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
 }

@@ -66,7 +66,7 @@ public class TokenUtil {
 		log.info("redis获取到ticket==>" + ticket);
 		if (StringUtil.isNull(ticket)) {
 			AccessToken accessToken = TokenUtil.getWXToken();
-			String acess_token = JSONObject.toJSONString(accessToken);
+			String acess_token = accessToken.getAccessToken();
 			String urlStr = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + acess_token
 					+ "&type=jsapi";
 			JSONObject jsonObject = HttpsUtil.httpsRequest(urlStr, "GET", null);

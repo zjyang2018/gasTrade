@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.common.cache.CacheService;
 import com.common.cache.redis.RedisCacheService;
 import com.common.wx.TokenUtil;
@@ -20,6 +21,8 @@ import com.common.wx.WeiXinSignUtil;
 import com.zach.gasTrade.common.DataResult;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "微信相关api")
@@ -37,7 +40,7 @@ public class WeiXinController {
 		DataResult result = DataResult.initResult();
 		// 1、获取请求url
 		// String url = request.getRequestURI();
-		String url = "http://www.yourtk.com";
+		String url = "http://www.yourtk.com/";
 		// 2、获取Ticket
 		String jsapi_ticket = TokenUtil.getWXTicket();
 		// 3、时间戳和随机字符串
@@ -45,7 +48,7 @@ public class WeiXinController {
 		String timestamp = WeiXinSignUtil.getTimeStamp();
 		// System.out.println("accessToken:"+accessToken+"\njsapi_ticket:"+jsapi_ticket+"\n时间戳："+timestamp+"\n随机字符串："+noncestr);
 		// 5、将参数排序并拼接字符串
-		String str = "jsapi_ticket=" + jsapi_ticket + "&noncestr=" + noncestr + "×tamp=" + timestamp + "url=" + url;
+		String str = "jsapi_ticket=" + jsapi_ticket + "&noncestr=" + noncestr + "&timestamp=" + timestamp + "&url=" + url;
 		// 6、将字符串进行sha1加密
 		logger.info("sha1加密==前==字符串==>" + str);
 		String signature = WeiXinSignUtil.sha1Hex(str);
@@ -61,6 +64,8 @@ public class WeiXinController {
 	}
 
 	@ApiOperation(value = "删除redis对应key的值", notes = "")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "key", value = "redis", required = true, paramType = "query", dataType = "String") })
 	@RequestMapping(value = "/redis/deletKeyValue", method = RequestMethod.GET)
 	@ResponseBody
 	public DataResult deletRedisKeyValue(HttpServletRequest request) {
@@ -69,14 +74,28 @@ public class WeiXinController {
 
 		cacheService.del(key);
 		String value = cacheService.get(key);
-		if ( value == null) {
+		if (value == null) {
 			result.setData("空值");
-		}else if("".equals(value)) {
+		} else if ("".equals(value)) {
 			result.setData("空字符");
-		}else if("null".equals(value)) {
+		} else if ("null".equals(value)) {
 			result.setData("空字符");
-		}else {
+		} else {
 			result.setData(value);
+		}
+		return result;
+	}
+	
+	@ApiOperation(value = "读取redis对应key的值", notes = "")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "key", value = "redis", required = true, paramType = "query", dataType = "String") })
+	@RequestMapping(value = "/redis/readKeyValue", method = RequestMethod.GET)
+	@ResponseBody
+	public DataResult readRedisKeyValue(HttpServletRequest request) {
+		DataResult result = DataResult.initResult();
+		String key = request.getParameter("key");
+		if(cacheService.get(key)!=null) {
+			result.setData(cacheService.get(key));
 		}
 		return result;
 	}

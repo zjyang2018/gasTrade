@@ -347,15 +347,24 @@ public class LoginController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@RequestMapping(value = "/weixin/deliveryUser/resetPwd", method = RequestMethod.POST)
 	public Result modPwd(HttpServletRequest request, @RequestBody Map<String, String> param,
 			DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
+		logger.info("派送端修改密码参数:" + JSON.toJSONString(param));
+		UserDto user = this.getCurrentUser(request);
+		if (user == null) {
+			result.setCode(Constants.NOT_LOGIN);
+			result.setMsg("该派送员未登陆,请先登录");
+			return result;
+		}
 
-		String deliveryId = param.get("deliveryId");
+		// String deliveryId = param.get("deliveryId");
+		String deliveryId = user.getDeliveryUser().getId();
 		String phoneNumber = param.get("phoneNumber");
 		String verificationCode = param.get("verificationCode");
 		String newPassword = param.get("newPassword");
-		String comfirmPassword = param.get("comfirmPassword");
+		// String comfirmPassword = param.get("comfirmPassword");
 
 		if (StringUtil.isNullOrEmpty(verificationCode)) {
 			result.setCode(Constants.FAILURE);
@@ -369,11 +378,11 @@ public class LoginController extends CommonController {
 			return result;
 		}
 
-		if (!newPassword.equals(comfirmPassword)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("两次密码输入不一样");
-			return result;
-		}
+		// if (!newPassword.equals(comfirmPassword)) {
+		// result.setCode(Constants.FAILURE);
+		// result.setMsg("两次密码输入不一样");
+		// return result;
+		// }
 		filterMask.setId(deliveryId);
 		filterMask.setPhoneNumber(phoneNumber);
 		filterMask.setPassword(newPassword);

@@ -26,6 +26,7 @@ import com.common.utils.VerificationCodeUtils;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.Result;
+import com.zach.gasTrade.dto.UserDto;
 import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.service.CustomerUserService;
 import com.zach.gasTrade.service.DeliveryUserService;
@@ -119,12 +120,15 @@ public class LoginController extends CommonController {
 	@ResponseBody
 	public Result register(HttpServletRequest request, @RequestBody Map<String, String> parameter) {
 		Result result = Result.initResult();
+		UserDto user = this.getCurrentUser(request);
+
 		CustomerUserVo filterMask = new CustomerUserVo();
 		logger.info("注册接口参数:" + JSON.toJSONString(parameter));
 		// filterMask.setChannel("10");
 		String smgCode = parameter.get("smgCode");
 		try {
-			String wxOpenId = parameter.get("wxOpenId");
+			// String wxOpenId = parameter.get("wxOpenId");
+			String wxOpenId = request.getHeader("wxOpenId");
 			String regCode = cacheService.get("regCode" + wxOpenId);
 			logger.info("注册获取参数,wxOpenId==>" + wxOpenId + ",regCode==>" + regCode);
 			if ("123456".equals(smgCode) || smgCode.equals(regCode)) {
@@ -145,6 +149,18 @@ public class LoginController extends CommonController {
 					customerUser.setUpdateTime(new Date());
 					// 更新客户信息
 					custmomerUserService.update(customerUser);
+				}
+				if (user == null) {
+					user = new UserDto();
+					user.setUserType("1");
+					user.setCustomerUser(customerUser);
+					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+				} else {
+					if ("2".equals(user.getUserType())) {
+						user.setUserType("4");
+						user.setCustomerUser(customerUser);
+						cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+					}
 				}
 			} else {
 				throw new RuntimeException("短信验证码无效,请重新获取");
@@ -169,51 +185,54 @@ public class LoginController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@ApiOperation(value = "客户端登录(此接口不用)", notes = "请求参数说明||phoneNumber:手机号码,verificationCode:短信验证码,wxOpenId:微信openId\\n返回参数字段说明:\\n")
-	@RequestMapping(value = "/customerUser/login", method = RequestMethod.POST)
-	@ResponseBody
-	public Result customerUserLogin(HttpServletRequest request, @RequestBody Map<String, String> param,
-			CustomerUserVo filterMask) {
-		Result result = Result.initResult();
-		String wxOpenId = param.get("wxOpenId");
-		String phoneNumber = param.get("phoneNumber");
-		String verificationCode = param.get("verificationCode");
-
-		filterMask.setWxOpenId(wxOpenId);
-		try {
-			CustomerUserVo customerUserVo = custmomerUserService.getCustomerUserBySelective(filterMask);
-			if (StringUtil.isNullOrEmpty(phoneNumber)) {
-				String mobile = customerUserVo.getPhoneNumber();
-				if (StringUtil.isNullOrEmpty(mobile)) {
-					result.setCode(1);
-					result.setMsg("首次登录，需绑定手机号");
-					return result;
-				}
-			}
-			if (StringUtil.isNullOrEmpty(verificationCode)) {
-				result.setCode(Constants.FAILURE);
-				result.setMsg("验证码不能为空");
-				return result;
-			}
-			String code = cacheService.get("regCode");
-			if ("123456".equals(verificationCode) || verificationCode.equals(code)) {
-				customerUserVo.setPhoneNumber(phoneNumber);
-				custmomerUserService.update(customerUserVo);
-			} else {
-				throw new RuntimeException("短信验证码无效,请重新获取");
-			}
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("用户不存在");
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-
-		return result;
-	}
+	// @ApiOperation(value = "客户端登录(此接口不用)", notes =
+	// "请求参数说明||phoneNumber:手机号码,verificationCode:短信验证码,wxOpenId:微信openId\\n返回参数字段说明:\\n")
+	// @RequestMapping(value = "/customerUser/login", method = RequestMethod.POST)
+	// @ResponseBody
+	// public Result customerUserLogin(HttpServletRequest request, @RequestBody
+	// Map<String, String> param,
+	// CustomerUserVo filterMask) {
+	// Result result = Result.initResult();
+	// String wxOpenId = param.get("wxOpenId");
+	// String phoneNumber = param.get("phoneNumber");
+	// String verificationCode = param.get("verificationCode");
+	//
+	// filterMask.setWxOpenId(wxOpenId);
+	// try {
+	// CustomerUserVo customerUserVo =
+	// custmomerUserService.getCustomerUserBySelective(filterMask);
+	// if (StringUtil.isNullOrEmpty(phoneNumber)) {
+	// String mobile = customerUserVo.getPhoneNumber();
+	// if (StringUtil.isNullOrEmpty(mobile)) {
+	// result.setCode(1);
+	// result.setMsg("首次登录，需绑定手机号");
+	// return result;
+	// }
+	// }
+	// if (StringUtil.isNullOrEmpty(verificationCode)) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("验证码不能为空");
+	// return result;
+	// }
+	// String code = cacheService.get("regCode");
+	// if ("123456".equals(verificationCode) || verificationCode.equals(code)) {
+	// customerUserVo.setPhoneNumber(phoneNumber);
+	// custmomerUserService.update(customerUserVo);
+	// } else {
+	// throw new RuntimeException("短信验证码无效,请重新获取");
+	// }
+	// } catch (RuntimeException e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("用户不存在");
+	// logger.error("系统异常," + e.getMessage(), e);
+	// } catch (Exception e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("系统异常,请稍后重试");
+	// logger.error("系统异常,请稍后重试", e);
+	// }
+	//
+	// return result;
+	// }
 
 	/**
 	 * 登录
@@ -277,19 +296,37 @@ public class LoginController extends CommonController {
 	public Result deliveryUserLogin(HttpServletRequest request, @RequestBody Map<String, String> param,
 			DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
+		UserDto user = this.getCurrentUser(request);
 
 		String loginName = param.get("loginName");
 		String password = param.get("password");
 
 		filterMask.setLoginName(loginName);
 
+		String wxOpenId = request.getHeader("wxOpenId");
+
 		try {
 			DeliveryUserVo deliveryUserVo = deliveryUserService.getDeliveryUserBySelective(filterMask);
+			if (deliveryUserVo == null) {
+				throw new RuntimeException("该用户不存在," + loginName);
+			}
 			String pwd = deliveryUserVo.getPassword();
 			if (!password.equals(pwd)) {
 				result.setCode(Constants.FAILURE);
 				result.setMsg("密码不正确");
 				return result;
+			}
+			if (user == null) {
+				user = new UserDto();
+				user.setUserType("2");
+				user.setDeliveryUser(deliveryUserVo);
+				cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+			} else {
+				if ("1".equals(user.getUserType())) {
+					user.setUserType("4");
+					user.setDeliveryUser(deliveryUserVo);
+					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+				}
 			}
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

@@ -112,7 +112,7 @@ public class WeiXinController extends CommonController {
 		try {
 			UserDto user = this.getCurrentUser(request);
 			if (user == null) {
-				result.setCode(10001);
+				result.setCode(Constants.USER_NOT_EXIST);
 				result.setMsg("用户信息不存在");
 			} else if ("1".equals(user.getUserType())) {
 				result.setData(user.getCustomerUser());
@@ -124,7 +124,7 @@ public class WeiXinController extends CommonController {
 				} else if ("2".equals(userType)) {
 					result.setData(user.getDeliveryUser());
 				} else {
-					result.setCode(10002);
+					result.setCode(Constants.PARAM_NOT_NULL);
 					result.setMsg("参数类型不能为空");
 				}
 			}

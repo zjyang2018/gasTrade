@@ -44,6 +44,7 @@ import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
 import com.zach.gasTrade.dto.OrderDetailDto;
 import com.zach.gasTrade.dto.OrderInfoDto;
 import com.zach.gasTrade.dto.OrderListDto;
+import com.zach.gasTrade.dto.UserDto;
 import com.zach.gasTrade.netpay.UnoinPayUtil;
 import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.service.CustomerUserService;
@@ -290,13 +291,18 @@ public class OrderInfoController extends CommonController {
 	 */
 	@ApiOperation(value = "订单去支付", notes = "样例参数{\n" + "  \"productId\": \"6666666\",\n"
 			+ "  \"orderId\": \"传订单ID则代表未支付订单\",\n" + "  \"customerUserId\": \"6888888\"\n" + "}\\n返回参数字段说明:\\n")
-	@RequestMapping(value = "/orderInfo/buy", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/orderInfo/buy", method = RequestMethod.POST)
 	@ResponseBody
 	public DataResult buy(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody OrderInfoVo filterMask) {
 		DataResult result = DataResult.initResult();
+		UserDto user = this.getCurrentUser(request);
 		logger.info("支付请求参数==>" + JSON.toJSONString(filterMask));
 		try {
+			if (user == null) {
+				throw new RuntimeException("该用户未注册,不能购买");
+			}
+			filterMask.setCustomerUserId(user.getCustomerUser().getId());
 			String payUrl = orderInfoService.buy(filterMask);
 			logger.info("支付请求payUrl==>" + payUrl);
 			// response.sendRedirect(payUrl);
@@ -321,7 +327,7 @@ public class OrderInfoController extends CommonController {
 	 * @throws Exception
 	 */
 	@ApiOperation(value = "接收通知的方法", notes = "银联支付通知回调")
-	@RequestMapping(value = "/orderInfo/payNotify", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/orderInfo/payNotify", method = RequestMethod.POST)
 	public void notifyHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// 收到通知后记得返回SUCCESS
 		PrintWriter writer = response.getWriter();
@@ -672,7 +678,7 @@ public class OrderInfoController extends CommonController {
 	}
 
 	/**
-	 * 公众号——客户端——确认签收
+	 * 测试微信消息推送
 	 * 
 	 * @param request
 	 * @param filterMask
@@ -722,15 +728,23 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/wxin/deliveryOrderInfo", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/deliveryOrderInfo", method = RequestMethod.POST)
 	@ResponseBody
 	public DataResult deliveryOrderInfo(HttpServletRequest request, @RequestBody Map<String, String> param,
 			OrderInfoVo filterMask) {
 		PageResult result = PageResult.initResult();
+		UserDto user = this.getCurrentUser(request);
+		if (user == null) {
+			result.setCode(Constants.NOT_LOGIN);
+			result.setMsg("该派送员未登陆,请先登录");
+			return result;
+		}
+
 		logger.info("派送员端——我的订单,请求参数:" + JSON.toJSONString(param));
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
-		String allotDeliveryId = param.get("allotDeliveryId");
+		// String allotDeliveryId = param.get("allotDeliveryId");
+		String allotDeliveryId = user.getDeliveryUser().getId();
 		String status = param.get("status");
 		if (StringUtil.isNullOrEmpty(allotDeliveryId)) {
 			result.setCode(Constants.FAILURE);
@@ -778,15 +792,24 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/wxin/customerOrderInfo", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/customerOrderInfo", method = RequestMethod.POST)
 	@ResponseBody
 	public DataResult customerOrderInfo(HttpServletRequest request, @RequestBody Map<String, String> param,
 			OrderInfoVo filterMask) {
 		PageResult result = PageResult.initResult();
 		logger.info("公众号——客户端——我的订单,请求参数为:" + JSON.toJSONString(param));
+		UserDto user = this.getCurrentUser(request);
+		if (user == null) {
+			result.setCode(Constants.NOT_LOGIN);
+			result.setMsg("该派送员未登陆,请先登录");
+			return result;
+		}
+
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
-		String customerUserId = param.get("customerUserId");
+		// String customerUserId = param.get("customerUserId");
+		String customerUserId = user.getCustomerUser().getId();
+
 		String status = param.get("status");
 		if (StringUtil.isNullOrEmpty(customerUserId)) {
 			result.setCode(Constants.FAILURE);

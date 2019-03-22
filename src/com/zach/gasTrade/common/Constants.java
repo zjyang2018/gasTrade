@@ -6,7 +6,17 @@ public class Constants {
 
 	public static final int SUCCESS = 0;
 	public static final int FAILURE = -1;
-	public static final int VERIFY_CODE_EXPIRE_TIME = 60 * 5 * 1000;
+	// 用户不存在
+	public static final int USER_NOT_EXIST = 10001;
+	// 参数不能为空
+	public static final int PARAM_NOT_NULL = 10002;
+	// 派送员未登陆
+	public static final int NOT_LOGIN = 10003;
+
+	public static final int VERIFY_CODE_EXPIRE_TIME = 60 * 5;
+
+	// redis保存key
+	public static final String USER_INFO_KEY = "USER_INFO_KEY:20190312";
 
 	public static final String BASE_PATH = "http://localhost:8080/gasTrade/images/";
 	// public static final String BASE_PATH =

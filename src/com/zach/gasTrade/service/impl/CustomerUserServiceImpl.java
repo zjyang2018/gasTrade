@@ -141,7 +141,7 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 				returnData.put("isRegister", false);
 			}
 		} else if ("2".equals(user.getUserType())) {
-			if (StringUtil.isNotNullAndNotEmpty(user.getDeliveryUser().getPhoneNumber())) {
+			if (StringUtil.isNotNullAndNotEmpty(user.getDeliveryUser().getLoginName())) {
 				returnData.put("isLogin", true);
 			} else {
 				returnData.put("isLogin", false);
@@ -153,7 +153,7 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 			} else {
 				returnData.put("isRegister", false);
 			}
-			if (StringUtil.isNotNullAndNotEmpty(user.getDeliveryUser().getPhoneNumber())) {
+			if (StringUtil.isNotNullAndNotEmpty(user.getDeliveryUser().getLoginName())) {
 				returnData.put("isLogin", true);
 			} else {
 				returnData.put("isLogin", false);

@@ -121,18 +121,20 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 		Map<String, Object> returnData = new HashMap<String, Object>();
 		returnData.put("openId", openId);
 
-		CustomerUserVo customerUserVo = new CustomerUserVo();
-		customerUserVo.setWxOpenId(openId);
-		CustomerUserVo customerUser = this.getCustomerUserBySelective(customerUserVo);
-		if (customerUser != null && StringUtil.isNotNullAndNotEmpty(customerUser.getPhoneNumber())) {
-			returnData.put("isRegister", true);
-			// this.save(customerUserVo);
-		} else {
-			returnData.put("isRegister", false);
-		}
+		// CustomerUserVo customerUserVo = new CustomerUserVo();
+		// customerUserVo.setWxOpenId(openId);
+		// CustomerUserVo customerUser =
+		// this.getCustomerUserBySelective(customerUserVo);
+		// if (customerUser != null &&
+		// StringUtil.isNotNullAndNotEmpty(customerUser.getPhoneNumber())) {
+		// returnData.put("isRegister", true);
+		// // this.save(customerUserVo);
+		// } else {
+		// returnData.put("isRegister", false);
+		// }
 
 		UserDto user = this.getUserInfo(openId);
-		if (user == null) {
+		if (StringUtil.isNull(user.getUserType())) {
 			returnData.put("userType", "3");
 		} else if ("1".equals(user.getUserType())) {
 			if (StringUtil.isNotNullAndNotEmpty(user.getCustomerUser().getPhoneNumber())) {

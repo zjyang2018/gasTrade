@@ -34,13 +34,13 @@ public class WeiXinController extends CommonController {
 	private CustomerUserService customerUserService;
 
 	@ApiOperation(value = "加载微信公众号js配置 接口", notes = "请求方式:GET\\n返回参数字段说明||appId:公众号appId,timestamp:随机时间戳 ,nonceStr:随机字符串,signature:签名字符串\\n")
-	@RequestMapping(value = "/weixin/loadConfig", method = RequestMethod.GET)
+	@RequestMapping(value = "/weixin/loadConfig", method = RequestMethod.POST)
 	@ResponseBody
-	public DataResult wxsdk_config(HttpServletRequest request) {
+	public DataResult wxsdk_config(HttpServletRequest request, Map<String, String> param) {
 		DataResult result = DataResult.initResult();
 		// 1、获取请求url
 		// String url = request.getRequestURI();
-		String url = "http://www.yourtk.com/";
+		String url = param.get("url");
 		// 2、获取Ticket
 		String jsapi_ticket = TokenUtil.getWXTicket();
 		// 3、时间戳和随机字符串

@@ -38,7 +38,6 @@ import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.CustomerOrderInfoDto;
 import com.zach.gasTrade.dto.DeliveryDetailDto;
 import com.zach.gasTrade.dto.DeliveryMonitorDto;
-import com.zach.gasTrade.dto.DeliveryOrderCompleteDetailDto;
 import com.zach.gasTrade.dto.DeliveryOrderDetailDto;
 import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
 import com.zach.gasTrade.dto.OrderDetailDto;
@@ -858,14 +857,12 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/orderInfo/deliveryOrderDetail", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/orderInfo/deliveryOrderDetail", method = RequestMethod.GET)
 	@ResponseBody
-	public DataResult deliveryOrderDetail(HttpServletRequest request, @RequestBody Map<String, String> param) {
+	public DataResult deliveryOrderDetail(HttpServletRequest request) {
 		DataResult result = DataResult.initResult();
 
-		String orderId = param.get("orderId");
-		// 1:派单详情;2:接单详情
-		String status = param.get("status");
+		String orderId = request.getParameter("orderId");
 
 		if (StringUtil.isNullOrEmpty(orderId)) {
 			result.setCode(Constants.FAILURE);
@@ -877,6 +874,9 @@ public class OrderInfoController extends CommonController {
 		filterMask.setOrderId(orderId);
 		try {
 			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			if (orderInfo != null) {
+				throw new RuntimeException("该订单不存在," + orderId);
+			}
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
 			ProductVo product = productService.getProductBySelective(productVo);
@@ -892,11 +892,10 @@ public class OrderInfoController extends CommonController {
 				deliveryOrderDetailDto.setCustomerAddress(customerUser.getAddress());
 			}
 
+			deliveryOrderDetailDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
 			deliveryOrderDetailDto.setOrderId(orderInfo.getOrderId());
 			deliveryOrderDetailDto.setProductName(orderInfo.getProductName());
-			if ("1".equals(status)) {
-				deliveryOrderDetailDto.setStockQty(product.getStockQty());
-			}
+			deliveryOrderDetailDto.setStockQty(product.getStockQty());
 			deliveryOrderDetailDto.setRemark(orderInfo.getRemark());
 
 			AdminUserVo adminUserVo = new AdminUserVo();
@@ -907,55 +906,6 @@ public class OrderInfoController extends CommonController {
 			}
 
 			result.setData(deliveryOrderDetailDto);
-
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
-
-	/**
-	 * 公众号——派送端——派单完成详情
-	 * 
-	 * @param request
-	 * @param filterMask
-	 * @return Result
-	 */
-	@RequestMapping(value = "/orderInfo/deliveryOrderCompleteDetail", method = RequestMethod.POST)
-	@ResponseBody
-	public DataResult deliveryOrderCompleteDetail(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
-		DataResult result = DataResult.initResult();
-		if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("订单编号不能为空");
-			return result;
-		}
-
-		try {
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
-			ProductVo productVo = new ProductVo();
-			productVo.setProductId(orderInfo.getProductId());
-			// ProductVo product = productService.getProductBySelective(productVo);
-
-			CustomerUserVo customerUserVo = new CustomerUserVo();
-			customerUserVo.setId(orderInfo.getCustomerUserId());
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-
-			DeliveryOrderCompleteDetailDto deliveryOrderCompleteDetailDto = new DeliveryOrderCompleteDetailDto();
-			deliveryOrderCompleteDetailDto.setOrderId(orderInfo.getOrderId());
-			deliveryOrderCompleteDetailDto.setProductName(orderInfo.getProductName());
-			deliveryOrderCompleteDetailDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
-			deliveryOrderCompleteDetailDto.setCustomerName(customerUser.getName());
-			deliveryOrderCompleteDetailDto.setCustomerAddress(customerUser.getAddress());
-			deliveryOrderCompleteDetailDto.setRemark("");
-
-			result.setData(deliveryOrderCompleteDetailDto);
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

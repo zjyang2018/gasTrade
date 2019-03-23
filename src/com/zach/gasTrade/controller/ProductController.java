@@ -265,26 +265,27 @@ public class ProductController extends CommonController {
 					continue;
 				}
 				// 处理删除图片
-				String imagePath = product.getImagePath();
-				if (StringUtil.isNotNullAndNotEmpty(imagePath)) {
-					String realBasePath = request.getServletContext().getRealPath("/") + "images/";
-					String[] images = imagePath.split(";");
-					for (String image : images) {
-						if (StringUtil.isNull(image)) {
-							continue;
-						}
-						try {
-							int index = image.lastIndexOf("/");
-							String imageName = image.substring(index + 1, image.length());
-							File imageFile = new File(realBasePath + imageName);
-							if (imageFile.exists()) {
-								imageFile.delete();
-							}
-						} catch (Exception e) {
-							logger.info("删除图片文件失败," + image);
-						}
-					}
-				}
+				// String imagePath = product.getImagePath();
+				// if (StringUtil.isNotNullAndNotEmpty(imagePath)) {
+				// String realBasePath = request.getServletContext().getRealPath("/") +
+				// "images/";
+				// String[] images = imagePath.split(";");
+				// for (String image : images) {
+				// if (StringUtil.isNull(image)) {
+				// continue;
+				// }
+				// try {
+				// int index = image.lastIndexOf("/");
+				// String imageName = image.substring(index + 1, image.length());
+				// File imageFile = new File(realBasePath + imageName);
+				// if (imageFile.exists()) {
+				// imageFile.delete();
+				// }
+				// } catch (Exception e) {
+				// logger.info("删除图片文件失败," + image);
+				// }
+				// }
+				// }
 
 				product.setStatus("20");
 				if (StringUtil.isNotNullAndNotEmpty(updateUserId)) {

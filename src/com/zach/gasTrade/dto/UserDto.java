@@ -5,7 +5,12 @@ import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 
-public class UserDto {
+public class UserDto implements java.io.Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5136957967973198419L;
 
 	// wxOpenId
 	private String wxOpenId;

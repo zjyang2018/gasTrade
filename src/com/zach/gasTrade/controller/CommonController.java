@@ -34,8 +34,9 @@ public class CommonController {
 					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, JSON.toJSONString(user));
 					return user;
 				}
+			} else {
+				return JSON.parseObject(userStr, UserDto.class);
 			}
-			return JSON.parseObject(userStr, UserDto.class);
 		}
 		return null;
 	}

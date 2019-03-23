@@ -236,10 +236,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			String moveLocation = "";
 			double minDistance = 0.00;
 			for (DeliveryLocationHistoryVo bean : list) {
-				//空坐标过滤掉 
+				// 空坐标过滤掉
 				if (StringUtil.isNull(orderInfoVo.getLatitude()) || StringUtil.isNull(orderInfoVo.getLongitude())
-						|| StringUtil.isNull(bean.getLatitude())
-						|| StringUtil.isNull(bean.getLongitude())) {
+						|| StringUtil.isNull(bean.getLatitude()) || StringUtil.isNull(bean.getLongitude())) {
 					continue;
 				}
 				double distance = MapHelper.GetPointDistance(bean.getLatitude() + "," + bean.getLongitude(),
@@ -411,32 +410,6 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	@Override
 	public CustomerOrderGenerateInfoDto orderGenerate(OrderInfoVo filterMask) {
 		// TODO Auto-generated method stub
-		String orderId = SerialGenerator.getSerialNum();
-		Date nowTime = new Date();
-		CustomerUserVo customerUserVo = new CustomerUserVo();
-		customerUserVo.setId(filterMask.getCustomerUserId());
-		CustomerUserVo customerUser = customerUserDao.getCustomerUserBySelective(customerUserVo);
-		filterMask.setOrderId(orderId);
-		filterMask.setPayStatus("10");
-		filterMask.setAllotStatus("10");
-		filterMask.setCustomerAddress(customerUser.getAddress());
-		filterMask.setLongitude(customerUser.getLongitude());
-		filterMask.setLatitude(customerUser.getLatitude());
-		filterMask.setOrderStatus("10");
-		filterMask.setRemark("");
-		filterMask.setCreateTime(nowTime);
-		filterMask.setUpdateTime(nowTime);
-
-		int n = orderInfoDao.save(filterMask);
-		if (n == 1) {
-			CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto = new CustomerOrderGenerateInfoDto();
-			customerOrderGenerateInfoDto.setOrderId(orderId);
-			customerOrderGenerateInfoDto.setProductAmount(filterMask.getAmount());
-			customerOrderGenerateInfoDto.setAddress(customerUser.getAddress());
-			customerOrderGenerateInfoDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
-			customerOrderGenerateInfoDto.setRemark("");
-			return customerOrderGenerateInfoDto;
-		}
 		return null;
 	}
 

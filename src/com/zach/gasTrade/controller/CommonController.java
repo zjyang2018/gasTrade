@@ -29,16 +29,13 @@ public class CommonController {
 		if (StringUtil.isNotNullAndNotEmpty(wxOpenId)) {
 			String userStr = cacheService.get(Constants.USER_INFO_KEY + wxOpenId);
 			if (StringUtil.isNull(userStr)) {
-				return null;
-			}
-			UserDto user = JSON.parseObject(userStr, UserDto.class);
-			if (user == null) {
-				user = customerUserService.getUserInfo(wxOpenId);
+				UserDto user = customerUserService.getUserInfo(wxOpenId);
 				if (user != null) {
-					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, JSON.toJSONString(user));
 					return user;
 				}
 			}
+			return JSON.parseObject(userStr, UserDto.class);
 		}
 		return null;
 	}

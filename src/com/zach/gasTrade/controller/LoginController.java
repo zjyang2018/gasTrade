@@ -154,12 +154,12 @@ public class LoginController extends CommonController {
 					user = new UserDto();
 					user.setUserType("1");
 					user.setCustomerUser(customerUser);
-					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, JSON.toJSONString(user));
 				} else {
 					if ("2".equals(user.getUserType())) {
 						user.setUserType("4");
 						user.setCustomerUser(customerUser);
-						cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+						cacheService.add(Constants.USER_INFO_KEY + wxOpenId, JSON.toJSONString(user));
 					}
 				}
 			} else {
@@ -325,7 +325,7 @@ public class LoginController extends CommonController {
 				if ("1".equals(user.getUserType())) {
 					user.setUserType("4");
 					user.setDeliveryUser(deliveryUserVo);
-					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+					cacheService.add(Constants.USER_INFO_KEY + wxOpenId, JSON.toJSONString(user));
 				}
 			}
 		} catch (RuntimeException e) {

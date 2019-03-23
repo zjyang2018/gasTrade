@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.alibaba.fastjson.JSON;
 import com.common.cache.CacheService;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
@@ -26,7 +27,11 @@ public class CommonController {
 		String wxOpenId = request.getHeader("Authorization");
 		logger.info("Header获取到wxOpenId==>" + wxOpenId);
 		if (StringUtil.isNotNullAndNotEmpty(wxOpenId)) {
-			UserDto user = cacheService.get(Constants.USER_INFO_KEY + wxOpenId);
+			String userStr = cacheService.get(Constants.USER_INFO_KEY + wxOpenId);
+			if (StringUtil.isNull(userStr)) {
+				return null;
+			}
+			UserDto user = JSON.parseObject(userStr, UserDto.class);
 			if (user == null) {
 				user = customerUserService.getUserInfo(wxOpenId);
 				if (user != null) {
@@ -37,7 +42,7 @@ public class CommonController {
 		}
 		return null;
 	}
-	
+
 	protected String getWxOpenId(HttpServletRequest request) {
 		String wxOpenId = request.getHeader("Authorization");
 		logger.info("Header获取到wxOpenId==>" + wxOpenId);

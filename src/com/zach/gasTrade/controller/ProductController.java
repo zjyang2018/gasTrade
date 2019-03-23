@@ -245,7 +245,6 @@ public class ProductController extends CommonController {
 	@ResponseBody
 	public Result delete(HttpServletRequest request, @RequestBody Map<String, String> param) {
 		Result result = Result.initResult();
-		ProductVo filterMask = new ProductVo();
 		String productIds = param.get("productIds");
 		if (StringUtil.isNullOrEmpty(productIds)) {
 			result.setCode(Constants.FAILURE);
@@ -253,18 +252,45 @@ public class ProductController extends CommonController {
 			return result;
 		}
 		String updateUserId = param.get("updateUserId");
-		if (StringUtil.isNullOrEmpty(updateUserId)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("用户编号不能为空");
-			return result;
-		}
-		String[] prods = productIds.split(",");
+		String[] prods = productIds.split(";");
 		try {
-			for (String str : prods) {
-				filterMask.setStatus("20");
-				filterMask.setProductId(str);
-				filterMask.setUpdateUserId(updateUserId);
-				productService.update(filterMask);
+			for (String productId : prods) {
+				if (StringUtil.isNull(productId)) {
+					continue;
+				}
+				ProductVo productParam = new ProductVo();
+				productParam.setProductId(productId);
+				ProductVo product = productService.getProductBySelective(productParam);
+				if (product == null) {
+					continue;
+				}
+				// 处理删除图片
+				String imagePath = product.getImagePath();
+				if (StringUtil.isNotNullAndNotEmpty(imagePath)) {
+					String realBasePath = request.getServletContext().getRealPath("/") + "images/";
+					String[] images = imagePath.split(";");
+					for (String image : images) {
+						if (StringUtil.isNull(image)) {
+							continue;
+						}
+						try {
+							int index = image.lastIndexOf("/");
+							String imageName = image.substring(index + 1, image.length());
+							File imageFile = new File(realBasePath + imageName);
+							if (imageFile.exists()) {
+								imageFile.delete();
+							}
+						} catch (Exception e) {
+							logger.info("删除图片文件失败," + image);
+						}
+					}
+				}
+
+				product.setStatus("20");
+				if (StringUtil.isNotNullAndNotEmpty(updateUserId)) {
+					product.setUpdateUserId(updateUserId);
+				}
+				productService.update(product);
 			}
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
@@ -277,85 +303,6 @@ public class ProductController extends CommonController {
 		}
 		return result;
 	}
-
-	/**
-	 * 删除图片
-	 * 
-	 * @param request
-	 * @param filterMask
-	 * @return Result
-	 */
-	// @RequestMapping(value = "/img/delete", method = RequestMethod.POST)
-	// @ResponseBody
-	// public Result deleteImg(HttpServletRequest request, @RequestBody Map<String,
-	// String> param) {
-	// Result result = Result.initResult();
-	// String images = param.get("images");
-	// String productId = param.get("productId");
-	// if (StringUtil.isNullOrEmpty(productId)) {
-	// result.setCode(Constants.FAILURE);
-	// result.setMsg("产品编号不能为空");
-	// return result;
-	// }
-	// String updateUserId = param.get("updateUserId");
-	// if (StringUtil.isNullOrEmpty(updateUserId)) {
-	// result.setCode(Constants.FAILURE);
-	// result.setMsg("用户编号不能为空");
-	// return result;
-	// }
-	// ProductVo filterMask = new ProductVo();
-	// filterMask.setProductId(productId);
-	//
-	// ProductVo productVo = productService.getProductBySelective(filterMask);
-	// String imagePath = productVo.getImagePath();
-	// if (StringUtil.isNullOrEmpty(imagePath)) {
-	// result.setCode(Constants.FAILURE);
-	// result.setMsg("没有图片可删除了");
-	// return result;
-	// }
-	//
-	// String[] imgArr = imagePath.split(",");
-	//
-	// List<String> strList = Arrays.asList(imgArr);
-	// List<String> arrList = new ArrayList<String>(strList);
-	//
-	// String realUploadPath = request.getServletContext().getRealPath("/") +
-	// "images";
-	// if (StringUtil.isNotNullAndNotEmpty(images)) {
-	// String[] imgNames = images.split(",");
-	// for (String str : imgNames) {
-	// if (arrList.contains(str)) {
-	// arrList.remove(str);
-	// File file = new File(realUploadPath + "/" + str);
-	// file.delete();
-	// }
-	// }
-	// if (!arrList.isEmpty()) {
-	// String sqlPath = arrList.toString();
-	// sqlPath = sqlPath.substring(1, sqlPath.length() - 1);
-	// sqlPath.replaceAll(" ", "");
-	// productVo.setImagePath(sqlPath);
-	// } else {
-	// productVo.setImagePath("");
-	// }
-	//
-	// }
-	// productVo.setUpdateUserId(updateUserId);
-	//
-	// try {
-	// productService.update(productVo);
-	//
-	// } catch (RuntimeException e) {
-	// result.setCode(Constants.FAILURE);
-	// result.setMsg(e.getMessage());
-	// logger.error("系统异常," + e.getMessage(), e);
-	// } catch (Exception e) {
-	// result.setCode(Constants.FAILURE);
-	// result.setMsg("系统异常,请稍后重试");
-	// logger.error("系统异常,请稍后重试", e);
-	// }
-	// return result;
-	// }
 
 	/**
 	 * 产品图片上传
@@ -381,14 +328,14 @@ public class ProductController extends CommonController {
 			return result;
 		}
 		try {
-			String realBasePath = request.getServletContext().getRealPath("/") + "images";
+			String realBasePath = request.getServletContext().getRealPath("/") + "images/";
 			logger.info("上传图片获取当前图片路径:" + realBasePath);
 
 			String uuid = SerialGenerator.getUUID();
 			// 得到新 文件名
 			String fileName = uuid + "." + imageSuffixName;
 
-			File imageFile = new File(realBasePath + "/" + fileName);// 创建文件对象
+			File imageFile = new File(realBasePath + fileName);// 创建文件对象
 			if (!imageFile.exists()) {// 文件名不存在 则新建文件，并将文件复制到新建文件中
 				imageFile.createNewFile();
 			}
@@ -445,10 +392,6 @@ public class ProductController extends CommonController {
 			if (product == null) {
 				throw new RuntimeException("该产品不存在," + filterMask.getProductId());
 			}
-			AdminUserVo adminUserVo = new AdminUserVo();
-			adminUserVo.setId(product.getCreateUserId());
-			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-
 			ProductInfoDto productInfoDto = new ProductInfoDto();
 			productInfoDto.setProductId(product.getProductId());
 			productInfoDto.setProductName(product.getProductName());
@@ -456,9 +399,13 @@ public class ProductController extends CommonController {
 			productInfoDto.setProductDesc(product.getProductDesc());
 			productInfoDto.setSpec(product.getSpec());
 			productInfoDto.setImagePath(product.getImagePath());
-			productInfoDto.setAddress(adminUser.getAddress());
+			AdminUserVo adminUserVo = new AdminUserVo();
+			adminUserVo.setId(product.getCreateUserId());
+			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
+			if (adminUser != null) {
+				productInfoDto.setAddress(adminUser.getAddress());
+			}
 			result.setData(productInfoDto);
-
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

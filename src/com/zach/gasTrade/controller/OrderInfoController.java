@@ -250,37 +250,6 @@ public class OrderInfoController extends CommonController {
 		return result;
 	}
 
-	// /**
-	// * 订单生成
-	// *
-	// * @param request
-	// * @param filterMask
-	// * @return Result
-	// */
-	// @RequestMapping(value = "/orderInfo/orderGenerate", method =
-	// RequestMethod.POST)
-	// @ResponseBody
-	// public Result orderGenerate(HttpServletRequest request, @RequestBody
-	// OrderInfoVo filterMask) {
-	// DataResult result = DataResult.initResult();
-	//
-	// try {
-	// CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto =
-	// orderInfoService.orderGenerate(filterMask);
-	// result.setData(customerOrderGenerateInfoDto);
-	// } catch (RuntimeException e) {
-	// result.setCode(Constants.FAILURE);
-	// result.setMsg(e.getMessage());
-	// logger.error("系统异常," + e.getMessage(), e);
-	// } catch (Exception e) {
-	// result.setCode(Constants.FAILURE);
-	// result.setMsg("系统异常,请稍后重试");
-	// logger.error("系统异常,请稍后重试", e);
-	// }
-	//
-	// return result;
-	// }
-
 	/**
 	 * 订单下单
 	 * 

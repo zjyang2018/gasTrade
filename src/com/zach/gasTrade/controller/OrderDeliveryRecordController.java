@@ -37,7 +37,6 @@ import com.zach.gasTrade.common.ExcelUtils;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.OrderDeliveryCountDto;
-import com.zach.gasTrade.service.CustomerUserService;
 import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.service.OrderDeliveryRecordService;
 import com.zach.gasTrade.service.OrderInfoService;
@@ -58,9 +57,6 @@ public class OrderDeliveryRecordController extends CommonController {
 
 	@Autowired
 	private OrderInfoService orderInfoService;
-
-	@Autowired
-	private CustomerUserService customerUserService;
 
 	@Autowired
 	private DeliveryUserService deliveryUserService;

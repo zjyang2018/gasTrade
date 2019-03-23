@@ -128,7 +128,7 @@ public class LoginController extends CommonController {
 		String smgCode = parameter.get("smgCode");
 		try {
 			// String wxOpenId = parameter.get("wxOpenId");
-			String wxOpenId = request.getHeader("wxOpenId");
+			String wxOpenId = this.getWxOpenId(request);
 			String regCode = cacheService.get("regCode" + wxOpenId);
 			logger.info("注册获取参数,wxOpenId==>" + wxOpenId + ",regCode==>" + regCode);
 			if ("123456".equals(smgCode) || smgCode.equals(regCode)) {
@@ -303,7 +303,7 @@ public class LoginController extends CommonController {
 
 		filterMask.setLoginName(loginName);
 
-		String wxOpenId = request.getHeader("wxOpenId");
+		String wxOpenId = this.getWxOpenId(request);
 
 		try {
 			DeliveryUserVo deliveryUserVo = deliveryUserService.getDeliveryUserBySelective(filterMask);

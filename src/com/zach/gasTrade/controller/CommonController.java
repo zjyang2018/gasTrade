@@ -23,7 +23,7 @@ public class CommonController {
 	private CacheService cacheService;
 
 	protected UserDto getCurrentUser(HttpServletRequest request) {
-		String wxOpenId = request.getHeader("wxOpenId");
+		String wxOpenId = request.getHeader("Authorization");
 		logger.info("Header获取到wxOpenId==>" + wxOpenId);
 		if (StringUtil.isNotNullAndNotEmpty(wxOpenId)) {
 			UserDto user = cacheService.get(Constants.USER_INFO_KEY + wxOpenId);
@@ -36,6 +36,12 @@ public class CommonController {
 			}
 		}
 		return null;
+	}
+	
+	protected String getWxOpenId(HttpServletRequest request) {
+		String wxOpenId = request.getHeader("Authorization");
+		logger.info("Header获取到wxOpenId==>" + wxOpenId);
+		return wxOpenId;
 	}
 
 }

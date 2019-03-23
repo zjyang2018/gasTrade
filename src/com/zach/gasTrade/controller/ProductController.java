@@ -9,9 +9,7 @@ package com.zach.gasTrade.controller;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.common.seq.SerialGenerator;
 import com.common.utils.StringUtil;
@@ -121,95 +117,46 @@ public class ProductController extends CommonController {
 	 */
 	@RequestMapping(value = "/product/save", method = RequestMethod.POST)
 	@ResponseBody
-	public Result save(HttpServletRequest request) {
-		DataResult result = DataResult.initResult();
-		ProductVo filterMask = new ProductVo();
-		// 取得用户ID
-		String createUserId = request.getParameter("createUserId");
-		String productName = request.getParameter("productName");
-		String spec = request.getParameter("spec");
-		String amount = request.getParameter("amount");
-		String stockQty = request.getParameter("stockQty");
-		String productDesc = request.getParameter("productDesc");
-
-		filterMask.setCreateUserId(createUserId);
-		filterMask.setProductName(productName);
-		filterMask.setSpec(spec);
-		filterMask.setAmount(BigDecimal.valueOf(Integer.parseInt(amount)));
-		filterMask.setStockQty(Integer.parseInt(stockQty));
-		filterMask.setProductDesc(productDesc);
-
-		// 取得上传的文件
-		// MultipartResolver resolver = new StandardServletMultipartResolver();
-		// MultipartHttpServletRequest multipartRequest =
-		// resolver.resolveMultipart(request);
-		// List<MultipartFile> images = multipartRequest.getFiles("image");
-		MultipartHttpServletRequest Murequest = (MultipartHttpServletRequest) request;
-		Map<String, MultipartFile> files = Murequest.getFileMap();// 得到文件map对象
-		if (files.size() > 3) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("图片不能超过3张哟");
-			return result;
-		}
-		if (!files.isEmpty()) {
-			// 保存数据库的路径
-			String sqlPath = "";
-			String imagesPath = "";
-			// 定义文件保存的本地路径
-			String realUploadPath = request.getSession().getServletContext().getRealPath("/") + "images";
-			File file = new File(realUploadPath);
-			if (!file.exists()) {
-				file.mkdirs();
+	public Result save(HttpServletRequest request, @RequestBody ProductVo filterMask) {
+		Result result = Result.initResult();
+		try {
+			if (StringUtil.isNull(filterMask.getProductName())) {
+				throw new RuntimeException("产品名称不能为空");
 			}
-			// 定义 文件名
-			String filename = null;
-			try {
-				for (MultipartFile multipartFile : files.values()) {
-					// 生成uuid作为文件名称
-					String uuid = SerialGenerator.getUUID();
-					// 获得文件类型（可以判断如果不是图片，禁止上传）
-					String contentType = multipartFile.getContentType();
-					// 获得上传文件名
-					String realFileName = multipartFile.getOriginalFilename();
-					int pos = realFileName.indexOf('.');
-					// 获得文件后缀名
-					String suffixName = realFileName.substring(pos + 1, realFileName.length());
-					// 得到新 文件名
-					filename = uuid + "." + suffixName;
-
-					File tagetFile = new File(realUploadPath + "/" + filename);// 创建文件对象
-					if (!tagetFile.exists()) {// 文件名不存在 则新建文件，并将文件复制到新建文件中
-						tagetFile.createNewFile();
+			if (StringUtil.isNull(filterMask.getSpec())) {
+				throw new RuntimeException("产品规格不能为空");
+			}
+			if (filterMask.getAmount() == null) {
+				throw new RuntimeException("产品金额不能为空");
+			}
+			String imagesPath = filterMask.getImagePath();
+			if (StringUtil.isNotNullAndNotEmpty(imagesPath)) {
+				String[] images = imagesPath.split(";");
+				if (images.length > 3) {
+					// 去掉空,取最后的3张图片
+					List<String> list = new ArrayList<String>();
+					for (int index = 0; index < images.length; index++) {
+						if (StringUtil.isNotNullAndNotEmpty(images[index])) {
+							list.add(images[index]);
+						}
 					}
-					// 文件保存路径
-					multipartFile.transferTo(tagetFile);
-					// 把图片的相对路径保存至数据库
-					sqlPath += filename + ",";
-					imagesPath += Constants.BASE_PATH + filename + ",";
+					if (list.size() > 3) {
+						imagesPath = list.get(1) + ";" + list.get(2) + ";" + list.get(2);
+					}
 				}
-
-				sqlPath = sqlPath.substring(0, sqlPath.length() - 1);
-				imagesPath = imagesPath.substring(0, imagesPath.length() - 1);
-
-				// 把图片的相对路径保存至数据库
-				// sqlPath = "/images/"+filename;
-				// sqlPath = realUploadPath + "/"+filename;
-				filterMask.setImagePath(sqlPath);
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("imagesPath", imagesPath);
-				result.setData(map);
-
-				productService.save(filterMask);
-
-			} catch (RuntimeException e) {
-				result.setCode(Constants.FAILURE);
-				result.setMsg(e.getMessage());
-				logger.error("系统异常," + e.getMessage(), e);
-			} catch (Exception e) {
-				result.setCode(Constants.FAILURE);
-				result.setMsg("系统异常,请稍后重试");
-				logger.error("系统异常,请稍后重试", e);
+				filterMask.setImagePath(imagesPath);
 			}
+
+			productService.save(filterMask);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
 		}
 
 		return result;

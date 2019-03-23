@@ -936,7 +936,7 @@ public class OrderInfoController extends CommonController {
 			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
-			ProductVo product = productService.getProductBySelective(productVo);
+			// ProductVo product = productService.getProductBySelective(productVo);
 
 			CustomerUserVo customerUserVo = new CustomerUserVo();
 			customerUserVo.setId(orderInfo.getCustomerUserId());

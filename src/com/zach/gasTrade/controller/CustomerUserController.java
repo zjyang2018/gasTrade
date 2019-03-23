@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.controller;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
+import com.zach.gasTrade.dto.UserDto;
 import com.zach.gasTrade.service.CustomerUserService;
 import com.zach.gasTrade.vo.CustomerUserVo;
 
@@ -153,6 +155,54 @@ public class CustomerUserController extends CommonController {
 			}
 
 			customerUserService.update(filterMask);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	/**
+	 * 修改客户收货信息
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@ApiOperation(value = "修改客户收货信息", notes = "请求参数说明||name:姓名 ,,phoneNumber:手机号码,address:联系地址\\n返回参数字段说明:\\n")
+	@RequestMapping(value = "/weixin/customerUser/updateInfo", method = RequestMethod.POST)
+	@ResponseBody
+	public Result updateAddress(HttpServletRequest request, @RequestBody CustomerUserVo filterMask) {
+		Result result = Result.initResult();
+		logger.info("修改客户收货信息接口参数:" + JSON.toJSONString(filterMask));
+		try {
+			UserDto user = this.getCurrentUser(request);
+			if (user == null || user.getCustomerUser() == null) {
+				throw new RuntimeException("该用户信息已过期,请重新进入");
+			}
+
+			String address = filterMask.getAddress();
+			JSONObject jsonObject = MapHelper.addressToPoint(address);
+			if (jsonObject == null || jsonObject.getInteger("confidence") < 16) {
+				throw new RuntimeException("地址输入详细，请重新输入");
+			}
+			String customerId = user.getCustomerUser().getId();
+			CustomerUserVo param = new CustomerUserVo();
+			param.setId(customerId);
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(param);
+			customerUser.setAddress(address);
+			customerUser.setPhoneNumber(filterMask.getPhoneNumber());
+			customerUser.setName(filterMask.getName());
+			customerUser.setLongitude(jsonObject.getJSONObject("location").getString("lng"));
+			customerUser.setLatitude(jsonObject.getJSONObject("location").getString("lat"));
+			customerUser.setUpdateTime(new Date());
+			customerUserService.update(customerUser);
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

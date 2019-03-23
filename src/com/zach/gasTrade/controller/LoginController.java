@@ -341,6 +341,7 @@ public class LoginController extends CommonController {
 	 * @return Result
 	 */
 	@RequestMapping(value = "/weixin/deliveryUser/resetPwd", method = RequestMethod.POST)
+	@ResponseBody
 	public Result modPwd(HttpServletRequest request, @RequestBody Map<String, String> param,
 			DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
@@ -370,17 +371,13 @@ public class LoginController extends CommonController {
 			result.setMsg("验证码错误,请重新输入");
 			return result;
 		}
-
-		// if (!newPassword.equals(comfirmPassword)) {
-		// result.setCode(Constants.FAILURE);
-		// result.setMsg("两次密码输入不一样");
-		// return result;
-		// }
-		filterMask.setId(deliveryId);
-		filterMask.setPhoneNumber(phoneNumber);
-		filterMask.setPassword(newPassword);
-
 		try {
+			filterMask.setId(deliveryId);
+			filterMask = deliveryUserService.getDeliveryUserBySelective(filterMask);
+
+			filterMask.setPhoneNumber(phoneNumber);
+			filterMask.setPassword(newPassword);
+
 			deliveryUserService.update(filterMask);
 
 		} catch (RuntimeException e) {

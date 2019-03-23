@@ -268,26 +268,27 @@ public class ProductController extends CommonController {
 					continue;
 				}
 				// 处理删除图片
-				String imagePath = product.getImagePath();
-				if (StringUtil.isNotNullAndNotEmpty(imagePath)) {
-					String realBasePath = request.getServletContext().getRealPath("/") + "images/";
-					String[] images = imagePath.split(";");
-					for (String image : images) {
-						if (StringUtil.isNull(image)) {
-							continue;
-						}
-						try {
-							int index = image.lastIndexOf("/");
-							String imageName = image.substring(index + 1, image.length());
-							File imageFile = new File(realBasePath + imageName);
-							if (imageFile.exists()) {
-								imageFile.delete();
-							}
-						} catch (Exception e) {
-							logger.info("删除图片文件失败," + image);
-						}
-					}
-				}
+				// String imagePath = product.getImagePath();
+				// if (StringUtil.isNotNullAndNotEmpty(imagePath)) {
+				// String realBasePath = request.getServletContext().getRealPath("/") +
+				// "images/";
+				// String[] images = imagePath.split(";");
+				// for (String image : images) {
+				// if (StringUtil.isNull(image)) {
+				// continue;
+				// }
+				// try {
+				// int index = image.lastIndexOf("/");
+				// String imageName = image.substring(index + 1, image.length());
+				// File imageFile = new File(realBasePath + imageName);
+				// if (imageFile.exists()) {
+				// imageFile.delete();
+				// }
+				// } catch (Exception e) {
+				// logger.info("删除图片文件失败," + image);
+				// }
+				// }
+				// }
 
 				product.setStatus("20");
 				if (StringUtil.isNotNullAndNotEmpty(updateUserId)) {
@@ -379,21 +380,22 @@ public class ProductController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/product/info", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/product/info", method = RequestMethod.GET)
 	@ResponseBody
-	public DataResult info(HttpServletRequest request, @RequestBody ProductVo filterMask) {
+	public DataResult info(HttpServletRequest request, ProductVo filterMask) {
 		DataResult result = DataResult.initResult();
-		if (StringUtil.isNullOrEmpty(filterMask.getProductId())) {
+		String productId = request.getParameter("productId");
+		if (StringUtil.isNullOrEmpty(productId)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("产品编号不能为空");
 			return result;
 		}
 
 		try {
-
+			filterMask.setProductId(productId);
 			ProductVo product = productService.getProductBySelective(filterMask);
 			if (product == null) {
-				throw new RuntimeException("该产品不存在," + filterMask.getProductId());
+				throw new RuntimeException("该产品不存在," + productId);
 			}
 			ProductInfoDto productInfoDto = new ProductInfoDto();
 			productInfoDto.setProductId(product.getProductId());
@@ -428,7 +430,7 @@ public class ProductController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/product/list", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/product/list", method = RequestMethod.POST)
 	@ResponseBody
 	public DataResult productList(HttpServletRequest request, @RequestBody Map<String, String> param,
 			ProductVo filterMask) {

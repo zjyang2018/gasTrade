@@ -45,7 +45,7 @@
 		            and product_id = #{productId}
 		       </if>
 	    	   <if  test="productName !=null ">
-		            and product_name like #{productName}
+		            and product_name like concat(concat(#{productName},"%"))
 		       </if>
 	    	   <if  test="amount !=null ">
 		            and amount = #{amount}
@@ -133,7 +133,7 @@
 		            and product_id = #{productId}
 		       </if>
 	    	   <if  test="productName !=null ">
-		            and product_name like #{productName}
+		            and product_name like concat(concat(#{productName},"%"))
 		       </if>
 	    	   <if  test="amount !=null ">
 		            and amount = #{amount}

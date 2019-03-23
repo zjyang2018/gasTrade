@@ -108,7 +108,7 @@ public class OrderInfoController extends CommonController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		if (StringUtil.isNotNullAndNotEmpty(orderId)) {
-			String id = orderId.trim() + "%";
+			String id = orderId.trim();
 			map.put("orderId", id);
 		}
 
@@ -117,7 +117,7 @@ public class OrderInfoController extends CommonController {
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(searchCustomerParam)) {
-			String selectCustomerParam = searchCustomerParam.trim() + "%";
+			String selectCustomerParam = searchCustomerParam.trim();
 			// selectCustomerParam以"1"开头则按手机号搜索
 			if (selectCustomerParam.startsWith("1")) {
 				map.put("customerPhoneNumber", selectCustomerParam);
@@ -127,7 +127,7 @@ public class OrderInfoController extends CommonController {
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(searchDeliveryParam)) {
-			String selectDeliveryParam = searchDeliveryParam.trim() + "%";
+			String selectDeliveryParam = searchDeliveryParam.trim();
 			// selectDeliveryParam以"1"开头则按手机号搜索
 			if (selectDeliveryParam.startsWith("1")) {
 				map.put("deliveryPhoneNumber", selectDeliveryParam);
@@ -146,9 +146,7 @@ public class OrderInfoController extends CommonController {
 
 		if (StringUtil.isNotNullAndNotEmpty(payTime)) {
 			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
-			if (payTime.indexOf(" ") != -1) {
-				payTime = payTime.substring(0, payTime.indexOf(" "));
-			}
+			payTime = payTime.substring(0, 10);
 			map.put("payTime", payTime);
 		}
 
@@ -204,23 +202,19 @@ public class OrderInfoController extends CommonController {
 		String endTime = param.get("endTime");
 
 		if (StringUtil.isNotNullAndNotEmpty(id)) {
-			String orderId = id.trim() + "%";
+			String orderId = id.trim();
 			map.put("orderId", orderId);
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(startTime)) {
 			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
-			if (startTime.indexOf(" ") != -1) {
-				startTime = startTime.substring(0, 10);
-			}
+			startTime = startTime.substring(0, 10);
 			map.put("startDate", startTime);
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(endTime)) {
 			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
-			if (endTime.indexOf(" ") != -1) {
-				endTime = endTime.substring(0, 10);
-			}
+			endTime = endTime.substring(0, 10);
 			map.put("endDate", endTime);
 		}
 

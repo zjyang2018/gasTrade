@@ -145,7 +145,7 @@
 	    ]]>
 		<where>
 			<if test="orderId !=null ">
-				and o.order_id like #{orderId}
+				and o.order_id like concat(concat(#{orderId},"%"))
 			</if>
 			<if test="payStatus !=null ">
 				and o.pay_status = #{payStatus}
@@ -157,16 +157,16 @@
 				and o.allot_status = #{allotStatus}
 			</if>
 			<if test="customerName !=null ">
-				and c.name like #{customerName}
+				and c.name like concat(concat(#{customerName},"%"))
 			</if>
 			<if test="customerPhoneNumber !=null ">
-				and c.phone_number like #{customerPhoneNumber}
+				and c.phone_number like concat(concat(#{customerPhoneNumber},"%"))
 			</if>
 			<if test="deliveryName !=null ">
-				and d.name like #{deliveryName}
+				and d.name like concat()
 			</if>
 			<if test="deliveryPhoneNumber !=null ">
-				and d.phone_number like #{deliveryPhoneNumber}
+				and d.phone_number like concat(concat(#{deliveryPhoneNumber},"%"))
 			</if>
 			<if test="orderStatus !=null ">
 				and o.order_status = #{orderStatus}
@@ -189,7 +189,7 @@
 				and product_id = #{productId}
 			</if>
 			<if test="productName !=null ">
-				and product_name = #{productName}
+				and product_name = #{productName}oncat(#{productName},"%"))
 			</if>
 			<if test="amount !=null ">
 				and amount = #{amount}
@@ -255,7 +255,7 @@
 		from order_info
 		<where>
 			<if test="orderId !=null ">
-				and order_id like #{orderId}
+				and order_id like concat(concat(#{orderId},"%"))
 			</if>
 			<if test="startTime !=null ">
 			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
@@ -277,7 +277,7 @@
 		left join delivery_user AS d on o.allot_delivery_id=d.id
 		<where>
 			<if test="orderId !=null ">
-				and o.order_id like #{orderId}
+				and o.order_id like concat(concat(#{orderId},"%"))
 			</if>
 			<if test="startTime !=null ">
 			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
@@ -446,7 +446,7 @@
 		left join delivery_user AS d on o.allot_delivery_id=d.id
 		<where>
 			<if test="orderId !=null ">
-				and o.order_id like #{orderId}
+				and o.order_id like concat(concat(#{orderId},"%"))
 			</if>
 			<if test="payStatus !=null ">
 				and o.pay_status = #{payStatus}
@@ -458,16 +458,16 @@
 				and o.allot_status = #{allotStatus}
 			</if>
 			<if test="customerName !=null ">
-				and c.name like #{customerName}
+				and c.name like concat(concat(#{customerName},"%"))
 			</if>
 			<if test="customerPhoneNumber !=null ">
-				and c.phone_number like #{customerPhoneNumber}
+				and c.phone_number like concat(concat(#{customerPhoneNumber},"%"))
 			</if>
 			<if test="deliveryName !=null ">
-				and d.name like #{deliveryName}
+				and d.name like concat(concat(#{deliveryName},"%"))
 			</if>
 			<if test="deliveryPhoneNumber !=null ">
-				and d.phone_number like #{deliveryPhoneNumber}
+				and d.phone_number like concat(concat(#{deliveryPhoneNumber},"%"))
 			</if>
 			<if test="orderStatus !=null ">
 				and o.order_status = #{orderStatus}
@@ -486,7 +486,7 @@
 		left join delivery_user AS d on o.allot_delivery_id=d.id
 		<where>
 			<if test="orderId !=null ">
-				and o.order_id like #{orderId}
+				and o.order_id like concat(concat(#{orderId},"%"))
 			</if>
 			<if test="payStatus !=null ">
 				and o.pay_status = #{payStatus}
@@ -498,16 +498,16 @@
 				and o.allot_status = #{allotStatus}
 			</if>
 			<if test="customerName !=null ">
-				and c.name like #{customerName}
+				and c.name like concat(concat(#{customerName},"%"))
 			</if>
 			<if test="customerPhoneNumber !=null ">
-				and c.phone_number like #{customerPhoneNumber}
+				and c.phone_number like concat(concat(#{customerPhoneNumber},"%"))
 			</if>
 			<if test="deliveryName !=null ">
-				and d.name like #{deliveryName}
+				and d.name like concat(concat(#{deliveryName},"%"))
 			</if>
 			<if test="deliveryPhoneNumber !=null ">
-				and d.phone_number like #{deliveryPhoneNumber}
+				and d.phone_number like concat(concat(#{deliveryPhoneNumber},"%"))
 			</if>
 			<if test="orderStatus !=null ">
 				and o.order_status = #{orderStatus}

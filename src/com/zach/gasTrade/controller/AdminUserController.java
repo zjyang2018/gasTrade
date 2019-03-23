@@ -51,19 +51,22 @@ public class AdminUserController extends CommonController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "平台管理员列表", notes = "请求参数说明||pageNum:页码 ,pageSize:每页条数,searchParam:搜索参数（姓名或手机号）,"
+			+ "workStatus:在职状态:10-在职,20-离职,accountStatus:账号状态:10-正常,20-冻结,"
+			+ "\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/adminUser/query_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
 			AdminUserVo filterMask) {
 		PageResult result = PageResult.initResult();
-
+		logger.info("平台管理员列表接口参数:" + JSON.toJSONString(param));
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String searchParam = param.get("searchParam");
 		String workStatus = param.get("workStatus");
 		String accountStatus = param.get("accountStatus");
 		if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
-			String selectParam = searchParam.trim() + "%";
+			String selectParam = searchParam.trim();
 			// searchParam以"1"开头则按手机号搜索
 			if (selectParam.startsWith("1")) {
 				filterMask.setPhoneNumber(selectParam);

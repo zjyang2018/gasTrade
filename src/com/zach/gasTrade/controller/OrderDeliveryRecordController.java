@@ -68,18 +68,19 @@ public class OrderDeliveryRecordController extends CommonController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "派送统计列表", notes = "请求参数说明||pageNum:页码,pageSize:每页条数,deliveryName:搜索参数（派送员姓名）\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/orderDeliveryRecord/deliveryCountList", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getDeliveryCountList(HttpServletRequest request, @RequestBody Map<String, String> param) {
 		PageResult result = PageResult.initResult();
 		Map<String, Object> map = new HashMap<String, Object>();
-
+		logger.info("派送统计列表接口参数:" + JSON.toJSONString(param));
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		int startIndex = (pageNum - 1) * pageSize;
 		String name = param.get("deliveryName");
 		if (StringUtil.isNotNullAndNotEmpty(name)) {
-			String deliveryName = name + "%";
+			String deliveryName = name.trim();
 			map.put("deliveryName", deliveryName);
 		}
 		map.put("startIndex", startIndex);

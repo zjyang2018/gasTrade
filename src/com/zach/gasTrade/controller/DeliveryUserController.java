@@ -58,7 +58,7 @@ public class DeliveryUserController extends CommonController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
-	@ApiOperation(value = "派送员创建账号列表", notes = "请求参数说明||pageNum:起始页码,pageSize:记录数,searchParam:搜索参数\\n返回参数字段说明:\\n")
+	@ApiOperation(value = "派送员创建账号列表", notes = "请求参数说明||pageNum:页码,pageSize:每页条数,searchParam:搜索参数（姓名或手机号）\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryUser/query_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
@@ -73,7 +73,7 @@ public class DeliveryUserController extends CommonController {
 			Map<String, Object> map = new HashMap<String, Object>();
 
 			if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
-				String selectParam = searchParam.trim() + "%";
+				String selectParam = searchParam.trim();
 				// searchParam以"1"开头则按手机号搜索
 				if (selectParam.startsWith("1")) {
 					map.put("phoneNumber", selectParam);
@@ -112,7 +112,7 @@ public class DeliveryUserController extends CommonController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
-	@ApiOperation(value = "派送员管理", notes = "请求参数说明||pageNum:起始页码,pageSize:记录数,dateParam:日期,workStatus:工作状态,searchParam:搜索参数\\n返回参数字段说明:\\n")
+	@ApiOperation(value = "派送员管理", notes = "请求参数说明||pageNum:页码,pageSize:每页条数,dateParam:日期,searchParam:搜索参数（姓名或手机号）,workStatus:工作状态:10-派送中,20-空闲,30-请假\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/deliveryUser/select_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult selectPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
@@ -129,7 +129,7 @@ public class DeliveryUserController extends CommonController {
 			Map<String, Object> map = new HashMap<String, Object>();
 
 			if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
-				String selectParam = searchParam.trim() + "%";
+				String selectParam = searchParam.trim();
 				// searchParam以"1"开头则按手机号搜索
 				if (selectParam.startsWith("1")) {
 					map.put("phoneNumber", selectParam);
@@ -143,9 +143,7 @@ public class DeliveryUserController extends CommonController {
 			}
 			if (StringUtil.isNotNullAndNotEmpty(time)) {
 				// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
-				if (time.indexOf(" ") != -1) {
-					time = time.substring(0, time.indexOf(" "));
-				}
+				time = time.substring(0, 10);
 				map.put("createTime", time);
 			}
 

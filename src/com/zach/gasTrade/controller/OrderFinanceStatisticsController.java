@@ -35,6 +35,7 @@ import com.zach.gasTrade.service.OrderFinanceStatisticsService;
 import com.zach.gasTrade.vo.OrderFinanceStatisticsVo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "财务统计相关api")
 @Controller
@@ -51,6 +52,7 @@ public class OrderFinanceStatisticsController extends CommonController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "订单统计列表", notes = "请求参数说明||pageNum:页码,pageSize:每页条数,searchStartDate:起始日期（yyyy-MM-dd）,searchEndDate:结束日期（yyyy-MM-dd）\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/orderFinanceStatistics/query_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,

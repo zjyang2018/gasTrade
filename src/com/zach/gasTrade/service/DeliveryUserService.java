@@ -74,4 +74,11 @@ public interface DeliveryUserService {
 	 */
 	public int delete(DeliveryUserVo deliveryUserVo);
 
+	/**
+	 * 检查派送员工作状态
+	 * 
+	 * @param deliveryUserId
+	 */
+	public void checkWorkStatus(String deliveryUserId);
+
 }

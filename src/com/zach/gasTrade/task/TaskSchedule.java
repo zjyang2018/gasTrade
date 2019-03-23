@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.service.OrderFinanceStatisticsService;
 import com.zach.gasTrade.service.OrderInfoService;
 
@@ -17,6 +18,9 @@ public class TaskSchedule {
 
 	@Autowired
 	private OrderInfoService orderInfoService;
+
+	@Autowired
+	private DeliveryUserService deliveryUserService;
 
 	// 每天凌晨2点执行
 	@Scheduled(cron = "0 0 2 * * ? ")
@@ -32,6 +36,13 @@ public class TaskSchedule {
 		logger.info("自动分配订单任务");
 		// System.out.println("使用SpringMVC框架配置定时任务");
 		orderInfoService.autoAllotDeliveryOrder();
+	}
+
+	// 检查派送员工作状态2分钟执行一次
+	@Scheduled(cron = "0 0/2 * * * ? ")
+	public void autoDeliveryWorkStatusTask() {
+		logger.info("检查派送员工作状态任务");
+		deliveryUserService.checkWorkStatus(null);
 	}
 
 }

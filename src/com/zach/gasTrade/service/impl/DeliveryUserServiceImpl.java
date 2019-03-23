@@ -14,16 +14,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.common.seq.SerialGenerator;
+import com.common.utils.StringUtil;
 import com.zach.gasTrade.dao.DeliveryUserDao;
+import com.zach.gasTrade.dao.OrderInfoDao;
 import com.zach.gasTrade.dto.DeliveryUserDto;
 import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.vo.DeliveryUserVo;
+import com.zach.gasTrade.vo.OrderInfoVo;
 
 @Service("deliveryUserService")
 public class DeliveryUserServiceImpl implements DeliveryUserService {
 
 	@Autowired
 	private DeliveryUserDao deliveryUserDao;
+
+	@Autowired
+	private OrderInfoDao orderInfoDao;
 
 	/**
 	 * 总数
@@ -109,6 +115,71 @@ public class DeliveryUserServiceImpl implements DeliveryUserService {
 	public List<DeliveryUserVo> getDeliveryUserList(Map<String, Object> map) {
 		// TODO Auto-generated method stub
 		return deliveryUserDao.selectDeliveryUserList(map);
+	}
+
+	@Override
+	public void checkWorkStatus(String deliveryUserId) {
+		Date now = new Date();
+		if (StringUtil.isNull(deliveryUserId)) {
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setAccountStatus("10");
+			List<DeliveryUserVo> list = deliveryUserDao.getDeliveryUserList(deliveryUserVo);
+			for (DeliveryUserVo bean : list) {
+				OrderInfoVo orderInfoVo = new OrderInfoVo();
+				orderInfoVo.setAllotDeliveryId(bean.getId());
+				orderInfoVo.setAllotStatus("20");
+				// 派送中
+				orderInfoVo.setOrderStatus("50");
+				List<OrderInfoVo> orders = orderInfoDao.getOrderInfoList(orderInfoVo);
+				if (orders == null || orders.isEmpty()) {
+					// 已接单
+					orderInfoVo.setOrderStatus("40");
+					orders = orderInfoDao.getOrderInfoList(orderInfoVo);
+					if (orders == null || orders.isEmpty()) {
+						bean.setWorkStatus("20");
+						bean.setUpdateTime(now);
+					} else {
+						bean.setWorkStatus("10");
+						bean.setUpdateTime(now);
+					}
+				} else {
+					bean.setWorkStatus("10");
+					bean.setUpdateTime(now);
+				}
+				deliveryUserDao.update(bean);
+			}
+		} else {
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setAccountStatus("10");
+			deliveryUserVo.setId(deliveryUserId);
+			DeliveryUserVo deliveryUser = deliveryUserDao.getDeliveryUserBySelective(deliveryUserVo);
+			if (deliveryUser == null) {
+				return;
+			}
+			OrderInfoVo orderInfoVo = new OrderInfoVo();
+			orderInfoVo.setAllotDeliveryId(deliveryUser.getId());
+			orderInfoVo.setAllotStatus("20");
+			// 派送中
+			orderInfoVo.setOrderStatus("50");
+			List<OrderInfoVo> orders = orderInfoDao.getOrderInfoList(orderInfoVo);
+			if (orders == null || orders.isEmpty()) {
+				// 已接单
+				orderInfoVo.setOrderStatus("40");
+				orders = orderInfoDao.getOrderInfoList(orderInfoVo);
+				if (orders == null || orders.isEmpty()) {
+					deliveryUser.setWorkStatus("10");
+					deliveryUser.setUpdateTime(now);
+				} else {
+					deliveryUser.setWorkStatus("20");
+					deliveryUser.setUpdateTime(now);
+				}
+			} else {
+				deliveryUser.setWorkStatus("20");
+				deliveryUser.setUpdateTime(now);
+			}
+			deliveryUserDao.update(deliveryUser);
+		}
+
 	}
 
 }

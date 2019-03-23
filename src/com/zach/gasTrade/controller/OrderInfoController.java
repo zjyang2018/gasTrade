@@ -41,6 +41,7 @@ import com.zach.gasTrade.dto.DeliveryMonitorDto;
 import com.zach.gasTrade.dto.DeliveryOrderDetailDto;
 import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
 import com.zach.gasTrade.dto.OrderDetailDto;
+import com.zach.gasTrade.dto.OrderInfoDetailDto;
 import com.zach.gasTrade.dto.OrderInfoDto;
 import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.dto.UserDto;
@@ -957,6 +958,43 @@ public class OrderInfoController extends CommonController {
 
 			orderInfoService.update(orderInfoVo);
 
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	/**
+	 * 公众号——订单详情
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/weixin/orderInfo/queryOrderDetailInfo", method = RequestMethod.GET)
+	@ResponseBody
+	public DataResult queryOrderDetailInfo(HttpServletRequest request, OrderInfoVo filterMask) {
+		DataResult result = DataResult.initResult();
+		String orderId = request.getParameter("orderId");
+		if (StringUtil.isNullOrEmpty(orderId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+
+		try {
+			filterMask.setOrderId(orderId);
+			OrderInfoDetailDto orderInfoVo = orderInfoService.queryOrderDetailInfo(orderId);
+			if (orderInfoVo == null) {
+				throw new RuntimeException("该订单不存在," + orderId);
+			}
+			result.setData(orderInfoVo);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

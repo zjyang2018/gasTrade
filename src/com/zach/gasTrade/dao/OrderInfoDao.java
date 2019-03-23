@@ -17,6 +17,7 @@ import com.zach.gasTrade.dto.CustomerOrderInfoDto;
 import com.zach.gasTrade.dto.DeliveryMonitorDto;
 import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
 import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
+import com.zach.gasTrade.dto.OrderInfoDetailDto;
 import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.vo.OrderInfoVo;
 
@@ -110,5 +111,13 @@ public interface OrderInfoDao {
 	 * @return
 	 */
 	public BigDecimal getOrderTotalAmount(Map<String, Object> map);
+
+	/**
+	 * 公众号订单详情
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public OrderInfoDetailDto queryOrderDetailInfo(@Param("orderId") String orderId);
 
 }

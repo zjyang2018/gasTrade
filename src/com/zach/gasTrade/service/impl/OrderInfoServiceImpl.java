@@ -40,6 +40,7 @@ import com.zach.gasTrade.dto.CustomerOrderInfoDto;
 import com.zach.gasTrade.dto.DeliveryMonitorDto;
 import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
 import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
+import com.zach.gasTrade.dto.OrderInfoDetailDto;
 import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.netpay.PayService;
 import com.zach.gasTrade.netpay.UnoinPayUtil;
@@ -410,6 +411,32 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	@Override
 	public CustomerOrderGenerateInfoDto orderGenerate(OrderInfoVo filterMask) {
 		// TODO Auto-generated method stub
+		String orderId = SerialGenerator.getSerialNum();
+		Date nowTime = new Date();
+		CustomerUserVo customerUserVo = new CustomerUserVo();
+		customerUserVo.setId(filterMask.getCustomerUserId());
+		CustomerUserVo customerUser = customerUserDao.getCustomerUserBySelective(customerUserVo);
+		filterMask.setOrderId(orderId);
+		filterMask.setPayStatus("10");
+		filterMask.setAllotStatus("10");
+		filterMask.setCustomerAddress(customerUser.getAddress());
+		filterMask.setLongitude(customerUser.getLongitude());
+		filterMask.setLatitude(customerUser.getLatitude());
+		filterMask.setOrderStatus("10");
+		filterMask.setRemark("");
+		filterMask.setCreateTime(nowTime);
+		filterMask.setUpdateTime(nowTime);
+
+		int n = orderInfoDao.save(filterMask);
+		if (n == 1) {
+			CustomerOrderGenerateInfoDto customerOrderGenerateInfoDto = new CustomerOrderGenerateInfoDto();
+			customerOrderGenerateInfoDto.setOrderId(orderId);
+			customerOrderGenerateInfoDto.setProductAmount(filterMask.getAmount());
+			customerOrderGenerateInfoDto.setAddress(customerUser.getAddress());
+			customerOrderGenerateInfoDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
+			customerOrderGenerateInfoDto.setRemark("");
+			return customerOrderGenerateInfoDto;
+		}
 		return null;
 	}
 
@@ -422,6 +449,23 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	public BigDecimal getOrderTotalAmount(Map<String, Object> map) {
 		// TODO Auto-generated method stub
 		return orderInfoDao.getOrderTotalAmount(map);
+	}
+
+	@Override
+	public OrderInfoDetailDto queryOrderDetailInfo(String orderId) {
+		OrderInfoDetailDto orderInfo = orderInfoDao.queryOrderDetailInfo(orderId);
+		if (orderInfo == null) {
+			return null;
+		}
+		if (StringUtil.isNull(orderInfo.getProductAddress())) {
+			JSONObject jSONObject = MapHelper.addressToLocation(orderInfo.getProductAddress());
+			if (jSONObject != null) {
+				String lng = jSONObject.getString("lng");
+				String lat = jSONObject.getString("lat");
+				orderInfo.setStartLocation(lng + "," + lat);
+			}
+		}
+		return orderInfo;
 	}
 
 }

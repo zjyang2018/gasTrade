@@ -803,5 +803,36 @@
 		</if>
 		)
 	</insert>
+	
+	<!--查询订单详情 -->
+	<select id="queryOrderDetailInfo" parameterType="java.lang.String"
+		resultType="com.zach.gasTrade.dto.OrderInfoDetailDto">                                             
+     	SELECT
+			o.order_id orderId,
+			o.pay_time payTime,
+			o.delivery_complete_time deliveryOrderTime,
+			o.delivery_order_time deliveryCompleteTime,
+			o.real_pay_amount payAmount,
+			o.remark,
+			o.product_name productName,
+			o.customer_address customerAddress,
+			u.phone_number customerPhoneNumber,
+			u.`name` customerName,
+			concat(u.longitude, ',', u.latitude) endLocation,
+			p.spec,
+			p.stock_qty stockQty,
+			p.amount,
+			d.`name` deliveryName,
+			d.phone_number deliveryPhoneNumber,
+			a.address productAddress
+		FROM
+			order_info o
+		JOIN product p ON o.product_id = p.product_id
+		LEFT JOIN customer_user u ON u.id = o.customer_user_id
+		LEFT JOIN delivery_user d ON d.id = o.allot_delivery_id
+		LEFT JOIN admin_user a ON a.id = p.create_user_id
+		WHERE o.order_id = #{orderId}
+	    
+	</select>
 </mapper>
 

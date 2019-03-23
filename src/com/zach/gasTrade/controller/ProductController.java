@@ -495,21 +495,12 @@ public class ProductController extends CommonController {
 		try {
 
 			ProductVo product = productService.getProductBySelective(filterMask);
+			if (product == null) {
+				throw new RuntimeException("该产品不存在," + filterMask.getProductId());
+			}
 			AdminUserVo adminUserVo = new AdminUserVo();
 			adminUserVo.setId(product.getCreateUserId());
 			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-			String imgPath = product.getImagePath();
-			String[] imgPathArr = {};
-			if (StringUtil.isNotNullAndNotEmpty(imgPath)) {
-				imgPathArr = imgPath.split(",");
-			}
-			String imagesPath = "";
-			for (String str : imgPathArr) {
-				imagesPath += Constants.BASE_PATH + str + ",";
-			}
-			if (imagesPath.endsWith(",")) {
-				imagesPath = imagesPath.substring(0, imagesPath.length() - 1);
-			}
 
 			ProductInfoDto productInfoDto = new ProductInfoDto();
 			productInfoDto.setProductId(product.getProductId());
@@ -517,7 +508,7 @@ public class ProductController extends CommonController {
 			productInfoDto.setAmount(product.getAmount());
 			productInfoDto.setProductDesc(product.getProductDesc());
 			productInfoDto.setSpec(product.getSpec());
-			productInfoDto.setImagePath(imagesPath);
+			productInfoDto.setImagePath(product.getImagePath());
 			productInfoDto.setAddress(adminUser.getAddress());
 			result.setData(productInfoDto);
 
@@ -554,21 +545,6 @@ public class ProductController extends CommonController {
 		try {
 			int total = productService.getProductCount(filterMask);
 			List<ProductListDto> products = productService.getProductInfoPage(filterMask);
-			for (ProductListDto product : products) {
-				String imgPath = product.getImagePath();
-				String[] imgPathArr = {};
-				if (StringUtil.isNotNullAndNotEmpty(imgPath)) {
-					imgPathArr = imgPath.split(",");
-				}
-				String imagesPath = "";
-				for (String str : imgPathArr) {
-					imagesPath += Constants.BASE_PATH + str + ",";
-				}
-				if (imagesPath.endsWith(",")) {
-					imagesPath = imagesPath.substring(0, imagesPath.length() - 1);
-				}
-				product.setImagePath(imagesPath);
-			}
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
 			result.setPageSize(pageSize);

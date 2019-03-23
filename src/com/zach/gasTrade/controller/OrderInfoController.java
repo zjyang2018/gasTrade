@@ -759,7 +759,7 @@ public class OrderInfoController extends CommonController {
 		try {
 			// 待接单
 			if ("1".equals(status)) {
-				filterMask.setAllotStatus("10");
+				filterMask.setOrderStatus("30");
 			} else if ("2".equals(status)) {
 				// 派送中
 				filterMask.setOrderStatus("50");
@@ -824,8 +824,7 @@ public class OrderInfoController extends CommonController {
 		try {
 			// 待支付
 			if ("1".equals(status)) {
-				filterMask.setPayStatus("10");
-
+				filterMask.setOrderStatus("10");
 			} else if ("2".equals(status)) {
 				// 派送中
 				filterMask.setOrderStatus("50");

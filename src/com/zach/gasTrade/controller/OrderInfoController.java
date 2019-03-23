@@ -881,25 +881,30 @@ public class OrderInfoController extends CommonController {
 			productVo.setProductId(orderInfo.getProductId());
 			ProductVo product = productService.getProductBySelective(productVo);
 
+			DeliveryOrderDetailDto deliveryOrderDetailDto = new DeliveryOrderDetailDto();
+
 			CustomerUserVo customerUserVo = new CustomerUserVo();
 			customerUserVo.setId(orderInfo.getCustomerUserId());
 			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			if (customerUser != null) {
+				deliveryOrderDetailDto.setCustomerName(customerUser.getName());
+				deliveryOrderDetailDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
+				deliveryOrderDetailDto.setCustomerAddress(customerUser.getAddress());
+			}
 
-			AdminUserVo adminUserVo = new AdminUserVo();
-			adminUserVo.setId(product.getCreateUserId());
-			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-
-			DeliveryOrderDetailDto deliveryOrderDetailDto = new DeliveryOrderDetailDto();
 			deliveryOrderDetailDto.setOrderId(orderInfo.getOrderId());
 			deliveryOrderDetailDto.setProductName(orderInfo.getProductName());
 			if ("1".equals(status)) {
 				deliveryOrderDetailDto.setStockQty(product.getStockQty());
 			}
-			deliveryOrderDetailDto.setCustomerName(customerUser.getName());
-			deliveryOrderDetailDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
-			deliveryOrderDetailDto.setCustomerAddress(customerUser.getAddress());
-			deliveryOrderDetailDto.setProductAddress(adminUser.getAddress());
-			deliveryOrderDetailDto.setRemark("");
+			deliveryOrderDetailDto.setRemark(orderInfo.getRemark());
+
+			AdminUserVo adminUserVo = new AdminUserVo();
+			adminUserVo.setId(product.getCreateUserId());
+			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
+			if (adminUser != null) {
+				deliveryOrderDetailDto.setProductAddress(adminUser.getAddress());
+			}
 
 			result.setData(deliveryOrderDetailDto);
 

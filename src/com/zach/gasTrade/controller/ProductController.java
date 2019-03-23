@@ -7,9 +7,10 @@
 package com.zach.gasTrade.controller;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.ProductVo;
 
 import io.swagger.annotations.Api;
+import sun.misc.BASE64Decoder;
 
 @Api(tags = "产品相关api")
 @Controller
@@ -222,128 +224,64 @@ public class ProductController extends CommonController {
 	 */
 	@RequestMapping(value = "/product/edit", method = RequestMethod.POST)
 	@ResponseBody
-	public Result edit(HttpServletRequest request) {
+	public Result edit(HttpServletRequest request, @RequestBody ProductVo filterMask) {
 		DataResult result = DataResult.initResult();
-		ProductVo filterMask = new ProductVo();
-		String profuctId = request.getParameter("profuctId");
-		if (StringUtil.isNullOrEmpty(profuctId)) {
+		if (StringUtil.isNullOrEmpty(filterMask.getProductId())) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("产品编号不能为空");
 			return result;
 		}
-		String updateUserId = request.getParameter("updateUserId");
-		if (StringUtil.isNullOrEmpty(updateUserId)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("用户编号不能为空");
-			return result;
-		}
+		try {
 
-		String productName = request.getParameter("productName");
-		String spec = request.getParameter("spec");
-		String amount = request.getParameter("amount");
-		String stockQty = request.getParameter("stockQty");
-		String productDesc = request.getParameter("productDesc");
-		filterMask.setProductId(profuctId);
-
-		ProductVo productVo = productService.getProductBySelective(filterMask);
-		String imgPath = productVo.getImagePath();
-		String[] imgPathArr = {};
-		if (StringUtil.isNotNullAndNotEmpty(imgPath)) {
-			imgPathArr = imgPath.split(",");
-		}
-		productVo.setUpdateUserId(updateUserId);
-		if (StringUtil.isNotNullAndNotEmpty(productName)) {
-			productVo.setProductName(productName);
-		}
-		if (StringUtil.isNotNullAndNotEmpty(spec)) {
-			productVo.setSpec(spec);
-		}
-		if (StringUtil.isNotNullAndNotEmpty(amount)) {
-			productVo.setAmount(BigDecimal.valueOf(Integer.parseInt(amount)));
-		}
-		if (StringUtil.isNotNullAndNotEmpty(stockQty)) {
-			productVo.setStockQty(Integer.parseInt(stockQty));
-		}
-		if (StringUtil.isNotNullAndNotEmpty(productDesc)) {
-			productVo.setProductDesc(productDesc);
-		}
-
-		MultipartHttpServletRequest Murequest = (MultipartHttpServletRequest) request;
-		Map<String, MultipartFile> files = Murequest.getFileMap();// 得到文件map对象
-		int currentImgCount = imgPathArr.length;
-		if ((files.size() + currentImgCount) > 3) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("已上传" + currentImgCount + "张图片，只能再上传" + (3 - currentImgCount) + "张图片");
-			return result;
-		}
-		if (!files.isEmpty()) {
-			// 保存数据库的路径
-			String sqlPath = "";
-			String imagesPath = "";
-			// 定义文件保存的本地路径
-			String realUploadPath = request.getSession().getServletContext().getRealPath("/") + "images";
-			File file = new File(realUploadPath);
-			if (!file.exists()) {
-				file.mkdirs();
+			ProductVo param = new ProductVo();
+			param.setProductId(filterMask.getProductId());
+			ProductVo productVo = productService.getProductBySelective(param);
+			if (productVo == null) {
+				result.setCode(Constants.FAILURE);
+				result.setMsg("该产品不存在," + filterMask.getProductId());
+				return result;
 			}
-			// 定义 文件名
-			String filename = null;
-			try {
-				for (MultipartFile multipartFile : files.values()) {
-					// 生成uuid作为文件名称
-					String uuid = SerialGenerator.getUUID();
-					// 获得文件类型（可以判断如果不是图片，禁止上传）
-					String contentType = multipartFile.getContentType();
-					// 获得上传文件名
-					String realFileName = multipartFile.getOriginalFilename();
-					int pos = realFileName.indexOf('.');
-					// 获得文件后缀名
-					String suffixName = realFileName.substring(pos + 1, realFileName.length());
-					// 得到新 文件名
-					filename = uuid + "." + suffixName;
+			productVo.setUpdateUserId(filterMask.getUpdateUserId());
+			if (StringUtil.isNotNullAndNotEmpty(filterMask.getProductName())) {
+				productVo.setProductName(filterMask.getProductName());
+			}
+			if (StringUtil.isNotNullAndNotEmpty(filterMask.getSpec())) {
+				productVo.setSpec(filterMask.getSpec());
+			}
+			productVo.setAmount(filterMask.getAmount());
+			productVo.setStockQty(filterMask.getStockQty());
+			if (StringUtil.isNotNullAndNotEmpty(filterMask.getProductDesc())) {
+				productVo.setProductDesc(filterMask.getProductDesc());
+			}
 
-					File tagetFile = new File(realUploadPath + "/" + filename);// 创建文件对象
-					if (!tagetFile.exists()) {// 文件名不存在 则新建文件，并将文件复制到新建文件中
-						tagetFile.createNewFile();
+			String imagesPath = filterMask.getImagePath();
+			if (StringUtil.isNotNullAndNotEmpty(imagesPath)) {
+				String[] images = imagesPath.split(";");
+				if (images.length > 3) {
+					// 去掉空,取最后的3张图片
+					List<String> list = new ArrayList<String>();
+					for (int index = 0; index < images.length; index++) {
+						if (StringUtil.isNotNullAndNotEmpty(images[index])) {
+							list.add(images[index]);
+						}
 					}
-					// 文件保存路径
-					multipartFile.transferTo(tagetFile);
-					// 把图片的相对路径保存至数据库
-					sqlPath += filename + ",";
-					imagesPath += Constants.BASE_PATH + filename + ",";
+					if (list.size() > 3) {
+						imagesPath = list.get(1) + ";" + list.get(2) + ";" + list.get(2);
+					}
 				}
-				sqlPath += imgPath;
-				sqlPath.replaceAll(" ", "");
-				if (sqlPath.endsWith(",")) {
-					sqlPath = sqlPath.substring(0, sqlPath.length() - 1);
-				}
-
-				for (String str : imgPathArr) {
-					imagesPath += Constants.BASE_PATH + str + ",";
-				}
-				if (imagesPath.endsWith(",")) {
-					imagesPath = imagesPath.substring(0, imagesPath.length() - 1);
-				}
-
-				// 把图片的相对路径保存至数据库
-				// sqlPath = "/images/"+filename;
-				// sqlPath = realUploadPath + "/"+filename;
-				productVo.setImagePath(sqlPath);
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("imagesPath", imagesPath);
-				result.setData(map);
-
-				productService.update(productVo);
-
-			} catch (RuntimeException e) {
-				result.setCode(Constants.FAILURE);
-				result.setMsg(e.getMessage());
-				logger.error("系统异常," + e.getMessage(), e);
-			} catch (Exception e) {
-				result.setCode(Constants.FAILURE);
-				result.setMsg("系统异常,请稍后重试");
-				logger.error("系统异常,请稍后重试", e);
+				productVo.setImagePath(imagesPath);
 			}
+
+			productService.update(productVo);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
 		}
 
 		return result;
@@ -378,7 +316,7 @@ public class ProductController extends CommonController {
 			for (String str : prods) {
 				filterMask.setStatus("20");
 				filterMask.setProductId(str);
-				filterMask.setCreateUserId(updateUserId);
+				filterMask.setUpdateUserId(updateUserId);
 				productService.update(filterMask);
 			}
 		} catch (RuntimeException e) {
@@ -400,64 +338,131 @@ public class ProductController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/img/delete", method = RequestMethod.POST)
+	// @RequestMapping(value = "/img/delete", method = RequestMethod.POST)
+	// @ResponseBody
+	// public Result deleteImg(HttpServletRequest request, @RequestBody Map<String,
+	// String> param) {
+	// Result result = Result.initResult();
+	// String images = param.get("images");
+	// String productId = param.get("productId");
+	// if (StringUtil.isNullOrEmpty(productId)) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("产品编号不能为空");
+	// return result;
+	// }
+	// String updateUserId = param.get("updateUserId");
+	// if (StringUtil.isNullOrEmpty(updateUserId)) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("用户编号不能为空");
+	// return result;
+	// }
+	// ProductVo filterMask = new ProductVo();
+	// filterMask.setProductId(productId);
+	//
+	// ProductVo productVo = productService.getProductBySelective(filterMask);
+	// String imagePath = productVo.getImagePath();
+	// if (StringUtil.isNullOrEmpty(imagePath)) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("没有图片可删除了");
+	// return result;
+	// }
+	//
+	// String[] imgArr = imagePath.split(",");
+	//
+	// List<String> strList = Arrays.asList(imgArr);
+	// List<String> arrList = new ArrayList<String>(strList);
+	//
+	// String realUploadPath = request.getServletContext().getRealPath("/") +
+	// "images";
+	// if (StringUtil.isNotNullAndNotEmpty(images)) {
+	// String[] imgNames = images.split(",");
+	// for (String str : imgNames) {
+	// if (arrList.contains(str)) {
+	// arrList.remove(str);
+	// File file = new File(realUploadPath + "/" + str);
+	// file.delete();
+	// }
+	// }
+	// if (!arrList.isEmpty()) {
+	// String sqlPath = arrList.toString();
+	// sqlPath = sqlPath.substring(1, sqlPath.length() - 1);
+	// sqlPath.replaceAll(" ", "");
+	// productVo.setImagePath(sqlPath);
+	// } else {
+	// productVo.setImagePath("");
+	// }
+	//
+	// }
+	// productVo.setUpdateUserId(updateUserId);
+	//
+	// try {
+	// productService.update(productVo);
+	//
+	// } catch (RuntimeException e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg(e.getMessage());
+	// logger.error("系统异常," + e.getMessage(), e);
+	// } catch (Exception e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("系统异常,请稍后重试");
+	// logger.error("系统异常,请稍后重试", e);
+	// }
+	// return result;
+	// }
+
+	/**
+	 * 产品图片上传
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/product/upload/image", method = RequestMethod.POST)
 	@ResponseBody
-	public Result deleteImg(HttpServletRequest request, @RequestBody Map<String, String> param) {
-		Result result = Result.initResult();
-		String images = param.get("images");
-		String productId = param.get("productId");
-		if (StringUtil.isNullOrEmpty(productId)) {
+	public DataResult uploadProductImage(HttpServletRequest request, @RequestBody Map<String, String> filterMask) {
+		DataResult result = DataResult.initResult();
+		String image = filterMask.get("image");
+		String imageSuffixName = filterMask.get("imageSuffixName");
+		if (StringUtil.isNull(image)) {
 			result.setCode(Constants.FAILURE);
-			result.setMsg("产品编号不能为空");
+			result.setMsg("图片为空");
 			return result;
 		}
-		String updateUserId = param.get("updateUserId");
-		if (StringUtil.isNullOrEmpty(updateUserId)) {
+		if (StringUtil.isNull(imageSuffixName)) {
 			result.setCode(Constants.FAILURE);
-			result.setMsg("用户编号不能为空");
+			result.setMsg("图片后缀名为空");
 			return result;
 		}
-		ProductVo filterMask = new ProductVo();
-		filterMask.setProductId(productId);
-
-		ProductVo productVo = productService.getProductBySelective(filterMask);
-		String imagePath = productVo.getImagePath();
-		if (StringUtil.isNullOrEmpty(imagePath)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("没有图片可删除了");
-			return result;
-		}
-
-		String[] imgArr = imagePath.split(",");
-
-		List<String> strList = Arrays.asList(imgArr);
-		List<String> arrList = new ArrayList<String>(strList);
-
-		String realUploadPath = request.getServletContext().getRealPath("/") + "images";
-		if (StringUtil.isNotNullAndNotEmpty(images)) {
-			String[] imgNames = images.split(",");
-			for (String str : imgNames) {
-				if (arrList.contains(str)) {
-					arrList.remove(str);
-					File file = new File(realUploadPath + "/" + str);
-					file.delete();
-				}
-			}
-			if (!arrList.isEmpty()) {
-				String sqlPath = arrList.toString();
-				sqlPath = sqlPath.substring(1, sqlPath.length() - 1);
-				sqlPath.replaceAll(" ", "");
-				productVo.setImagePath(sqlPath);
-			} else {
-				productVo.setImagePath("");
-			}
-
-		}
-		productVo.setUpdateUserId(updateUserId);
-
 		try {
-			productService.update(productVo);
+			String realBasePath = request.getServletContext().getRealPath("/") + "images";
+			logger.info("上传图片获取当前图片路径:" + realBasePath);
 
+			String uuid = SerialGenerator.getUUID();
+			// 得到新 文件名
+			String fileName = uuid + "." + imageSuffixName;
+
+			File imageFile = new File(realBasePath + "/" + fileName);// 创建文件对象
+			if (!imageFile.exists()) {// 文件名不存在 则新建文件，并将文件复制到新建文件中
+				imageFile.createNewFile();
+			}
+			BASE64Decoder decoder = new BASE64Decoder();
+			try {
+				// Base64解码
+				byte[] b = decoder.decodeBuffer(image);
+				for (int i = 0; i < b.length; ++i) {
+					// 调整异常数据
+					if (b[i] < 0) {
+						b[i] += 256;
+					}
+				}
+				OutputStream out = new FileOutputStream(imageFile);
+				out.write(b);
+				out.flush();
+				out.close();
+			} catch (Exception e) {
+				logger.error("写入图片文件异常", e);
+			}
+			result.setData(Constants.BASE_PATH + fileName);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

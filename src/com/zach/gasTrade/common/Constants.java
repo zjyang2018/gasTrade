@@ -18,7 +18,7 @@ public class Constants {
 	// redis保存key
 	public static final String USER_INFO_KEY = "USER_INFO_KEY:20190312";
 
-	public static final String BASE_PATH = "http://localhost:8080/gasTrade/images/";
+	public static final String BASE_PATH = "http://www.yourtk.com/gasTrade/images/";
 	// public static final String BASE_PATH =
 	// "http://39.98.54.16:8080/gasTrade/images/";
 

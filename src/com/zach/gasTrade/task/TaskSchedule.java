@@ -38,8 +38,8 @@ public class TaskSchedule {
 		orderInfoService.autoAllotDeliveryOrder();
 	}
 
-	// 检查派送员工作状态2分钟执行一次
-	@Scheduled(cron = "0 0/2 * * * ? ")
+	// 检查派送员工作状态5分钟执行一次
+	@Scheduled(cron = "0 0/5 * * * ? ")
 	public void autoDeliveryWorkStatusTask() {
 		logger.info("检查派送员工作状态任务");
 		deliveryUserService.checkWorkStatus(null);

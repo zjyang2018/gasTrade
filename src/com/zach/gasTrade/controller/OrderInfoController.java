@@ -874,7 +874,7 @@ public class OrderInfoController extends CommonController {
 		filterMask.setOrderId(orderId);
 		try {
 			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
-			if (orderInfo != null) {
+			if (orderInfo == null) {
 				throw new RuntimeException("该订单不存在," + orderId);
 			}
 			ProductVo productVo = new ProductVo();

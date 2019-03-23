@@ -38,7 +38,7 @@
 		            and id = #{id}
 		       </if>
 	    	   <if  test="name !=null ">
-		            and name like #{name}
+		            and name like concat(concat(#{name},"%"))
 		       </if>
 	    	   <if  test="wxName !=null ">
 		            and wx_name = #{wxName}
@@ -50,7 +50,7 @@
 		            and sex = #{sex}
 		       </if>
 	    	   <if  test="phoneNumber !=null ">
-		            and phone_number like #{phoneNumber}
+		            and phone_number like concat(concat(#{phoneNumber},"%"))
 		       </if>
 	    	   <if  test="address !=null ">
 		            and address = #{address}
@@ -132,7 +132,7 @@
 		            and id = #{id}
 		       </if>
 	    	   <if  test="name !=null ">
-		            and name like #{name}
+		            and name like concat(concat(#{name},"%"))
 		       </if>
 	    	   <if  test="wxName !=null ">
 		            and wx_name = #{wxName}
@@ -144,7 +144,7 @@
 		            and sex = #{sex}
 		       </if>
 	    	   <if  test="phoneNumber !=null ">
-		            and phone_number like #{phoneNumber}
+		            and phone_number like concat(concat(#{phoneNumber},"%"))
 		       </if>
 	    	   <if  test="address !=null ">
 		            and address = #{address}

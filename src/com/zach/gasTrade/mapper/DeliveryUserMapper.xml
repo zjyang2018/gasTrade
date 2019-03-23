@@ -43,10 +43,10 @@
 		            and wx_open_id = #{wxOpenId}
 		       </if>
 	    	   <if  test="name !=null ">
-		            and name like #{name}
+		            and name like concat(concat(#{name},"%"))
 		       </if>
 	    	   <if  test="phoneNumber !=null ">
-		            and phone_number like #{phoneNumber}
+		            and phone_number like concat(concat(#{phoneNumber},"%"))
 		       </if>
 	    	   <if  test="loginName !=null ">
 		            and login_name = #{loginName}
@@ -161,10 +161,10 @@
 		            and wx_open_id = #{wxOpenId}
 		       </if>
 	    	   <if  test="name !=null ">
-		            and name like #{name}
+		            and name like concat(concat(#{name},"%"))
 		       </if>
 	    	   <if  test="phoneNumber !=null ">
-		            and phone_number like #{phoneNumber}
+		            and phone_number like concat(concat(#{phoneNumber},"%"))
 		       </if>
 	    	   <if  test="loginName !=null ">
 		            and login_name = #{loginName}

@@ -49,19 +49,21 @@ public class CustomerUserController extends CommonController {
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "客户端用户列表", notes = "请求参数说明||pageNum:页码 ,pageSize:每页条数 ,searchParam:搜索参数（姓名或手机号）,"
+			+ "channel:渠道来源:10-微信公众号,20-客服录入,30-其它\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/customerUser/query_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
 			CustomerUserVo filterMask) {
 		PageResult result = PageResult.initResult();
-
+		logger.info("客户端用户列表接口参数:" + JSON.toJSONString(param));
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String searchParam = param.get("searchParam");
 		String channel = param.get("channel");
 
 		if (StringUtil.isNotNullAndNotEmpty(searchParam)) {
-			String selectParam = searchParam.trim() + "%";
+			String selectParam = searchParam.trim();
 			// searchParam以"1"开头则按手机号搜索
 			if (selectParam.startsWith("1")) {
 				filterMask.setPhoneNumber(selectParam);

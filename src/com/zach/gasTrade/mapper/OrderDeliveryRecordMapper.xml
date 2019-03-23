@@ -55,7 +55,7 @@
         <where>
             ud.account_status = "10"
     	   <if  test="deliveryName !=null ">
-	            and ud.name = #{deliveryName}
+	            and ud.name like concat(concat(#{deliveryName},"%"))
 	       </if>
 		</where>
    </select> 
@@ -163,7 +163,7 @@
     	<where>
     	   ud.account_status = "10"
     	   <if  test="deliveryName !=null ">
-	            and ud.name = #{deliveryName}
+	            and ud.name like concat(concat(#{deliveryName},"%"))
 	       </if>
 		</where>
 	    order by ud.create_time

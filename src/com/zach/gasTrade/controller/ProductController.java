@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.common.seq.SerialGenerator;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
@@ -37,6 +38,7 @@ import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.ProductVo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import sun.misc.BASE64Decoder;
 
 @Api(tags = "产品相关api")
@@ -51,23 +53,24 @@ public class ProductController extends CommonController {
 	private AdminUserService adminUserService;
 
 	/**
-	 * 分页列表
+	 * 分页列表 + 搜索
 	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return PageResult
 	 */
+	@ApiOperation(value = "产品管理列表", notes = "请求参数说明||pageNum:页码,pageSize:每页条数,productName:搜索参数（产品名称）\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/product/query_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
 			ProductVo filterMask) {
 		PageResult result = PageResult.initResult();
-
+		logger.info("产品管理列表接口参数:" + JSON.toJSONString(param));
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String likeName = param.get("productName");
 		if (StringUtil.isNotNullAndNotEmpty(likeName)) {
-			String productName = likeName + "%";
+			String productName = likeName.trim();
 			filterMask.setProductName(productName);
 		}
 

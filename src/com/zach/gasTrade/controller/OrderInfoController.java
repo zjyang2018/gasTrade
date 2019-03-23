@@ -385,6 +385,7 @@ public class OrderInfoController extends CommonController {
 				throw new RuntimeException("该用户不存在," + deliveryName);
 			}
 			orderInfoVo.setAllotDeliveryId(deliveryUser.getId());
+			orderInfoVo.setAllotTime(new Date());
 
 			orderInfoService.update(orderInfoVo);
 
@@ -417,13 +418,12 @@ public class OrderInfoController extends CommonController {
 			if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
 				throw new RuntimeException("订单编号不能为空");
 			}
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
-			CustomerUserVo customerUserVo = new CustomerUserVo();
-			customerUserVo.setId(orderInfo.getCustomerUserId());
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
-			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
-			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			OrderInfoVo param = new OrderInfoVo();
+			param.setOrderId(filterMask.getOrderId());
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(param);
+			if (orderInfo == null) {
+				throw new RuntimeException("该订单不存在," + filterMask.getOrderId());
+			}
 
 			OrderInfoDto orderInfoDto = new OrderInfoDto();
 			orderInfoDto.setOrderId(orderInfo.getOrderId());
@@ -432,10 +432,23 @@ public class OrderInfoController extends CommonController {
 			orderInfoDto.setPayTime(orderInfo.getPayTime());
 			orderInfoDto.setAllotStatus(orderInfo.getAllotStatus());
 			orderInfoDto.setAllotTime(orderInfo.getAllotTime());
-			orderInfoDto.setAllotDeliveryName(deliveryUser.getName());
-			orderInfoDto.setAllotDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
-			orderInfoDto.setCustomerUserName(customerUser.getName());
-			orderInfoDto.setCustomerAddress(customerUser.getAddress());
+
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
+			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			if (deliveryUser != null) {
+				orderInfoDto.setAllotDeliveryName(deliveryUser.getName());
+				orderInfoDto.setAllotDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
+			}
+
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			if (customerUser != null) {
+				orderInfoDto.setCustomerUserName(customerUser.getName());
+				orderInfoDto.setCustomerAddress(customerUser.getAddress());
+			}
+
 			orderInfoDto.setOrderStatus(orderInfo.getOrderStatus());
 			orderInfoDto.setRemark(orderInfo.getRemark());
 			orderInfoDto.setEditReason(orderInfo.getEditReason());
@@ -473,16 +486,25 @@ public class OrderInfoController extends CommonController {
 		}
 
 		try {
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
-			CustomerUserVo customerUserVo = new CustomerUserVo();
-			customerUserVo.setId(orderInfo.getCustomerUserId());
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			OrderInfoVo param = new OrderInfoVo();
+			param.setOrderId(filterMask.getOrderId());
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(param);
+			if (orderInfo == null) {
+				throw new RuntimeException("该订单不存在," + filterMask.getOrderId());
+			}
 
 			CustomerOrderInfoDto customerOrderInfoDto = new CustomerOrderInfoDto();
 			customerOrderInfoDto.setOrderId(orderInfo.getOrderId());
 			customerOrderInfoDto.setProductName(orderInfo.getProductName());
 			customerOrderInfoDto.setProductAmount(orderInfo.getAmount());
-			customerOrderInfoDto.setCustomerName(customerUser.getName());
+
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			if (customerUser != null) {
+				customerOrderInfoDto.setCustomerName(customerUser.getName());
+			}
+
 			customerOrderInfoDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
 			customerOrderInfoDto.setRemark(orderInfo.getRemark());
 
@@ -518,10 +540,18 @@ public class OrderInfoController extends CommonController {
 		}
 
 		try {
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+			OrderInfoVo param = new OrderInfoVo();
+			param.setProductId(filterMask.getOrderId());
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(param);
+			if (orderInfo == null) {
+				throw new RuntimeException("该订单不存在," + filterMask.getOrderId());
+			}
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
 			ProductVo product = productService.getProductBySelective(productVo);
+			if (product == null) {
+				throw new RuntimeException("该订单产品已过期或不存在," + orderInfo.getProductId());
+			}
 
 			OrderDetailDto orderDetailDto = new OrderDetailDto();
 			orderDetailDto.setOrderId(orderInfo.getOrderId());
@@ -567,18 +597,9 @@ public class OrderInfoController extends CommonController {
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
 			ProductVo product = productService.getProductBySelective(productVo);
-
-			CustomerUserVo customerUserVo = new CustomerUserVo();
-			customerUserVo.setId(orderInfo.getCustomerUserId());
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-
-			AdminUserVo adminUserVo = new AdminUserVo();
-			adminUserVo.setId(product.getCreateUserId());
-			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-
-			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
-			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
-			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			if (product == null) {
+				throw new RuntimeException("该产品不存在," + filterMask.getOrderId());
+			}
 
 			DeliveryDetailDto deliveryDetailDto = new DeliveryDetailDto();
 			deliveryDetailDto.setOrderId(orderInfo.getOrderId());
@@ -586,10 +607,27 @@ public class OrderInfoController extends CommonController {
 			deliveryDetailDto.setAmount(orderInfo.getAmount());
 			deliveryDetailDto.setPayTime(orderInfo.getPayTime());
 			deliveryDetailDto.setDeliveryOrderTime(orderInfo.getDeliveryOrderTime());
-			deliveryDetailDto.setDeliveryName(deliveryUser.getName());
-			deliveryDetailDto.setDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
-			deliveryDetailDto.setProductAddress(adminUser.getAddress());
-			deliveryDetailDto.setCustomerAddress(customerUser.getAddress());
+
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
+			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			if (deliveryUser != null) {
+				deliveryDetailDto.setDeliveryName(deliveryUser.getName());
+				deliveryDetailDto.setDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
+			}
+
+			AdminUserVo adminUserVo = new AdminUserVo();
+			adminUserVo.setId(product.getCreateUserId());
+			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
+			if (adminUser != null) {
+				deliveryDetailDto.setProductAddress(adminUser.getAddress());
+			}
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfo.getCustomerUserId());
+			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+			if (customerUser != null) {
+				deliveryDetailDto.setCustomerAddress(customerUser.getAddress());
+			}
 
 			result.setData(deliveryDetailDto);
 
@@ -612,7 +650,7 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/orderInfo/confirmReceive", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/orderInfo/confirmReceive", method = RequestMethod.POST)
 	@ResponseBody
 	public Result confirmReceive(HttpServletRequest request, @RequestBody Map<String, String> param) {
 		Result result = Result.initResult();
@@ -624,13 +662,17 @@ public class OrderInfoController extends CommonController {
 		}
 
 		Date nowTime = new Date();
-
-		OrderInfoVo orderInfoVo = new OrderInfoVo();
-		orderInfoVo.setOrderId(orderId);
-		orderInfoVo.setDeliveryCompleteTime(nowTime);
-		orderInfoVo.setOrderStatus("60");
-
 		try {
+			OrderInfoVo filterMask = new OrderInfoVo();
+			filterMask.setOrderId(orderId);
+			OrderInfoVo orderInfoVo = orderInfoService.getOrderInfoBySelective(filterMask);
+			if (orderInfoVo == null) {
+				throw new RuntimeException("该订单不存在," + orderId);
+			}
+			orderInfoVo.setDeliveryCompleteTime(nowTime);
+			orderInfoVo.setOrderStatus("60");
+			orderInfoVo.setUpdateTime(nowTime);
+
 			orderInfoService.update(orderInfoVo);
 
 		} catch (RuntimeException e) {

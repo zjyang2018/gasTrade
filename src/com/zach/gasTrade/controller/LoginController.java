@@ -371,11 +371,6 @@ public class LoginController extends CommonController {
 			return result;
 		}
 
-		// if (!newPassword.equals(comfirmPassword)) {
-		// result.setCode(Constants.FAILURE);
-		// result.setMsg("两次密码输入不一样");
-		// return result;
-		// }
 		filterMask.setId(deliveryId);
 		filterMask.setPhoneNumber(phoneNumber);
 		filterMask.setPassword(newPassword);

@@ -529,22 +529,23 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/orderInfo/orderDetail", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/orderInfo/orderDetail", method = RequestMethod.GET)
 	@ResponseBody
-	public DataResult orderDetail(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
+	public DataResult orderDetail(HttpServletRequest request) {
 		DataResult result = DataResult.initResult();
-		if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
+		String orderId = request.getParameter("orderId");
+		if (StringUtil.isNullOrEmpty(orderId)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("订单编号不能为空");
 			return result;
 		}
 
 		try {
-			OrderInfoVo param = new OrderInfoVo();
-			param.setProductId(filterMask.getOrderId());
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(param);
+			OrderInfoVo filterMask = new OrderInfoVo();
+			filterMask.setOrderId(orderId);
+			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
 			if (orderInfo == null) {
-				throw new RuntimeException("该订单不存在," + filterMask.getOrderId());
+				throw new RuntimeException("该订单不存在," + orderId);
 			}
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfo.getProductId());
@@ -582,7 +583,7 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/orderInfo/deliveryDetail", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/orderInfo/deliveryDetail", method = RequestMethod.GET)
 	@ResponseBody
 	public DataResult deliveryDetail(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
 		DataResult result = DataResult.initResult();

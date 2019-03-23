@@ -376,21 +376,22 @@ public class ProductController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/product/info", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/product/info", method = RequestMethod.GET)
 	@ResponseBody
-	public DataResult info(HttpServletRequest request, @RequestBody ProductVo filterMask) {
+	public DataResult info(HttpServletRequest request, ProductVo filterMask) {
 		DataResult result = DataResult.initResult();
-		if (StringUtil.isNullOrEmpty(filterMask.getProductId())) {
+		String productId = request.getParameter("productId");
+		if (StringUtil.isNullOrEmpty(productId)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("产品编号不能为空");
 			return result;
 		}
 
 		try {
-
+			filterMask.setProductId(productId);
 			ProductVo product = productService.getProductBySelective(filterMask);
 			if (product == null) {
-				throw new RuntimeException("该产品不存在," + filterMask.getProductId());
+				throw new RuntimeException("该产品不存在," + productId);
 			}
 			ProductInfoDto productInfoDto = new ProductInfoDto();
 			productInfoDto.setProductId(product.getProductId());
@@ -425,7 +426,7 @@ public class ProductController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/product/list", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/product/list", method = RequestMethod.POST)
 	@ResponseBody
 	public DataResult productList(HttpServletRequest request, @RequestBody Map<String, String> param,
 			ProductVo filterMask) {

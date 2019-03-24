@@ -313,7 +313,7 @@ public class LoginController extends CommonController {
 				user = new UserDto();
 				user.setUserType("2");
 				user.setDeliveryUser(deliveryUserVo);
-				cacheService.add(Constants.USER_INFO_KEY + wxOpenId, user);
+				cacheService.add(Constants.USER_INFO_KEY + wxOpenId, JSON.toJSONString(user));
 			} else {
 				if ("1".equals(user.getUserType())) {
 					user.setUserType("4");

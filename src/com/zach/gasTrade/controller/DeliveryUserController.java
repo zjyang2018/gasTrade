@@ -34,6 +34,8 @@ import com.zach.gasTrade.service.ProductService;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "派送员用户相关api")
@@ -325,6 +327,9 @@ public class DeliveryUserController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "派送端-修改库存数量", notes = "修改库存数量")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "stockQty", value = "库存数量", required = true, paramType = "query", dataType = "Integer") })
 	@RequestMapping(value = "/weixin/deliveryUser/updateStockQty", method = RequestMethod.GET)
 	@ResponseBody
 	public Result updateStockQty(HttpServletRequest request, DeliveryUserVo filterMask) {

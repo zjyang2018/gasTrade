@@ -150,4 +150,13 @@ public interface OrderInfoService {
 	 */
 	public OrderInfoDetailDto queryOrderDetailInfo(String orderId);
 
+	/**
+	 * 公众号消息推送
+	 * 
+	 * @param messgeType:10-订单分配,20-派送员接单,30-签收,40-支付
+	 * @param orderInfoVo保证有所需信息
+	 * @return
+	 */
+	public void pushWeiXinMessge(String messgeType, OrderInfoVo orderInfoVo);
+
 }

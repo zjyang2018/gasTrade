@@ -32,6 +32,7 @@ import com.common.wx.bean.TemplateMessage;
 import com.zach.gasTrade.dao.AdminUserDao;
 import com.zach.gasTrade.dao.CustomerUserDao;
 import com.zach.gasTrade.dao.DeliveryLocationHistoryDao;
+import com.zach.gasTrade.dao.DeliveryUserDao;
 import com.zach.gasTrade.dao.OrderDeliveryRecordDao;
 import com.zach.gasTrade.dao.OrderInfoDao;
 import com.zach.gasTrade.dao.ProductDao;
@@ -47,6 +48,7 @@ import com.zach.gasTrade.netpay.UnoinPayUtil;
 import com.zach.gasTrade.service.OrderInfoService;
 import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
+import com.zach.gasTrade.vo.DeliveryUserVo;
 import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
 import com.zach.gasTrade.vo.OrderInfoVo;
 import com.zach.gasTrade.vo.ProductVo;
@@ -69,6 +71,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 
 	@Autowired
 	private AdminUserDao adminUserDao;
+
+	@Autowired
+	private DeliveryUserDao deliveryUserDao;
 
 	@Autowired
 	private DeliveryLocationHistoryDao deliveryLocationHistoryDao;
@@ -284,6 +289,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 
 			orderDeliveryRecordVo.setCreateTime(now);
 			orderDeliveryRecordDao.save(orderDeliveryRecordVo);
+
+			// 推送微信消息-派送通知(客户)
+			this.pushWeiXinMessge("10", orderInfoVo);
 		} catch (Exception e) {
 			// TODO: handle exception
 			logger.error("自动分配订单异常," + JSON.toJSONString(orderInfoVo), e);
@@ -310,8 +318,14 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 				if ("50".equals(orderInfoVo.getOrderStatus())) {
 					recordVo.setAcceptTime(orderInfoVo.getDeliveryOrderTime());
 					recordVo.setDeliveryTime(orderInfoVo.getDeliveryOrderTime());
+
+					// 推送微信消息-派送通知(客户)
+					this.pushWeiXinMessge("20", orderInfoVo);
 				} else if ("60".equals(orderInfoVo.getOrderStatus())) {
 					recordVo.setCompleteTime(orderInfoVo.getDeliveryCompleteTime());
+
+					// 推送微信消息-派送通知(客户)
+					this.pushWeiXinMessge("30", orderInfoVo);
 				}
 				orderDeliveryRecordDao.update(recordVo);
 			}
@@ -346,6 +360,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 
 			orderDeliveryRecordVo.setCreateTime(nowTime);
 			orderDeliveryRecordDao.save(orderDeliveryRecordVo);
+
+			// 推送微信消息-派送通知(客户)
+			this.pushWeiXinMessge("10", orderInfoVo);
 		}
 
 		return 1;
@@ -402,33 +419,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 				logger.info("没有获取到用户微信openId,不推送消息,订单号为:" + orderId);
 				return checkRet;
 			}
-			// 推送微信消息
-			TemplateMessage templateMessage = TemplateMessage.New();
-			try {
-				AccessToken access = TokenUtil.getWXToken();
 
-				templateMessage.setOpenId(customerUserVo.getWxOpenId());
-				templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");
-				templateMessage.setUrl("");
-				templateMessage.setTopcolor("#696969");
-
-				Map<String, TemplateData> msgData = new HashMap<String, TemplateData>();
-				msgData.put("first", new TemplateData("尊敬的客户，您好，您的订单已支付完成。", "#696969"));
-				msgData.put("keyword1", new TemplateData(orderId, "#696969"));
-				msgData.put("keyword2",
-						new TemplateData(DateTimeUtils.dateToString(now, "yyyy-MM-dd hh:mm:ss"), "#696969"));
-				msgData.put("keyword3", new TemplateData("微信支付", "#696969"));
-				msgData.put("keyword4", new TemplateData(
-						new BigDecimal(realPayAmountStr).divide(new BigDecimal(100)).toPlainString(), "#696969"));
-				msgData.put("remark", new TemplateData("查看详情", "#696969"));
-
-				templateMessage.setTemplateData(msgData);
-				// 推送消息
-				WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
-			} catch (RuntimeException e) {
-				logger.error("微信支付成功通知推送失败,推送参数:" + JSON.toJSONString(templateMessage), e);
-			}
-
+			// 推送微信消息-支付通知
+			this.pushWeiXinMessge("40", orderInfoVo);
 		}
 		return checkRet;
 	}
@@ -493,6 +486,63 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			return customerOrderGenerateInfoDto;
 		}
 		return null;
+	}
+
+	public void pushWeiXinMessge(String messgeType, OrderInfoVo orderInfoVo) {
+		// messgeType:10-订单分配,20-派送员接单,30-签收
+
+		// 推送微信消息-派送通知(客户)
+		TemplateMessage templateMessage = TemplateMessage.New();
+		try {
+			CustomerUserVo customerUserVo = new CustomerUserVo();
+			customerUserVo.setId(orderInfoVo.getCustomerUserId());
+			customerUserVo = this.customerUserDao.getCustomerUserBySelective(customerUserVo);
+			if (customerUserVo == null) {
+				throw new RuntimeException("客户信息查询不到," + orderInfoVo.getCustomerUserId());
+			}
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(orderInfoVo.getAllotDeliveryId());
+			deliveryUserVo = this.deliveryUserDao.getDeliveryUserBySelective(deliveryUserVo);
+			if (deliveryUserVo == null) {
+				throw new RuntimeException("派送员信息查询不到," + orderInfoVo.getAllotDeliveryId());
+			}
+
+			AccessToken access = TokenUtil.getWXToken();
+			if ("40".equals(messgeType)) {
+				templateMessage.setOpenId(customerUserVo.getWxOpenId());
+				templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");
+				templateMessage.setUrl("");
+				templateMessage.setTopcolor("#696969");
+
+				Map<String, TemplateData> msgData = new HashMap<String, TemplateData>();
+				msgData.put("first", new TemplateData("尊敬的客户，您好，您的订单已支付完成。", "#696969"));
+				msgData.put("keyword1", new TemplateData(orderInfoVo.getOrderId(), "#696969"));
+				msgData.put("keyword2", new TemplateData(
+						DateTimeUtils.dateToString(orderInfoVo.getPayTime(), "yyyy-MM-dd hh:mm:ss"), "#696969"));
+				msgData.put("keyword3", new TemplateData("微信支付", "#696969"));
+				msgData.put("keyword4", new TemplateData(orderInfoVo.getRealPayAmount().toPlainString(), "#696969"));
+				msgData.put("remark", new TemplateData("查看详情", "#696969"));
+				templateMessage.setTemplateData(msgData);
+				// 推送消息
+				WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
+			} else if ("20".equals(messgeType)) {
+				templateMessage.setOpenId(customerUserVo.getWxOpenId());
+				templateMessage.setTemplateId("pw_w0okvI2znoKOz6Zb2Hqo6AJNfokU0k8mlXyPa2Y8");
+				templateMessage.setUrl("");
+				templateMessage.setTopcolor("#696969");
+
+				Map<String, TemplateData> msgData = new HashMap<String, TemplateData>();
+				msgData.put("first", new TemplateData("尊敬的客户,您的商品正在派送中,请保持电话通畅!", "#696969"));
+				msgData.put("keyword1", new TemplateData(deliveryUserVo.getName(), "#696969"));
+				msgData.put("keyword2", new TemplateData(deliveryUserVo.getPhoneNumber(), "#696969"));
+				msgData.put("remark", new TemplateData("查看详情", "#696969"));
+				templateMessage.setTemplateData(msgData);
+				// 推送消息
+				WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
+			}
+		} catch (RuntimeException e) {
+			logger.error("微信支付成功通知推送失败,推送参数:" + JSON.toJSONString(templateMessage), e);
+		}
 	}
 
 	/**

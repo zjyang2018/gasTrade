@@ -818,9 +818,11 @@
 			o.customer_address customerAddress,
 			u.phone_number customerPhoneNumber,
 			u.`name` customerName,
-			concat(u.longitude, ',', u.latitude) endLocation,
+			odr.start_location startLocation,
+			odr.end_location endLocation,
+			odr.move_location currentLocation,
 			p.spec,
-			p.stock_qty stockQty,
+			d.stock_qty stockQty,
 			p.amount,
 			d.`name` deliveryName,
 			d.phone_number deliveryPhoneNumber,
@@ -831,6 +833,7 @@
 		LEFT JOIN customer_user u ON u.id = o.customer_user_id
 		LEFT JOIN delivery_user d ON d.id = o.allot_delivery_id
 		LEFT JOIN admin_user a ON a.id = p.create_user_id
+		LEFT JOIN order_delivery_record odr ON odr.order_id = o.order_id
 		WHERE o.order_id = #{orderId}
 	    
 	</select>

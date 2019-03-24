@@ -14,6 +14,7 @@
          <result property="equipNo" column="equip_no"/>
          <result property="idcardNo" column="idcard_no"/>
          <result property="address" column="address"/>
+         <result property="stockQty" column="stock_qty"/>
          <result property="remark" column="remark"/>
          <result property="accountStatus" column="account_status"/>
          <result property="workStatus" column="work_status"/>
@@ -25,7 +26,7 @@
      
     <!-- 公用查询sql-->
     <sql id="DeliveryUserQuery">
-	    id ,name,wx_open_id ,phone_number ,login_name ,password ,equip_no ,idcard_no ,address ,remark ,account_status ,work_status ,frozen_reason ,create_time ,update_time 
+	    id ,name,wx_open_id ,phone_number ,login_name ,password ,equip_no ,idcard_no ,stock_qty,address ,remark ,account_status ,work_status ,frozen_reason ,create_time ,update_time 
 	</sql>
 	
 	
@@ -62,6 +63,9 @@
 		       </if>
 	    	   <if  test="address !=null ">
 		            and address = #{address}
+		       </if>
+		       <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
 		       </if>
 	    	   <if  test="remark !=null ">
 		            and remark = #{remark}
@@ -116,6 +120,9 @@
 	    	   <if  test="address !=null ">
 		            and address = #{address}
 		       </if>
+		       <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
+		       </if>
 	    	   <if  test="remark !=null ">
 		            and remark = #{remark}
 		       </if>
@@ -137,6 +144,7 @@
 	    </where>
      </select>
      
+    <!-- 模糊查询派送员列表,用来选择 -->
    <select id="selectDeliveryUserList"  parameterType="java.util.Map" resultMap="DeliveryUserResultMap">   
           select                                             
 	      	id ,name,phone_number ,login_name ,address,account_status ,work_status
@@ -180,6 +188,9 @@
 		       </if>
 	    	   <if  test="address !=null ">
 		            and address = #{address}
+		       </if>
+		       <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
 		       </if>
 	    	   <if  test="remark !=null ">
 		            and remark = #{remark}
@@ -235,6 +246,9 @@
 		       </if>
 	    	   <if  test="address !=null ">
 		            and address = #{address}
+		       </if>
+		       <if  test="stockQty !=null ">
+		            and stock_qty = #{stockQty}
 		       </if>
 	    	   <if  test="remark !=null ">
 		            and remark = #{remark}
@@ -292,6 +306,9 @@
         	<if test="address !=null "> 
         	address = #{address} ,
         	</if> 
+        	<if test="stockQty !=null "> 
+        	stock_qty = #{stockQty} ,
+        	</if>
         	<if test="remark !=null "> 
         	remark = #{remark} ,
         	</if> 
@@ -343,6 +360,9 @@
 	        </if>	
 	        <if test="address !=null ">
 	        	address ,
+	        </if>
+	        <if test="stockQty !=null ">
+	        	stock_qty ,
 	        </if>	
 	        <if test="remark !=null ">
 	        	remark ,
@@ -389,6 +409,9 @@
 	        </if>	
 	        <if test="address !=null ">
 	        	#{address} ,
+	        </if>
+	        <if test="stockQty !=null ">
+	        	#{stockQty} ,
 	        </if>	
 	        <if test="remark !=null ">
 	        	#{remark} ,

@@ -53,6 +53,11 @@ public class DeliveryUserVo extends PaginatedHelper implements java.io.Serializa
 	 * 备注
 	 */
 	private java.lang.String remark;
+
+	/**
+	 * 派送员领用库存数量
+	 */
+	private java.lang.Integer stockQty;
 	/**
 	 * 账号状态:10-正常，20-冻结
 	 */
@@ -194,6 +199,14 @@ public class DeliveryUserVo extends PaginatedHelper implements java.io.Serializa
 
 	public void setWxOpenId(String wxOpenId) {
 		this.wxOpenId = wxOpenId;
+	}
+
+	public java.lang.Integer getStockQty() {
+		return stockQty;
+	}
+
+	public void setStockQty(java.lang.Integer stockQty) {
+		this.stockQty = stockQty;
 	}
 
 }

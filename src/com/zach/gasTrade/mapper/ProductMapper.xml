@@ -12,6 +12,7 @@
          <result property="productDesc" column="product_desc"/>
          <result property="imagePath" column="image_path"/>
          <result property="stockQty" column="stock_qty"/>
+         <result property="businessAddress" column="business_dddress"/>
          <result property="status" column="status"/>
          <result property="updateTime" column="update_time"/>
          <result property="updateUserId" column="update_user_id"/>
@@ -30,7 +31,7 @@
      
     <!-- 公用查询sql-->
     <sql id="ProductQuery">
-	    product_id ,product_name ,amount ,spec ,product_desc ,image_path ,stock_qty ,status ,update_time ,update_user_id ,create_time ,create_user_id 
+	    product_id ,product_name ,amount ,spec ,product_desc ,image_path ,stock_qty ,business_dddress,status ,update_time ,update_user_id ,create_time ,create_user_id 
 	</sql>
 	
 	
@@ -289,11 +290,11 @@
         	<if test="stockQty !=null "> 
         	stock_qty = #{stockQty} ,
         	</if> 
+        	<if test="businessAddress !=null "> 
+        	business_dddress = #{businessAddress} ,
+        	</if> 
         	<if test="status !=null "> 
         	status = #{status} ,
-        	</if> 
-        	<if test="updateTime !=null "> 
-        	update_time = #{updateTime} ,
         	</if> 
         	<if test="updateUserId !=null "> 
         	update_user_id = #{updateUserId} ,
@@ -302,7 +303,10 @@
         	create_time = #{createTime} ,
         	</if> 
         	<if test="createUserId !=null "> 
-        	create_user_id = #{createUserId} 
+        	create_user_id = #{createUserId} ,
+        	</if> 
+        	<if test="updateTime !=null "> 
+        	update_time = #{updateTime} 
         	</if> 
         WHERE 
         	product_id = #{productId} 
@@ -332,6 +336,9 @@
 	        <if test="stockQty !=null ">
 	        	stock_qty ,
 	        </if>	
+	        <if test="businessAddress !=null ">
+	        	business_dddress ,
+	        </if>
 	        <if test="status !=null ">
 	        	status ,
 	        </if>	
@@ -369,6 +376,9 @@
 	        <if test="stockQty !=null ">
 	        	#{stockQty} ,
 	        </if>	
+	        <if test="businessAddress !=null ">
+	        	#{businessAddress} ,
+	        </if>
 	        <if test="status !=null ">
 	        	#{status} ,
 	        </if>	

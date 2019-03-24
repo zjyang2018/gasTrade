@@ -45,7 +45,6 @@ import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.netpay.PayService;
 import com.zach.gasTrade.netpay.UnoinPayUtil;
 import com.zach.gasTrade.service.OrderInfoService;
-import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
 import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
@@ -267,14 +266,22 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			ProductVo productVo = new ProductVo();
 			productVo.setProductId(orderInfoVo.getProductId());
 			ProductVo product = productDao.getProductBySelective(productVo);
-			AdminUserVo adminUserVo = new AdminUserVo();
-			adminUserVo.setId(product.getCreateUserId());
-			AdminUserVo adminUser = adminUserDao.getAdminUserBySelective(adminUserVo);
-			String startLocation = adminUser.getAddress();
+			// AdminUserVo adminUserVo = new AdminUserVo();
+			// adminUserVo.setId(product.getCreateUserId());
+			// AdminUserVo adminUser = adminUserDao.getAdminUserBySelective(adminUserVo);
+			String startLocationAddress = product.getBusinessAddress();
+			if (StringUtil.isNull(startLocationAddress)) {
+				JSONObject jSONObject = MapHelper.addressToLocation(startLocationAddress);
+				if (jSONObject != null) {
+					String lng = jSONObject.getString("lng");
+					String lat = jSONObject.getString("lat");
+					orderDeliveryRecordVo.setStartLocation(lng + "," + lat);
+				}
+			}
 			String endLocation = orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude();
 			orderDeliveryRecordVo.setEndLocation(endLocation);
 			orderDeliveryRecordVo.setMoveLocation(moveLocation);
-			orderDeliveryRecordVo.setMoveLocation(startLocation);
+
 			orderDeliveryRecordVo.setCreateTime(now);
 			orderDeliveryRecordDao.save(orderDeliveryRecordVo);
 		} catch (Exception e) {
@@ -456,14 +463,6 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		OrderInfoDetailDto orderInfo = orderInfoDao.queryOrderDetailInfo(orderId);
 		if (orderInfo == null) {
 			return null;
-		}
-		if (StringUtil.isNull(orderInfo.getProductAddress())) {
-			JSONObject jSONObject = MapHelper.addressToLocation(orderInfo.getProductAddress());
-			if (jSONObject != null) {
-				String lng = jSONObject.getString("lng");
-				String lat = jSONObject.getString("lat");
-				orderInfo.setStartLocation(lng + "," + lat);
-			}
 		}
 		return orderInfo;
 	}

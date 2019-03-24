@@ -268,13 +268,17 @@
 
 	<select id="getDeliveryMonitorPage" parameterType="java.util.Map"
 		resultMap="DeliveryMonitorDtoResultMap">
-		select
-		o.order_id AS order_id,c.name AS customer_name,c.phone_number AS
-		customer_phone_number,d.name AS delivery_name,d.phone_number AS
-		delivery_phone_number,o.delivery_order_time AS delivery_order_time
-		from order_info AS o
-		left join customer_user AS c on o.customer_user_id=c.id
-		left join delivery_user AS d on o.allot_delivery_id=d.id
+		SELECT
+			o.order_id AS order_id,
+			c. NAME AS customer_name,
+			c.phone_number AS customer_phone_number,
+			d. NAME AS delivery_name,
+			d.phone_number AS delivery_phone_number,
+			o.delivery_order_time AS delivery_order_time
+		FROM
+			order_info AS o
+		LEFT JOIN customer_user AS c ON o.customer_user_id = c.id
+		LEFT JOIN delivery_user AS d ON o.allot_delivery_id = d.id
 		<where>
 			<if test="orderId !=null ">
 				and o.order_id like concat(concat(#{orderId},"%"))

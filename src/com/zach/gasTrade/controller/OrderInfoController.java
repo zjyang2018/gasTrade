@@ -1001,7 +1001,8 @@ public class OrderInfoController extends CommonController {
 			if (deliveryUser == null) {
 				throw new RuntimeException("派送库存修改失败");
 			}
-			deliveryUser.setStockQty(deliveryUser.getStockQty() - 1);
+			int stockQty = deliveryUser.getStockQty() == null ? 0 : deliveryUser.getStockQty();
+			deliveryUser.setStockQty(stockQty - 1);
 			deliveryUser.setUpdateTime(nowTime);
 			deliveryUserService.update(deliveryUser);
 

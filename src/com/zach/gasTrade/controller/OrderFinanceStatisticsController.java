@@ -94,12 +94,14 @@ public class OrderFinanceStatisticsController extends CommonController {
 		return result;
 	}
 
-	@RequestMapping(value = "/orderFinanceStatistics/exportOrderStatisticsList", method = RequestMethod.GET)
+	@RequestMapping(value = "/orderFinanceStatistics/exportOrderStatisticsList", method = RequestMethod.POST)
 	public void exportOrderStatistics(HttpServletRequest request, HttpServletResponse response,
-			OrderFinanceStatisticsVo filterMask) {
+			@RequestBody Map<String, String> param, OrderFinanceStatisticsVo filterMask) {
 		PageResult result = PageResult.initResult();
 
-		String searchStartDate = request.getParameter("searchStartDate");
+		// String searchStartDate = request.getParameter("searchStartDate");
+		// String searchEndDate = request.getParameter("searchEndDate");
+		String searchStartDate = param.get("searchStartDate");
 		String searchEndDate = request.getParameter("searchEndDate");
 		if (StringUtil.isNotNullAndNotEmpty(searchStartDate)) {
 			// filterMask.setDate(searchDate.substring(0, 10));

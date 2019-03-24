@@ -642,49 +642,6 @@ public class OrderInfoController extends CommonController {
 	}
 
 	/**
-	 * 公众号——客户端——确认签收
-	 * 
-	 * @param request
-	 * @param filterMask
-	 * @return Result
-	 */
-	@RequestMapping(value = "/weixin/orderInfo/confirmReceive", method = RequestMethod.GET)
-	@ResponseBody
-	public Result confirmReceive(HttpServletRequest request, OrderInfoVo filterMask) {
-		Result result = Result.initResult();
-		String orderId = request.getParameter("orderId");
-		if (StringUtil.isNullOrEmpty(orderId)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("订单编号不能为空");
-			return result;
-		}
-
-		Date nowTime = new Date();
-		try {
-			filterMask.setOrderId(orderId);
-			OrderInfoVo orderInfoVo = orderInfoService.getOrderInfoBySelective(filterMask);
-			if (orderInfoVo == null) {
-				throw new RuntimeException("该订单不存在," + orderId);
-			}
-			orderInfoVo.setDeliveryCompleteTime(nowTime);
-			orderInfoVo.setOrderStatus("60");
-			orderInfoVo.setUpdateTime(nowTime);
-
-			orderInfoService.update(orderInfoVo);
-
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
-
-	/**
 	 * 测试微信消息推送
 	 * 
 	 * @param request
@@ -791,6 +748,49 @@ public class OrderInfoController extends CommonController {
 		result.setPageNum(pageNum);
 		result.setPageSize(pageSize);
 		result.setData(list);
+		return result;
+	}
+
+	/**
+	 * 公众号——客户端——确认签收
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/weixin/orderInfo/confirmReceive", method = RequestMethod.GET)
+	@ResponseBody
+	public Result confirmReceive(HttpServletRequest request, OrderInfoVo filterMask) {
+		Result result = Result.initResult();
+		String orderId = request.getParameter("orderId");
+		if (StringUtil.isNullOrEmpty(orderId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+
+		Date nowTime = new Date();
+		try {
+			filterMask.setOrderId(orderId);
+			OrderInfoVo orderInfoVo = orderInfoService.getOrderInfoBySelective(filterMask);
+			if (orderInfoVo == null) {
+				throw new RuntimeException("该订单不存在," + orderId);
+			}
+			orderInfoVo.setDeliveryCompleteTime(nowTime);
+			orderInfoVo.setOrderStatus("60");
+			orderInfoVo.setUpdateTime(nowTime);
+
+			orderInfoService.update(orderInfoVo);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
 		return result;
 	}
 
@@ -957,6 +957,53 @@ public class OrderInfoController extends CommonController {
 			orderInfoVo.setUpdateTime(nowTime);
 
 			orderInfoService.update(orderInfoVo);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
+	/**
+	 * 公众号——派送端——确认签收,减去派送库存
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/weixin/orderInfo/delivery/confirmOrderReceived", method = RequestMethod.GET)
+	@ResponseBody
+	public Result confirmOrderReceived(HttpServletRequest request, OrderInfoVo filterMask) {
+		Result result = Result.initResult();
+		String orderId = request.getParameter("orderId");
+		if (StringUtil.isNullOrEmpty(orderId)) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("订单编号不能为空");
+			return result;
+		}
+
+		Date nowTime = new Date();
+		try {
+			filterMask.setOrderId(orderId);
+			OrderInfoVo orderInfoVo = orderInfoService.getOrderInfoBySelective(filterMask);
+			if (orderInfoVo == null) {
+				throw new RuntimeException("该订单不存在," + orderId);
+			}
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(orderInfoVo.getAllotDeliveryId());
+			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			if (deliveryUser == null) {
+				throw new RuntimeException("派送库存修改失败");
+			}
+			deliveryUser.setStockQty(deliveryUser.getStockQty() - 1);
+			deliveryUser.setUpdateTime(nowTime);
+			deliveryUserService.update(deliveryUser);
 
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

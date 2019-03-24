@@ -6,7 +6,6 @@
 
 package com.zach.gasTrade.controller;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +27,11 @@ import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.DeliveryUserDto;
+import com.zach.gasTrade.dto.UserDto;
 import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.service.OrderInfoService;
 import com.zach.gasTrade.service.ProductService;
 import com.zach.gasTrade.vo.DeliveryUserVo;
-import com.zach.gasTrade.vo.OrderInfoVo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -320,26 +319,32 @@ public class DeliveryUserController extends CommonController {
 	}
 
 	/**
-	 * 确认接单
+	 * 派送端-修改库存数量
 	 * 
 	 * @param request
 	 * @param filterMask
 	 * @return Result
 	 */
-	@ApiOperation(value = "确认接单", notes = "请求参数说明||orderId:订单编号,allotDeliveryId:派送员编号\\n返回参数字段说明:\\n")
-	@RequestMapping(value = "/deliveryUser/accept_order", method = RequestMethod.POST)
+	@RequestMapping(value = "/weixin/deliveryUser/updateStockQty", method = RequestMethod.GET)
 	@ResponseBody
-	public Result accpetOrder(HttpServletRequest request, @RequestBody OrderInfoVo filterMask) {
+	public Result updateStockQty(HttpServletRequest request, DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
-		logger.info("确认接单接口参数:" + JSON.toJSONString(filterMask));
+		String stockQty = request.getParameter("stockQty");
 		try {
-			if (StringUtil.isNullOrEmpty(filterMask.getOrderId())) {
-				throw new RuntimeException("订单编号不能为空");
+			if (StringUtil.isNull(stockQty)) {
+				throw new RuntimeException("库存数量不能为空");
 			}
-			filterMask.setDeliveryOrderTime(new Date());
-			// 订单状态设为已接单
-			filterMask.setOrderStatus("40");
-			orderInfoService.update(filterMask);
+			UserDto user = this.getCurrentUser(request);
+			if (user == null) {
+				throw new RuntimeException("该用户未登陆," + this.getWxOpenId(request));
+			}
+			if (user.getDeliveryUser() == null) {
+				throw new RuntimeException("该用户非派送员," + this.getWxOpenId(request));
+			}
+			filterMask.setId(user.getDeliveryUser().getId());
+			filterMask.setStockQty(Integer.getInteger(stockQty));
+			deliveryUserService.update(filterMask);
+
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
@@ -351,4 +356,5 @@ public class DeliveryUserController extends CommonController {
 		}
 		return result;
 	}
+
 }

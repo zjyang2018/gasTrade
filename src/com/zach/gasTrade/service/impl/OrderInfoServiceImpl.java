@@ -296,11 +296,59 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	 * 
 	 * @param orderInfoVo
 	 */
+	@Transactional
 	public int update(OrderInfoVo orderInfoVo) {
 		Date nowTime = new Date();
 		orderInfoVo.setUpdateTime(nowTime);
+		orderInfoDao.update(orderInfoVo);
+		if ("50".equals(orderInfoVo.getOrderStatus()) || "60".equals(orderInfoVo.getOrderStatus())) {
+			OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
+			orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
+			OrderDeliveryRecordVo recordVo = orderDeliveryRecordDao
+					.getOrderDeliveryRecordBySelective(orderDeliveryRecordVo);
+			if (recordVo != null) {
+				if ("50".equals(orderInfoVo.getOrderStatus())) {
+					recordVo.setAcceptTime(orderInfoVo.getDeliveryOrderTime());
+					recordVo.setDeliveryTime(orderInfoVo.getDeliveryOrderTime());
+				} else if ("60".equals(orderInfoVo.getOrderStatus())) {
+					recordVo.setCompleteTime(orderInfoVo.getDeliveryCompleteTime());
+				}
+				orderDeliveryRecordDao.update(recordVo);
+			}
+		} else if ("30".equals(orderInfoVo.getOrderStatus())) {
+			OrderDeliveryRecordVo param = new OrderDeliveryRecordVo();
+			param.setOrderId(orderInfoVo.getOrderId());
+			OrderDeliveryRecordVo recordVo = orderDeliveryRecordDao.getOrderDeliveryRecordBySelective(param);
+			if (recordVo != null) {
+				return 1;
+			}
+			// 添加订单派送记录
+			OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
+			orderDeliveryRecordVo.setId(SerialGenerator.getUUID());
+			orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
+			orderDeliveryRecordVo.setAllotTime(nowTime);
+			String endLocation = orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude();
+			orderDeliveryRecordVo.setEndLocation(endLocation);
+			// orderDeliveryRecordVo.setMoveLocation(moveLocation);
 
-		return orderInfoDao.update(orderInfoVo);
+			ProductVo productVo = new ProductVo();
+			productVo.setProductId(orderInfoVo.getProductId());
+			ProductVo product = productDao.getProductBySelective(productVo);
+			String startLocationAddress = product.getBusinessAddress();
+			if (StringUtil.isNull(startLocationAddress)) {
+				JSONObject jSONObject = MapHelper.addressToLocation(startLocationAddress);
+				if (jSONObject != null) {
+					String lng = jSONObject.getString("lng");
+					String lat = jSONObject.getString("lat");
+					orderDeliveryRecordVo.setStartLocation(lng + "," + lat);
+				}
+			}
+
+			orderDeliveryRecordVo.setCreateTime(nowTime);
+			orderDeliveryRecordDao.save(orderDeliveryRecordVo);
+		}
+
+		return 1;
 	}
 
 	/**

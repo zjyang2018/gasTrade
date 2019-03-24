@@ -29,8 +29,6 @@ import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.DeliveryUserDto;
 import com.zach.gasTrade.dto.UserDto;
 import com.zach.gasTrade.service.DeliveryUserService;
-import com.zach.gasTrade.service.OrderInfoService;
-import com.zach.gasTrade.service.ProductService;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 
 import io.swagger.annotations.Api;
@@ -45,12 +43,6 @@ public class DeliveryUserController extends CommonController {
 
 	@Autowired
 	private DeliveryUserService deliveryUserService;
-
-	@Autowired
-	private OrderInfoService orderInfoService;
-
-	@Autowired
-	private ProductService prodcutService;
 
 	/**
 	 * 分页列表 + 搜索
@@ -172,7 +164,7 @@ public class DeliveryUserController extends CommonController {
 	}
 
 	/**
-	 * 分页列表 + 搜索(人员管理)
+	 * 模糊搜索派送员列表 + 搜索(人员管理)
 	 * 
 	 * @param request
 	 * @param filterMask

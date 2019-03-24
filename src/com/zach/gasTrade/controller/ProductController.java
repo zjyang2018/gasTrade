@@ -79,21 +79,6 @@ public class ProductController extends CommonController {
 		try {
 			int total = productService.getProductCount(filterMask);
 			List<ProductVo> list = productService.getProductPage(filterMask);
-			for (ProductVo productVo : list) {
-				String imgPath = productVo.getImagePath();
-				String[] imgPathArr = {};
-				if (StringUtil.isNotNullAndNotEmpty(imgPath)) {
-					imgPathArr = imgPath.split(",");
-				}
-				String imagesPath = "";
-				for (String str : imgPathArr) {
-					imagesPath += Constants.BASE_PATH + str + ",";
-				}
-				if (imagesPath.endsWith(",")) {
-					imagesPath = imagesPath.substring(0, imagesPath.length() - 1);
-				}
-				productVo.setImagePath(imagesPath);
-			}
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
@@ -134,7 +119,7 @@ public class ProductController extends CommonController {
 			}
 			String imagesPath = filterMask.getImagePath();
 			if (StringUtil.isNotNullAndNotEmpty(imagesPath)) {
-				String[] images = imagesPath.split(";");
+				String[] images = imagesPath.split(",");
 				if (images.length > 3) {
 					// 去掉空,取最后的3张图片
 					List<String> list = new ArrayList<String>();
@@ -144,7 +129,7 @@ public class ProductController extends CommonController {
 						}
 					}
 					if (list.size() > 3) {
-						imagesPath = list.get(1) + ";" + list.get(2) + ";" + list.get(2);
+						imagesPath = list.get(1) + "," + list.get(2) + "," + list.get(2);
 					}
 				}
 				filterMask.setImagePath(imagesPath);
@@ -206,7 +191,7 @@ public class ProductController extends CommonController {
 
 			String imagesPath = filterMask.getImagePath();
 			if (StringUtil.isNotNullAndNotEmpty(imagesPath)) {
-				String[] images = imagesPath.split(";");
+				String[] images = imagesPath.split(",");
 				if (images.length > 3) {
 					// 去掉空,取最后的3张图片
 					List<String> list = new ArrayList<String>();
@@ -216,7 +201,7 @@ public class ProductController extends CommonController {
 						}
 					}
 					if (list.size() > 3) {
-						imagesPath = list.get(1) + ";" + list.get(2) + ";" + list.get(2);
+						imagesPath = list.get(1) + "," + list.get(2) + "," + list.get(2);
 					}
 				}
 				productVo.setImagePath(imagesPath);

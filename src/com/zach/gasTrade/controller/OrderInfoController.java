@@ -58,6 +58,8 @@ import com.zach.gasTrade.vo.OrderInfoVo;
 import com.zach.gasTrade.vo.ProductVo;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "订单相关api")
@@ -934,6 +936,9 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "派送端——去接单", notes = "派送端——去接单")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "orderId", value = "订单Id", required = true, paramType = "query", dataType = "String") })
 	@RequestMapping(value = "/weixin/orderInfo/deliveryReceiveOrder", method = RequestMethod.GET)
 	@ResponseBody
 	public Result receiveOrder(HttpServletRequest request, OrderInfoVo filterMask) {
@@ -977,6 +982,9 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "派送端——确认签收", notes = "确认签收,减去派送库存")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "orderId", value = "订单Id", required = true, paramType = "query", dataType = "String") })
 	@RequestMapping(value = "/weixin/orderInfo/delivery/confirmOrderReceived", method = RequestMethod.GET)
 	@ResponseBody
 	public Result confirmOrderReceived(HttpServletRequest request, OrderInfoVo filterMask) {
@@ -1025,6 +1033,9 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
+	@ApiOperation(value = "公众号——订单所有详情", notes = "订单所有详情信息")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "orderId", value = "订单Id", required = true, paramType = "query", dataType = "String") })
 	@RequestMapping(value = "/weixin/orderInfo/queryOrderDetailInfo", method = RequestMethod.GET)
 	@ResponseBody
 	public DataResult queryOrderDetailInfo(HttpServletRequest request, OrderInfoVo filterMask) {

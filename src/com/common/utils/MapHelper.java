@@ -92,7 +92,7 @@ public class MapHelper {
 	}
 
 	public static void main(String[] args) {
-		String address = "深圳市南山区桃园村";
+		String address = "深圳市南山区桃源村北门";
 		JSONObject result = addressToPoint(address);
 		System.out.println(result.toJSONString());
 		System.out.println(addressToLocation(address));

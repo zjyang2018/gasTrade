@@ -406,10 +406,12 @@ public class ProductController extends CommonController {
 			productInfoDto.setImagePath(product.getImagePath());
 			AdminUserVo adminUserVo = new AdminUserVo();
 			adminUserVo.setId(product.getCreateUserId());
-			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-			if (adminUser != null) {
-				productInfoDto.setAddress(adminUser.getAddress());
-			}
+			productInfoDto.setAddress(product.getBusinessAddress());
+			// AdminUserVo adminUser =
+			// adminUserService.getAdminUserBySelective(adminUserVo);
+			// if (adminUser != null) {
+			// productInfoDto.setAddress(adminUser.getAddress());
+			// }
 			result.setData(productInfoDto);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);

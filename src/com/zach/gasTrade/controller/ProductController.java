@@ -76,6 +76,7 @@ public class ProductController extends CommonController {
 
 		filterMask.setPage(pageNum);
 		filterMask.setPageSize(pageSize);
+		filterMask.setStatus("10");
 		try {
 			int total = productService.getProductCount(filterMask);
 			List<ProductVo> list = productService.getProductPage(filterMask);

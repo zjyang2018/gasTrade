@@ -113,12 +113,11 @@ public class OrderDeliveryRecordController extends CommonController {
 	 * @return PageResult
 	 */
 	@RequestMapping(value = "/orderDeliveryRecord/exportDeliveryCountList", method = RequestMethod.GET)
-	public void exportDeliveryCountList(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody Map<String, String> param) {
+	public void exportDeliveryCountList(HttpServletRequest request, HttpServletResponse response) {
 		PageResult result = PageResult.initResult();
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		String name = param.get("deliveryName");
+		String name = request.getParameter("deliveryName");
 		if (StringUtil.isNotNullAndNotEmpty(name)) {
 			map.put("deliveryName", name);
 		}

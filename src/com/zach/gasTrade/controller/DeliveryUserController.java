@@ -278,7 +278,7 @@ public class DeliveryUserController extends CommonController {
 	 * @return Result
 	 */
 	@ApiOperation(value = "切换账号状态", notes = "请求参数说明||id:派送员编号,frozenReason:冻结原因,accountStatus:账号状态:10-正常，20-冻结\\n返回参数字段说明:\\n")
-	@RequestMapping(value = "/deliveryUser/change_account_status", method = RequestMethod.POST)
+	@RequestMapping(value = "/deliveryUser/delete", method = RequestMethod.POST)
 	@ResponseBody
 	public Result delete(HttpServletRequest request, @RequestBody DeliveryUserVo filterMask) {
 		Result result = Result.initResult();

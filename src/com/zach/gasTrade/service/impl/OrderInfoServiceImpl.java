@@ -280,7 +280,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 				if (jSONObject != null) {
 					String lng = jSONObject.getString("lng");
 					String lat = jSONObject.getString("lat");
-					orderDeliveryRecordVo.setStartLocation(lng + "," + lat);
+					orderDeliveryRecordVo.setStartLocation(lat + "," + lng);
 				}
 			}
 			String endLocation = orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude();
@@ -354,7 +354,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 				if (jSONObject != null) {
 					String lng = jSONObject.getString("lng");
 					String lat = jSONObject.getString("lat");
-					orderDeliveryRecordVo.setStartLocation(lng + "," + lat);
+					orderDeliveryRecordVo.setStartLocation(lat + "," + lng);
 				}
 			}
 

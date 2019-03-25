@@ -290,7 +290,7 @@
 			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &lt;= #{endTime}
 			</if>
 		</where>
-		order by o.update_time
+		order by o.update_time desc
 		limit #{startIndex},#{pageSize}
 	</select>
 	<!-- 公众号——派送员端——我的订单列表 -->
@@ -320,7 +320,7 @@
 			</if>
 
 		</where>
-		order by o.update_time
+		order by o.update_time desc
 		limit #{startIndex},#{pageSize}
 	</select>
 	
@@ -352,7 +352,7 @@
 			</if>
 
 		</where>
-		order by o.update_time
+		order by o.update_time desc
 		limit #{startIndex},#{pageSize}
 	</select>
 
@@ -477,7 +477,7 @@
 				and o.order_status = #{orderStatus}
 			</if>
 		</where>
-		order by o.update_time
+		order by o.update_time desc
 		limit #{startIndex},#{pageSize}
 	</select>
 	

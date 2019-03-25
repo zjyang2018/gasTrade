@@ -168,7 +168,7 @@
 		            and update_time = #{updateTime}
 		       </if>
 	    </where>
-	    order by update_time
+	    order by update_time desc
 	    limit #{startIndex},#{pageSize}
      </select>
      

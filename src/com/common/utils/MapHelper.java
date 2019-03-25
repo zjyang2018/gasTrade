@@ -74,9 +74,13 @@ public class MapHelper {
 	public static JSONObject addressToPoint(String address) {
 		final String KEY_1 = "7d9fbeb43e975cd1e9477a7e5d5e192a";
 		String url = "http://api.map.baidu.com/geocoder?address=" + address + "&output=json&key=" + KEY_1;
-		JSONObject result = HttpUrlClient.doGetStr(url);
-		if ("OK".equals(result.getString("status"))) {
-			return result.getJSONObject("result");
+		try {
+			JSONObject result = HttpUrlClient.doGetStr(url);
+			if ("OK".equals(result.getString("status"))) {
+				return result.getJSONObject("result");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("地址填写错误,请检查");
 		}
 		// {"confidence":30,"level":"村庄","location":{"lat":22.564436,"lng":113.98797},"precise":0}
 		return null;

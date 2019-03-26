@@ -354,4 +354,44 @@ public class DeliveryUserController extends CommonController {
 		return result;
 	}
 
+	/**
+	 * 修改
+	 * 
+	 * @param request
+	 * @param filterMask
+	 * @return Result
+	 */
+	@RequestMapping(value = "/weixin/deliveryUser/edit", method = RequestMethod.POST)
+	@ResponseBody
+	public Result update(HttpServletRequest request, @RequestBody DeliveryUserVo filterMask) {
+		Result result = Result.initResult();
+		UserDto user = this.getCurrentUser(request);
+		if (user == null) {
+			throw new RuntimeException("该用户未登陆," + this.getWxOpenId(request));
+		}
+		if (user.getDeliveryUser() == null) {
+			throw new RuntimeException("该用户非派送员," + this.getWxOpenId(request));
+		}
+
+		try {
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(user.getDeliveryUser().getId());
+			deliveryUserVo.setName(filterMask.getName());
+			deliveryUserVo.setAddress(filterMask.getAddress());
+			deliveryUserVo.setPhoneNumber(filterMask.getPhoneNumber());
+			deliveryUserVo.setStockQty(filterMask.getStockQty());
+			deliveryUserService.update(deliveryUserVo);
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
+		return result;
+	}
+
 }

@@ -15,7 +15,7 @@ public class UserDto implements java.io.Serializable {
 	// wxOpenId
 	private String wxOpenId;
 
-	// 用户类型:1-客户端用户,2-派送端用户,3-管理端用户,4-即是客户端用户也是派送端用户
+	// 用户类型:1-客户端用户,2-派送端用户,3-游客,4-即是客户端用户也是派送端用户
 	private String userType;
 
 	// 客户端用户信息

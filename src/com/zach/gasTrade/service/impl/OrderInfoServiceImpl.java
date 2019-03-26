@@ -221,6 +221,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	public void autoAllotDeliveryOrder() {
 		OrderInfoVo orderInfoVo = new OrderInfoVo();
 		orderInfoVo.setAllotStatus("10");
+		orderInfoVo.setPayStatus("20");
 		List<OrderInfoVo> list = orderInfoDao.getOrderInfoList(orderInfoVo);
 		for (OrderInfoVo bean : list) {
 			autoAllotDeliveryOrder(bean);
@@ -236,18 +237,31 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	public void autoAllotDeliveryOrder(OrderInfoVo orderInfoVo) {
 		logger.info("自动分配订单参数:" + JSON.toJSONString(orderInfoVo));
 		try {
+			String customerAddress = orderInfoVo.getCustomerAddress();
+			if (StringUtil.isNull(customerAddress)) {
+				// 发送短信
+				logger.info("客户未填写联系地址,订单号为:" + orderInfoVo.getOrderId());
+				return;
+			}
+			String customerLocation = "";
+			JSONObject customerJSONObject = MapHelper.addressToLocation(customerAddress);
+			if (customerJSONObject != null) {
+				String lng = customerJSONObject.getString("lng");
+				String lat = customerJSONObject.getString("lat");
+				customerLocation = lat + "," + lng;
+			}
+
 			List<DeliveryLocationHistoryVo> list = deliveryLocationHistoryDao.getDeliveryLocationHistoryByRecent();
 			String deliveryUserId = "";
 			String moveLocation = "";
 			double minDistance = 0.00;
 			for (DeliveryLocationHistoryVo bean : list) {
 				// 空坐标过滤掉
-				if (StringUtil.isNull(orderInfoVo.getLatitude()) || StringUtil.isNull(orderInfoVo.getLongitude())
-						|| StringUtil.isNull(bean.getLatitude()) || StringUtil.isNull(bean.getLongitude())) {
+				if (StringUtil.isNull(bean.getLatitude()) || StringUtil.isNull(bean.getLongitude())) {
 					continue;
 				}
 				double distance = MapHelper.GetPointDistance(bean.getLatitude() + "," + bean.getLongitude(),
-						orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude());
+						customerLocation);
 				if (minDistance > distance) {
 					minDistance = distance;
 					deliveryUserId = bean.getDeliveryUserId();
@@ -275,7 +289,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			// adminUserVo.setId(product.getCreateUserId());
 			// AdminUserVo adminUser = adminUserDao.getAdminUserBySelective(adminUserVo);
 			String startLocationAddress = product.getBusinessAddress();
-			if (StringUtil.isNull(startLocationAddress)) {
+			if (StringUtil.isNotNullAndNotEmpty(startLocationAddress)) {
 				JSONObject jSONObject = MapHelper.addressToLocation(startLocationAddress);
 				if (jSONObject != null) {
 					String lng = jSONObject.getString("lng");

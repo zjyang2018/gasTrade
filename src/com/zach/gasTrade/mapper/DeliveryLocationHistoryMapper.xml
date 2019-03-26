@@ -209,6 +209,7 @@
 	</select>
 	
 	<select id="queryAllDeliveryNewLocationList"  resultType="com.zach.gasTrade.dto.DeliveryNewLocationDto">
+	    select * from (
 		select
 			b.delivery_user_id deliveryId,
 			b.location currentLoaction,
@@ -219,6 +220,7 @@
 		 	left join order_info o on b.delivery_user_id = o.allot_delivery_id and o.order_status in ('40','50')
 		  where not exists(select 1 from delivery_location_history c where c.delivery_user_id= b.delivery_user_id
 		and b.create_time &lt; c.create_time)
+		) tb GROUP BY tb.deliveryId
 	</select>
 </mapper>
 

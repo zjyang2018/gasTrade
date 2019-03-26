@@ -85,6 +85,10 @@ public class CustomerUserController extends CommonController {
 		try {
 			int total = customerUserService.getCustomerUserCount(filterMask);
 			List<CustomerUserVo> list = customerUserService.getCustomerUserPage(filterMask);
+			int index = 1;
+			for (CustomerUserVo bean : list) {
+				bean.setIndex(index++);
+			}
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);

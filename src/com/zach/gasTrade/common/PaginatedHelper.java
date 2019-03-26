@@ -1,4 +1,4 @@
-package  com.zach.gasTrade.common;
+package com.zach.gasTrade.common;
 
 import java.io.Serializable;
 
@@ -14,6 +14,8 @@ public class PaginatedHelper implements Serializable {
 	private static final long serialVersionUID = 1L;
 	protected int page = 1;
 	protected int pageSize;
+
+	protected int index;
 
 	// 开始位置
 	protected int startIndex;
@@ -62,6 +64,14 @@ public class PaginatedHelper implements Serializable {
 		} else {
 			this.pageSize = PAGE_SIZE;
 		}
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 }

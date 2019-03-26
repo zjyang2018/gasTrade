@@ -81,6 +81,10 @@ public class DeliveryUserController extends CommonController {
 
 			int total = deliveryUserService.getDeliveryUserCount(map);
 			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(map);
+			int index = 1;
+			for (DeliveryUserVo bean : list) {
+				bean.setIndex(index++);
+			}
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
@@ -146,6 +150,10 @@ public class DeliveryUserController extends CommonController {
 
 			int total = deliveryUserService.getDeliveryUserCount(map);
 			List<DeliveryUserVo> list = deliveryUserService.getDeliveryUserPage(map);
+			int index = 1;
+			for (DeliveryUserVo bean : list) {
+				bean.setIndex(index++);
+			}
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);

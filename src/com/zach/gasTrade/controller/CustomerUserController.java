@@ -29,7 +29,9 @@ import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.UserDto;
 import com.zach.gasTrade.service.CustomerUserService;
+import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.vo.CustomerUserVo;
+import com.zach.gasTrade.vo.DeliveryUserVo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -41,6 +43,9 @@ public class CustomerUserController extends CommonController {
 
 	@Autowired
 	private CustomerUserService customerUserService;
+
+	@Autowired
+	private DeliveryUserService deliveryUserService;
 
 	/**
 	 * 分页列表 + 搜索
@@ -180,10 +185,12 @@ public class CustomerUserController extends CommonController {
 	@ApiOperation(value = "修改客户收货信息", notes = "请求参数说明||name:姓名 ,,phoneNumber:手机号码,address:联系地址\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/weixin/customerUser/updateInfo", method = RequestMethod.POST)
 	@ResponseBody
-	public Result updateAddress(HttpServletRequest request, @RequestBody CustomerUserVo filterMask) {
+	public Result updateAddress(HttpServletRequest request, @RequestBody DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
 		logger.info("修改客户收货信息接口参数:" + JSON.toJSONString(filterMask));
 		try {
+			String pageType = request.getParameter("pageType");
+
 			UserDto user = this.getCurrentUser(request);
 			if (user == null || user.getCustomerUser() == null) {
 				throw new RuntimeException("该用户信息已过期,请重新进入");
@@ -194,18 +201,38 @@ public class CustomerUserController extends CommonController {
 			if (jsonObject == null || jsonObject.getInteger("confidence") < 16) {
 				throw new RuntimeException("地址输入详细，请重新输入");
 			}
-			String customerId = user.getCustomerUser().getId();
-			CustomerUserVo param = new CustomerUserVo();
-			param.setId(customerId);
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(param);
-			customerUser.setAddress(address);
-			customerUser.setPhoneNumber(filterMask.getPhoneNumber());
-			customerUser.setName(filterMask.getName());
-			customerUser.setLongitude(jsonObject.getJSONObject("location").getString("lng"));
-			customerUser.setLatitude(jsonObject.getJSONObject("location").getString("lat"));
-			customerUser.setUpdateTime(new Date());
-			customerUserService.update(customerUser);
 
+			// pageType:1-客户端,2-派送端
+			if ("2".equals(pageType)) {
+				if (user.getDeliveryUser() == null) {
+					throw new RuntimeException("该用户非派送员," + this.getWxOpenId(request));
+				}
+
+				DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+				deliveryUserVo.setId(user.getDeliveryUser().getId());
+				deliveryUserVo.setName(filterMask.getName());
+				deliveryUserVo.setAddress(filterMask.getAddress());
+				deliveryUserVo.setPhoneNumber(filterMask.getPhoneNumber());
+				deliveryUserVo.setStockQty(filterMask.getStockQty());
+				deliveryUserService.update(deliveryUserVo);
+			} else {
+				if (user.getCustomerUser() == null) {
+					throw new RuntimeException("该用户非客户端用户," + this.getWxOpenId(request));
+				}
+				String customerId = user.getCustomerUser().getId();
+				CustomerUserVo customerUser = new CustomerUserVo();
+				// param.setId(customerId);
+				// CustomerUserVo customerUser =
+				// customerUserService.getCustomerUserBySelective(param);
+				customerUser.setId(customerId);
+				customerUser.setAddress(address);
+				customerUser.setPhoneNumber(filterMask.getPhoneNumber());
+				customerUser.setName(filterMask.getName());
+				customerUser.setLongitude(jsonObject.getJSONObject("location").getString("lng"));
+				customerUser.setLatitude(jsonObject.getJSONObject("location").getString("lat"));
+				customerUser.setUpdateTime(new Date());
+				customerUserService.update(customerUser);
+			}
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());

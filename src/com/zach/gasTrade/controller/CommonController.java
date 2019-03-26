@@ -28,6 +28,7 @@ public class CommonController {
 		logger.info("Header获取到wxOpenId==>" + wxOpenId);
 		if (StringUtil.isNotNullAndNotEmpty(wxOpenId)) {
 			String userStr = cacheService.get(Constants.USER_INFO_KEY + wxOpenId);
+			logger.info("打印用户信息==" + userStr);
 			if (StringUtil.isNull(userStr)) {
 				UserDto user = customerUserService.getUserInfo(wxOpenId);
 				if (user != null) {

@@ -366,14 +366,14 @@ public class DeliveryUserController extends CommonController {
 	public Result update(HttpServletRequest request, @RequestBody DeliveryUserVo filterMask) {
 		Result result = Result.initResult();
 		UserDto user = this.getCurrentUser(request);
-		if (user == null) {
-			throw new RuntimeException("该用户未登陆," + this.getWxOpenId(request));
-		}
-		if (user.getDeliveryUser() == null) {
-			throw new RuntimeException("该用户非派送员," + this.getWxOpenId(request));
-		}
-
 		try {
+			if (user == null) {
+				throw new RuntimeException("该用户未登陆," + this.getWxOpenId(request));
+			}
+			if (user.getDeliveryUser() == null) {
+				throw new RuntimeException("该用户非派送员," + this.getWxOpenId(request));
+			}
+
 			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
 			deliveryUserVo.setId(user.getDeliveryUser().getId());
 			deliveryUserVo.setName(filterMask.getName());

@@ -103,15 +103,13 @@ public class OrderFinanceStatisticsController extends CommonController {
 		String searchEndDate = request.getParameter("searchEndDate");
 		// String searchStartDate = param.get("searchStartDate");
 		// String searchEndDate = request.getParameter("searchEndDate");
-		if (StringUtil.isNotNullAndNotEmpty(searchStartDate)) {
-			// filterMask.setDate(searchDate.substring(0, 10));
-			filterMask.setStartDate(searchStartDate.substring(0, 10));
-		}
-		if (StringUtil.isNotNullAndNotEmpty(searchEndDate)) {
-			filterMask.setEndDate(searchEndDate.substring(0, 10));
-		}
-
 		try {
+			if (StringUtil.isNotNullAndNotEmpty(searchStartDate)) {
+				filterMask.setStartDate(searchStartDate.substring(0, 10));
+			}
+			if (StringUtil.isNotNullAndNotEmpty(searchEndDate)) {
+				filterMask.setEndDate(searchEndDate.substring(0, 10));
+			}
 			List<OrderFinanceStatisticsVo> list = orderFinanceStatisticsService
 					.getOrderFinanceStatisticsList(filterMask);
 			// 声明一个工作薄

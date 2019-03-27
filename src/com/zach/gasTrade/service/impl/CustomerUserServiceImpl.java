@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.common.http.HttpUrlClient;
 import com.common.seq.SerialGenerator;
-import com.common.utils.StringUtil;
 import com.zach.gasTrade.dao.CustomerUserDao;
 import com.zach.gasTrade.dao.DeliveryUserDao;
 import com.zach.gasTrade.dto.UserDto;
@@ -121,54 +120,13 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 		Map<String, Object> returnData = new HashMap<String, Object>();
 		returnData.put("openId", openId);
 
-		// CustomerUserVo customerUserVo = new CustomerUserVo();
-		// customerUserVo.setWxOpenId(openId);
-		// CustomerUserVo customerUser =
-		// this.getCustomerUserBySelective(customerUserVo);
-		// if (customerUser != null &&
-		// StringUtil.isNotNullAndNotEmpty(customerUser.getPhoneNumber())) {
-		// returnData.put("isRegister", true);
-		// // this.save(customerUserVo);
-		// } else {
-		// returnData.put("isRegister", false);
-		// }
-
 		UserDto user = this.getUserInfo(openId);
 		if (user == null) {
 			returnData.put("userType", "1");
 			returnData.put("isRegister", false);
 			return returnData;
 		}
-		if (StringUtil.isNull(user.getUserType())) {
-			returnData.put("userType", "3");
-		} else if ("1".equals(user.getUserType())) {
-			returnData.put("userType", "1");
-			if (StringUtil.isNotNullAndNotEmpty(user.getCustomerUser().getPhoneNumber())) {
-				returnData.put("isRegister", true);
-			} else {
-				returnData.put("isRegister", false);
-			}
-		} else if ("2".equals(user.getUserType())) {
-			returnData.put("userType", "2");
-			if (StringUtil.isNotNullAndNotEmpty(user.getDeliveryUser().getLoginName())) {
-				returnData.put("isLogin", true);
-			} else {
-				returnData.put("isLogin", false);
-			}
-		} else if ("4".equals(user.getUserType())) {
-			returnData.put("userType", "4");
-			if (StringUtil.isNotNullAndNotEmpty(user.getCustomerUser().getPhoneNumber())) {
-				returnData.put("isRegister", true);
-			} else {
-				returnData.put("isRegister", false);
-			}
-			if (StringUtil.isNotNullAndNotEmpty(user.getDeliveryUser().getLoginName())) {
-				returnData.put("isLogin", true);
-			} else {
-				returnData.put("isLogin", false);
-			}
-		}
-
+		returnData.put("userType", user.getUserType());
 		return returnData;
 	}
 

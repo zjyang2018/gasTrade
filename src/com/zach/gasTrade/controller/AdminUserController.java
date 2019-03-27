@@ -52,8 +52,7 @@ public class AdminUserController extends CommonController {
 	 * @return PageResult
 	 */
 	@ApiOperation(value = "平台管理员列表", notes = "请求参数说明||pageNum:页码 ,pageSize:每页条数,searchParam:搜索参数（姓名或手机号）,"
-			+ "workStatus:在职状态:10-在职,20-离职,accountStatus:账号状态:10-正常,20-冻结,"
-			+ "\\n返回参数字段说明:\\n")
+			+ "workStatus:在职状态:10-在职,20-离职,accountStatus:账号状态:10-正常,20-冻结," + "\\n返回参数字段说明:\\n")
 	@RequestMapping(value = "/adminUser/query_page", method = RequestMethod.POST)
 	@ResponseBody
 	public PageResult getPageData(HttpServletRequest request, @RequestBody Map<String, String> param,
@@ -87,6 +86,10 @@ public class AdminUserController extends CommonController {
 		try {
 			int total = adminUserService.getAdminUserCount(filterMask);
 			List<AdminUserVo> list = adminUserService.getAdminUserPage(filterMask);
+			int index = 1;
+			for (AdminUserVo bean : list) {
+				bean.setIndex(index++);
+			}
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);

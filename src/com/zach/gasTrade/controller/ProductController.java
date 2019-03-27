@@ -80,6 +80,10 @@ public class ProductController extends CommonController {
 		try {
 			int total = productService.getProductCount(filterMask);
 			List<ProductVo> list = productService.getProductPage(filterMask);
+			int index = 1;
+			for (ProductVo bean : list) {
+				bean.setIndex(index++);
+			}
 
 			result.setAllCount(total);
 			result.setPageNum(pageNum);

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.common.utils.StringUtil;
 import com.common.wx.TokenUtil;
 import com.common.wx.WeiXinConstant;
 import com.common.wx.WeiXinSignUtil;
@@ -110,7 +111,11 @@ public class WeiXinController extends CommonController {
 		String userType = request.getParameter("userType");
 		logger.info("查询个人信息参数,userType:" + userType);
 		try {
-			UserDto user = this.getCurrentUser(request);
+			String wxOpenId = this.getWxOpenId(request);
+			if (StringUtil.isNull(wxOpenId)) {
+				throw new RuntimeException("未注册或者未登录");
+			}
+			UserDto user = customerUserService.getUserInfo(wxOpenId);
 			if (user == null) {
 				result.setCode(Constants.USER_NOT_EXIST);
 				result.setMsg("用户信息不存在");

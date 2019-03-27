@@ -96,7 +96,7 @@ public class OrderFinanceStatisticsController extends CommonController {
 
 	@RequestMapping(value = "/orderFinanceStatistics/exportOrderStatisticsList", method = RequestMethod.GET)
 	public void exportOrderStatistics(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody Map<String, String> param, OrderFinanceStatisticsVo filterMask) {
+			OrderFinanceStatisticsVo filterMask) {
 		PageResult result = PageResult.initResult();
 
 		String searchStartDate = request.getParameter("searchStartDate");

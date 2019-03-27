@@ -122,7 +122,7 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 
 		UserDto user = this.getUserInfo(openId);
 		if (user == null) {
-			returnData.put("userType", "1");
+			returnData.put("userType", "3");
 			returnData.put("isRegister", false);
 			return returnData;
 		}

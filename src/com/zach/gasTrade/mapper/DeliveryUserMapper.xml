@@ -332,11 +332,14 @@
     </update>
     
     <!-- 保存 -->
-     <insert id="save" parameterType="com.zach.gasTrade.dto.DeliveryUserDto" >
+     <insert id="save" parameterType="com.zach.gasTrade.dto.DeliveryUserVo" >
         INSERT INTO delivery_user (
 	        <if test="id !=null ">
 	        	id ,
 	        </if>	
+	        <if test="wxOpenId !=null ">
+	        	wx_open_id ,
+	        </if>
 	        <if test="name !=null ">
 	        	name ,
 	        </if>	
@@ -383,6 +386,9 @@
 	        <if test="id !=null ">
 	        	#{id} ,
 	        </if>
+	        <if test="wxOpenId !=null ">
+	        	#{wxOpenId} ,
+	        </if>	
 	        <if test="name !=null ">
 	        	#{name} ,
 	        </if>	

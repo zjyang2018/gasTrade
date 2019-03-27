@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -87,7 +88,10 @@ public class DeliveryUserServiceImpl implements DeliveryUserService {
 		deliveryUserDto.setCreateTime(nowTime);
 		deliveryUserDto.setUpdateTime(nowTime);
 
-		return deliveryUserDao.save(deliveryUserDto);
+		DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+		BeanUtils.copyProperties(deliveryUserDto, deliveryUserVo);
+
+		return deliveryUserDao.save(deliveryUserVo);
 	}
 
 	/**

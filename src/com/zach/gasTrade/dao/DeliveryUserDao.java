@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
-import com.zach.gasTrade.dto.DeliveryUserDto;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 
 @Repository("deliveryUserDao")
@@ -62,7 +61,7 @@ public interface DeliveryUserDao {
 	 * 
 	 * @param deliveryUserVo
 	 */
-	public int save(DeliveryUserDto deliveryUserDto);
+	public int save(DeliveryUserVo deliveryUserVo);
 
 	/**
 	 * 更新

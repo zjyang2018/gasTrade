@@ -332,7 +332,7 @@
     </update>
     
     <!-- 保存 -->
-     <insert id="save" parameterType="com.zach.gasTrade.dto.DeliveryUserVo" >
+     <insert id="save" parameterType="com.zach.gasTrade.vo.DeliveryUserVo" >
         INSERT INTO delivery_user (
 	        <if test="id !=null ">
 	        	id ,

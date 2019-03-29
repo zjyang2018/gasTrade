@@ -122,20 +122,24 @@ public class ProductController extends CommonController {
 			if (filterMask.getAmount() == null) {
 				throw new RuntimeException("产品金额不能为空");
 			}
-			String imagesPath = filterMask.getImagePath();
-			if (StringUtil.isNotNullAndNotEmpty(imagesPath)) {
-				String[] images = imagesPath.split(",");
-				if (images.length > 3) {
-					// 去掉空,取最后的3张图片
-					List<String> list = new ArrayList<String>();
-					for (int index = 0; index < images.length; index++) {
-						if (StringUtil.isNotNullAndNotEmpty(images[index])) {
-							list.add(images[index]);
-						}
+			String imagesPathSplit = filterMask.getImagePath();
+			if (StringUtil.isNotNullAndNotEmpty(imagesPathSplit)) {
+				String[] images = imagesPathSplit.split(",");
+				String imagesPath = "";
+				// 去掉空,取最后的3张图片
+				List<String> list = new ArrayList<String>();
+				for (int index = 0; index < images.length; index++) {
+					String imagePath = images[index];
+					if (StringUtil.isNull(imagePath)) {
+						continue;
 					}
-					if (list.size() > 3) {
-						imagesPath = list.get(1) + "," + list.get(2) + "," + list.get(2);
+					if (imagePath.contains(".")) {
+						list.add(imagePath);
+						imagesPath = imagesPath + imagePath + ",";
 					}
+				}
+				if (list.size() > 3) {
+					imagesPath = list.get(1) + "," + list.get(2) + "," + list.get(3);
 				}
 				filterMask.setImagePath(imagesPath);
 			}
@@ -194,22 +198,26 @@ public class ProductController extends CommonController {
 				productVo.setProductDesc(filterMask.getProductDesc());
 			}
 
-			String imagesPath = filterMask.getImagePath();
-			if (StringUtil.isNotNullAndNotEmpty(imagesPath)) {
-				String[] images = imagesPath.split(",");
-				if (images.length > 3) {
-					// 去掉空,取最后的3张图片
-					List<String> list = new ArrayList<String>();
-					for (int index = 0; index < images.length; index++) {
-						if (StringUtil.isNotNullAndNotEmpty(images[index])) {
-							list.add(images[index]);
-						}
+			String imagesPathSplit = filterMask.getImagePath();
+			if (StringUtil.isNotNullAndNotEmpty(imagesPathSplit)) {
+				String[] images = imagesPathSplit.split(",");
+				String imagesPath = "";
+				// 去掉空,取最后的3张图片
+				List<String> list = new ArrayList<String>();
+				for (int index = 0; index < images.length; index++) {
+					String imagePath = images[index];
+					if (StringUtil.isNull(imagePath)) {
+						continue;
 					}
-					if (list.size() > 3) {
-						imagesPath = list.get(1) + "," + list.get(2) + "," + list.get(2);
+					if (imagePath.contains(".")) {
+						list.add(imagePath);
+						imagesPath = imagesPath + imagePath + ",";
 					}
 				}
-				productVo.setImagePath(imagesPath);
+				if (list.size() > 3) {
+					imagesPath = list.get(1) + "," + list.get(2) + "," + list.get(3);
+				}
+				filterMask.setImagePath(imagesPath);
 			}
 
 			productService.update(productVo);

@@ -133,7 +133,8 @@ public class ProductController extends CommonController {
 					if (StringUtil.isNull(imagePath)) {
 						continue;
 					}
-					if (imagePath.contains(".")) {
+					int endIndex = imagePath.lastIndexOf("/");
+					if (endIndex + 1 < imagePath.length()) {
 						list.add(imagePath);
 						imagesPath = imagesPath + imagePath + ",";
 					}
@@ -209,7 +210,8 @@ public class ProductController extends CommonController {
 					if (StringUtil.isNull(imagePath)) {
 						continue;
 					}
-					if (imagePath.contains(".")) {
+					int endIndex = imagePath.lastIndexOf("/");
+					if (endIndex + 1 < imagePath.length()) {
 						list.add(imagePath);
 						imagesPath = imagesPath + imagePath + ",";
 					}

@@ -1,6 +1,7 @@
 package com.zach.gasTrade.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import com.zach.gasTrade.common.PaginatedHelper;
 
@@ -25,17 +26,22 @@ public class ProductInfoDto extends PaginatedHelper implements java.io.Serializa
 	 */
 	private java.lang.String spec;
 	/**
-     * 产品描述 
-     */ 
+	 * 产品描述
+	 */
 	private java.lang.String productDesc;
 	/**
 	 * imagePath
 	 */
 	private java.lang.String imagePath;
 	/**
-     * 商家地址 
-     */ 
+	 * 商家地址
+	 */
 	private java.lang.String address;
+
+	/**
+	 * 商家地址
+	 */
+	private List<String> imageList;
 
 	public java.lang.String getProductId() {
 		return productId;
@@ -91,6 +97,14 @@ public class ProductInfoDto extends PaginatedHelper implements java.io.Serializa
 
 	public void setAddress(java.lang.String address) {
 		this.address = address;
+	}
+
+	public List<String> getImageList() {
+		return imageList;
+	}
+
+	public void setImageList(List<String> imageList) {
+		this.imageList = imageList;
 	}
 
 }

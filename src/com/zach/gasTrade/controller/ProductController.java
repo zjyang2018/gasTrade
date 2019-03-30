@@ -31,10 +31,8 @@ import com.zach.gasTrade.common.DataResult;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.ProductInfoDto;
-import com.zach.gasTrade.dto.ProductListDto;
 import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.service.ProductService;
-import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.ProductVo;
 
 import io.swagger.annotations.Api;
@@ -404,14 +402,29 @@ public class ProductController extends CommonController {
 			productInfoDto.setProductDesc(product.getProductDesc());
 			productInfoDto.setSpec(product.getSpec());
 			productInfoDto.setImagePath(product.getImagePath());
-			AdminUserVo adminUserVo = new AdminUserVo();
-			adminUserVo.setId(product.getCreateUserId());
+			// AdminUserVo adminUserVo = new AdminUserVo();
+			// adminUserVo.setId(product.getCreateUserId());
 			productInfoDto.setAddress(product.getBusinessAddress());
 			// AdminUserVo adminUser =
 			// adminUserService.getAdminUserBySelective(adminUserVo);
 			// if (adminUser != null) {
 			// productInfoDto.setAddress(adminUser.getAddress());
 			// }
+			String imagePath = product.getImagePath();
+			if (StringUtil.isNotNullAndNotEmpty(imagePath)) {
+				String[] imagePaths = imagePath.split(",");
+				List<String> list = new ArrayList<String>();
+				for (int index = 0; index < imagePaths.length; index++) {
+					String image = imagePaths[index];
+					if (StringUtil.isNull(image)) {
+						continue;
+					}
+					list.add(image);
+				}
+				if (!list.isEmpty()) {
+					productInfoDto.setImageList(list);
+				}
+			}
 			result.setData(productInfoDto);
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
@@ -445,7 +458,7 @@ public class ProductController extends CommonController {
 		filterMask.setPageSize(pageSize);
 		try {
 			int total = productService.getProductCount(filterMask);
-			List<ProductListDto> products = productService.getProductInfoPage(filterMask);
+			List<ProductVo> products = productService.getProductPage(filterMask);
 			result.setAllCount(total);
 			result.setPageNum(pageNum);
 			result.setPageSize(pageSize);

@@ -81,8 +81,18 @@ public class WeiXinController extends CommonController {
 		// Map<String, String> paramer = new HashMap<String, String>();
 		// paramer.put("code", "code");
 		// paramer.put("isRegister", "false");
+		Map<String, Object> returnData = new HashMap<String, Object>();
 		try {
-			Map<String, Object> returnData = customerUserService.getWeiXinUserBaseInfo(code);
+			String wxOpenId = this.getWxOpenId(request);
+			if (StringUtil.isNotNullAndNotEmpty(wxOpenId)) {
+				UserDto user = customerUserService.getUserInfo(wxOpenId);
+				returnData.put("openId", wxOpenId);
+				returnData.put("userType", user.getUserType());
+				result.setData(returnData);
+				return result;
+			}
+
+			returnData = customerUserService.getWeiXinUserBaseInfo(code);
 			logger.info("获取到微信授权wxOpenId结果为:" + JSON.toJSONString(returnData));
 			result.setData(returnData);
 		} catch (RuntimeException e) {

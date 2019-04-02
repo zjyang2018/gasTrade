@@ -119,7 +119,9 @@ public class DeliveryUserController extends CommonController {
 		try {
 			int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 			int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
-			String time = param.get("dateParam");
+			// String time = param.get("dateParam");
+			String searchStartTime = param.get("searchStartTime");
+			String searchEndTime = param.get("searchEndTime");
 			String workStatus = param.get("workStatus");
 			String searchParam = param.get("searchParam");
 
@@ -138,10 +140,20 @@ public class DeliveryUserController extends CommonController {
 			if (StringUtil.isNotNullAndNotEmpty(workStatus)) {
 				map.put("workStatus", workStatus);
 			}
-			if (StringUtil.isNotNullAndNotEmpty(time)) {
+			// if (StringUtil.isNotNullAndNotEmpty(time)) {
+			// // 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+			// time = time.substring(0, 10);
+			// map.put("createTime", time);
+			// }
+			if (StringUtil.isNotNullAndNotEmpty(searchStartTime)) {
 				// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
-				time = time.substring(0, 10);
-				map.put("createTime", time);
+				searchStartTime = searchStartTime.substring(0, 10);
+				map.put("searchStartTime", searchStartTime);
+			}
+			if (StringUtil.isNotNullAndNotEmpty(searchEndTime)) {
+				// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+				searchEndTime = searchEndTime.substring(0, 10);
+				map.put("searchEndTime", searchEndTime);
 			}
 
 			int startIndex = (pageNum - 1) * pageSize;

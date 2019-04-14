@@ -612,7 +612,11 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		for (OrderInfoVo bean : list) {
 			Date time = DateTimeUtils.addDateTime(bean.getCreateTime(), TimeUnit.MINUTE, 20);
 			if (new Date().after(time)) {
-				this.payService.closeOrderPay(bean.getOrderId());
+				try {
+					this.payService.closeOrderPay(bean.getOrderId());
+				} catch (Exception e) {
+					logger.error("订单关闭操作失败", e);
+				}
 			}
 		}
 	}

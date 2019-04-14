@@ -161,19 +161,19 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			orderInfo.setOrderId(orderInfoVo.getOrderId());
 			orderInfo = orderInfoDao.getOrderInfoBySelective(orderInfo);
 			if (orderInfo != null) {
+				JSONObject pay = this.payService.pay(orderInfoVo.getOrderId(), orderInfo.getAmount());
+				orderInfo.setPayNo(pay.getString("OrderID"));
+
 				if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getCustomerAddress())) {
 					orderInfo.setCustomerAddress(orderInfoVo.getCustomerAddress());
 				}
 				if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getRemark())) {
 					orderInfo.setRemark(orderInfoVo.getRemark());
 				}
-				if (StringUtil.isNotNullAndNotEmpty(orderInfoVo.getCustomerAddress())
-						|| StringUtil.isNotNullAndNotEmpty(orderInfoVo.getRemark())) {
-					orderInfo.setUpdateTime(new Date());
-					orderInfoDao.update(orderInfo);
-				}
+				orderInfo.setUpdateTime(new Date());
+				orderInfoDao.update(orderInfo);
 				// 生成支付url
-				return this.payService.pay(orderInfoVo.getOrderId(), orderInfo.getAmount());
+				return pay.getString("Url");
 			}
 		}
 		String customUserId = orderInfoVo.getCustomerUserId();
@@ -205,13 +205,16 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		Date now = new Date();
 		orderInfoVo.setCreateTime(now);
 		orderInfoVo.setUpdateTime(now);
+		JSONObject pay = this.payService.pay(orderInfoVo.getOrderId(), product.getAmount());
+		orderInfoVo.setPayNo(pay.getString("OrderID"));
 
 		int count = orderInfoDao.save(orderInfoVo);
 		if (count != 1) {
 			throw new RuntimeException("用户下单失败," + JSON.toJSONString(orderInfoVo));
 		}
 		// 生成支付url
-		return this.payService.pay(orderId, product.getAmount());
+
+		return pay.getString("Url");
 	}
 
 	/**

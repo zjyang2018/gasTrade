@@ -38,15 +38,14 @@ public class PayService {
 
 	private APIList apiInstance = new APIList(domain);
 
-	public String pay(String orderId, BigDecimal amount) {
+	public JSONObject pay(String orderId, BigDecimal amount) {
 		String result = apiInstance.UnifiedOrder(DeviceID, devicesecret, DockingDeviceID, orderId,
 				DataUtil.GetNonceStr(), amount, "wx", SiteUserID, DataUtil.GetTimestamp(), DockingSecret);
 
 		logger.info("订单号:" + orderId + ",支付接口返回==>" + result);
 		JSONObject json = JSON.parseObject(result);
 		if (1 == json.getIntValue("success")) {
-			JSONObject reObj = json.getJSONObject("ReObj");
-			return reObj.getString("Url");
+			return json.getJSONObject("ReObj");
 		}
 		throw new RuntimeException(json.getString("msg"));
 	}

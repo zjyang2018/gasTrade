@@ -142,15 +142,15 @@ public class Main {
 			// 交易订单号OrderID
 			// System.out.println("请输入交易订单号OrderID（回车键结束）");
 			// String OrderID = scanner.next();
-			String OrderID = "39008584836982147275";
+			String OrderID = "39008720711513397656";
 			// 退款订单号RefundOrderID
 			// System.out.println("请输入退款订单号RefundOrderID（回车键结束）");
 			// String RefundOrderID = scanner.next();
-			String RefundOrderID = "20190414R00000001";
+			String RefundOrderID = "20190414R0000002";
 			// 退款金额Remoney
 			// System.out.println("请输入退款金额Remoney（回车键结束）");
 			// BigDecimal Remoney = scanner.nextBigDecimal();
-			BigDecimal Remoney = BigDecimal.valueOf(0.01);
+			BigDecimal Remoney = BigDecimal.valueOf(29.99);
 			// 退款授权密码Operatepass
 			// System.out.println("请输入退款授权密码Operatepass（回车键结束）");
 			// String Operatepass = scanner.next();

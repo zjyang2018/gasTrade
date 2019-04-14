@@ -159,4 +159,11 @@ public interface OrderInfoService {
 	 */
 	public void pushWeiXinMessge(String messgeType, OrderInfoVo orderInfoVo);
 
+	/**
+	 * 关闭订单
+	 * 
+	 * @return
+	 */
+	public void closeOrder();
+
 }

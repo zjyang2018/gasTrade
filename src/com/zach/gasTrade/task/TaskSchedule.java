@@ -45,4 +45,11 @@ public class TaskSchedule {
 		deliveryUserService.checkWorkStatus(null);
 	}
 
+	// 自动关闭订单5分钟执行一次
+	@Scheduled(cron = "0 0/5 * * * ? ")
+	public void autoCloseOrderTask() {
+		logger.info("自动关闭订单任务");
+		orderInfoService.closeOrder();
+	}
+
 }

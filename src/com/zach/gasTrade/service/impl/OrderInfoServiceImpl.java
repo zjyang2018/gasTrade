@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.common.enums.TimeUnit;
 import com.common.seq.SerialGenerator;
 import com.common.utils.DateTimeUtils;
 import com.common.utils.MapHelper;
@@ -600,6 +601,20 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			return null;
 		}
 		return orderInfo;
+	}
+
+	@Override
+	public void closeOrder() {
+		OrderInfoVo orderInfoVo = new OrderInfoVo();
+		orderInfoVo.setOrderStatus("10");
+		orderInfoVo.setPayStatus("10");
+		List<OrderInfoVo> list = orderInfoDao.getOrderInfoList(orderInfoVo);
+		for (OrderInfoVo bean : list) {
+			Date time = DateTimeUtils.addDateTime(bean.getCreateTime(), TimeUnit.MINUTE, 20);
+			if (new Date().after(time)) {
+				this.payService.closeOrderPay(bean.getOrderId());
+			}
+		}
 	}
 
 }

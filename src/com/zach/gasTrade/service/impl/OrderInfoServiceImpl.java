@@ -43,8 +43,7 @@ import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
 import com.zach.gasTrade.dto.OrderFinanceStatisticsDto;
 import com.zach.gasTrade.dto.OrderInfoDetailDto;
 import com.zach.gasTrade.dto.OrderListDto;
-import com.zach.gasTrade.netpay.PayService;
-import com.zach.gasTrade.netpay.UnoinPayUtil;
+import com.zach.gasTrade.netpay.xiaomage.PayService;
 import com.zach.gasTrade.service.OrderInfoService;
 import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryLocationHistoryVo;
@@ -191,7 +190,8 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			throw new RuntimeException("该产品已下架," + orderInfoVo.getProductId());
 		}
 
-		String orderId = UnoinPayUtil.genMerOrderId(PayService.msgSrcId);
+		// String orderId = UnoinPayUtil.genMerOrderId(PayService.msgSrcId);
+		String orderId = SerialGenerator.getOrderId();
 		orderInfoVo.setOrderId(orderId);
 		orderInfoVo.setAmount(product.getAmount());
 		orderInfoVo.setProductName(product.getProductName());
@@ -403,20 +403,37 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	public boolean notifyHandle(Map<String, String> params) {
 		boolean checkRet = this.payService.checkSign(params);
 		if (checkRet) {
-			String orderId = params.get("merOrderId");
-			String payNo = params.get("seqId");
-			String realPayAmountStr = params.get("buyerPayAmount");
-			String payTimeStr = params.get("payTime");
-			String refundAmountStr = params.get("refundAmount");
-			if (refundAmountStr != null && !refundAmountStr.isEmpty()) {
-				throw new RuntimeException("退款通知不处理," + JSON.toJSONString(params));
+			// String orderId = params.get("merOrderId");
+			// String payNo = params.get("seqId");
+			// String realPayAmountStr = params.get("buyerPayAmount");
+			// String payTimeStr = params.get("payTime");
+			// String refundAmountStr = params.get("refundAmount");
+			// if (refundAmountStr != null && !refundAmountStr.isEmpty()) {
+			// throw new RuntimeException("退款通知不处理," + JSON.toJSONString(params));
+			// }
+			// String refundOrderId = params.get("refundOrderId");
+
+			String orderId = params.get("DockingOrderID");
+			String payNo = params.get("OrderID");
+			String realPayAmountStr = params.get("OrderMoney");
+			String payTimeStr = params.get("PayTime");
+			String payStatus = params.get("OrderState");
+			if (!"SUCCESS".equals(payStatus)) {
+				throw new RuntimeException("支付失败");
 			}
-			String refundOrderId = params.get("refundOrderId");
+			// String refundAmountStr = params.get("refundAmount");
+			// if (refundAmountStr != null && !refundAmountStr.isEmpty()) {
+			// throw new RuntimeException("退款通知不处理," + JSON.toJSONString(params));
+			// }
+			// String refundOrderId = params.get("refundOrderId");
+
 			OrderInfoVo orderInfoVo = new OrderInfoVo();
 			orderInfoVo.setOrderId(orderId);
 			OrderInfoVo orderInfo = orderInfoDao.getOrderInfoBySelective(orderInfoVo);
 			orderInfo.setPayNo(payNo);
-			orderInfo.setRealPayAmount(new BigDecimal(realPayAmountStr).divide(new BigDecimal(100)));
+			// orderInfo.setRealPayAmount(new BigDecimal(realPayAmountStr).divide(new
+			// BigDecimal(100)));
+			orderInfo.setRealPayAmount(new BigDecimal(realPayAmountStr));
 			orderInfo.setPayStatus("20");
 			Date now = new Date();
 			orderInfo.setPayTime(new Date());
@@ -436,6 +453,8 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 
 			// 推送微信消息-支付通知
 			this.pushWeiXinMessge("40", orderInfoVo);
+		} else {
+			logger.info("校验签名失败," + JSON.toJSONString(params));
 		}
 		return checkRet;
 	}
@@ -448,8 +467,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		if (orderInfo == null) {
 			throw new RuntimeException(orderId + ",订单不存在");
 		}
-		JSONObject result = payService.refund(orderId, orderInfo.getRealPayAmount());
-		logger.info("退款返回参数值:" + result.toJSONString() + ",退款订单号:" + orderId);
+		// JSONObject result = payService.refund(orderId, orderInfo.getRealPayAmount());
+		// logger.info("退款返回参数值:" + result.toJSONString() + ",退款订单号:" + orderId);
+		payService.refund(orderInfo.getPayNo(), orderInfo.getOrderId().replace("P", "R"), orderInfo.getRealPayAmount());
 	}
 
 	@Override

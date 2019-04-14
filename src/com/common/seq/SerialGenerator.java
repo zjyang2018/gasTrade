@@ -26,7 +26,7 @@ public class SerialGenerator {
 	}
 
 	public static String getOrderId() {
-		CacheService cacheService = SpringContextHolder.getBean("cacheService");
+		CacheService cacheService = SpringContextHolder.getBean("redisCacheService");
 		String orderId = cacheService.get("orderId");
 		if (orderId == null || orderId.isEmpty()) {
 			String preStr = DateTimeUtils.getCurrentDate("yyyyMMdd");

@@ -614,6 +614,10 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			if (new Date().after(time)) {
 				try {
 					this.payService.closeOrderPay(bean.getOrderId());
+
+					bean.setOrderStatus("70");
+					bean.setUpdateTime(new Date());
+					orderInfoDao.update(bean);
 				} catch (Exception e) {
 					logger.error("订单关闭操作失败", e);
 				}

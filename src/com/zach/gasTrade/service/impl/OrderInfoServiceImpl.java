@@ -613,7 +613,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			Date time = DateTimeUtils.addDateTime(bean.getCreateTime(), TimeUnit.MINUTE, 20);
 			if (new Date().after(time)) {
 				try {
-					this.payService.closeOrderPay(bean.getOrderId());
+					this.payService.closeOrderPay(bean.getPayNo());
 
 					bean.setOrderStatus("70");
 					bean.setUpdateTime(new Date());

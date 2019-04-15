@@ -178,7 +178,7 @@ public class OrderInfoController extends CommonController {
 	}
 
 	@RequestMapping(value = "/orderInfo/exportOrderList", method = RequestMethod.GET)
-	public void exportOrderList(HttpServletRequest request, HttpServletResponse response, OrderInfoVo filterMask) {
+	public void exportOrderList(HttpServletRequest request, HttpServletResponse response) {
 		PageResult result = PageResult.initResult();
 
 		String orderId = request.getParameter("orderId");
@@ -189,6 +189,8 @@ public class OrderInfoController extends CommonController {
 		String orderStatus = request.getParameter("orderStatus");
 		String startCreateTime = request.getParameter("startCreateTime");
 		String endCreateTime = request.getParameter("endCreateTime");
+
+		OrderInfoVo filterMask = new OrderInfoVo();
 		try {
 			if (StringUtil.isNotNullAndNotEmpty(orderId)) {
 				filterMask.setOrderId(orderId.trim());

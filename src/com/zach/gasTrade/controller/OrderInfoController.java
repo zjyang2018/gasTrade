@@ -310,7 +310,8 @@ public class OrderInfoController extends CommonController {
 		}
 
 		if (checkRet) {
-			writer.print("SUCCESS");
+			// writer.print("SUCCESS");
+			writer.print("success");
 		} else {
 			writer.print("FAILED");
 		}

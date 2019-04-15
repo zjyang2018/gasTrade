@@ -131,7 +131,7 @@ public class UnoinPayUtil {
 		List<String> keys = new ArrayList<String>(params.size());
 
 		for (String key : params.keySet()) {
-			if ("sign".equals(key))
+			if ("sign".equalsIgnoreCase(key))
 				continue;
 			if (StringUtils.isEmpty(params.get(key)))
 				continue;

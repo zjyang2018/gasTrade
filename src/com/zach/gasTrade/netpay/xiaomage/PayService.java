@@ -79,10 +79,10 @@ public class PayService {
 	}
 
 	public boolean checkSign(Map<String, String> params) {
-		String originalSign = params.get("sign");
+		String originalSign = params.get("Sign");
 		String stringA = UnoinPayUtil.buildSignString(params);
 		String sign = DataUtil.GetSign(stringA, DockingSecret);
-		logger.info("计算签名sign为：" + sign);
+		System.out.println("计算签名sign为：" + sign);
 		// 返回结果
 		return originalSign.equals(sign);
 	}

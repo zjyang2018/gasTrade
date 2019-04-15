@@ -49,6 +49,8 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 	/**
 	 * 支付时间
 	 */
+	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
 	private java.util.Date payTime;
 	/**
 	 * 分配状态:10-未分配，20-已分配
@@ -57,6 +59,8 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 	/**
 	 * 分配时间
 	 */
+	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
 	private java.util.Date allotTime;
 	/**
 	 * 派送员ID

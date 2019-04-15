@@ -456,7 +456,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			}
 
 			// 推送微信消息-支付通知
-			this.pushWeiXinMessge("40", orderInfoVo);
+			this.pushWeiXinMessge("40", orderInfo);
 		} else {
 			logger.info("校验签名失败," + JSON.toJSONString(params));
 		}

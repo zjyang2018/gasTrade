@@ -266,11 +266,17 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 				}
 				double distance = MapHelper.GetPointDistance(bean.getLatitude() + "," + bean.getLongitude(),
 						customerLocation);
+				if (minDistance == 0.00) {
+					minDistance = distance;
+				}
 				if (minDistance > distance) {
 					minDistance = distance;
 					deliveryUserId = bean.getDeliveryUserId();
 					moveLocation = bean.getLatitude() + "," + bean.getLongitude();
 				}
+			}
+			if (deliveryUserId.isEmpty()) {
+				return;
 			}
 
 			orderInfoVo.setAllotDeliveryId(deliveryUserId);

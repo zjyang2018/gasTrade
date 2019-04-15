@@ -64,7 +64,7 @@
     <select id="getOrderDeliveryStatisticsPage"  parameterType="java.util.Map" resultMap="OrderDeliveryCountDtoResultMap">   
 	    SELECT
 			ud.id,
-			ud. NAME,
+			ud. NAME delivery_name,
 			IFNULL(tb1.day_complete_time, 0) day_complete_time,
 			IFNULL(tb2.day_accept_time, 0) day_accept_time,
 			IFNULL(tb3.month_complete_time, 0) month_complete_time,

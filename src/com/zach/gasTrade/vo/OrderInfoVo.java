@@ -8,6 +8,9 @@ package com.zach.gasTrade.vo;
 
 import java.math.BigDecimal;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zach.gasTrade.common.PaginatedHelper;
 
 public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable {
@@ -98,10 +101,14 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 	/**
 	 * createTime
 	 */
+	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
 	private java.util.Date createTime;
 	/**
 	 * updateTime
 	 */
+	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
 	private java.util.Date updateTime;
 
 	/**

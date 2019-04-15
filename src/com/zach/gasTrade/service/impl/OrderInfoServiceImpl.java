@@ -87,8 +87,8 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	 * @param map
 	 * @return
 	 */
-	public int getOrderInfoCount(Map<String, Object> map) {
-		return orderInfoDao.getOrderInfoCount(map);
+	public int getOrderInfoCount(OrderInfoVo orderInfoVo) {
+		return orderInfoDao.getOrderInfoCount(orderInfoVo);
 	}
 
 	/**
@@ -117,8 +117,8 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	 * @param map
 	 * @return
 	 */
-	public List<OrderListDto> getOrderInfoPage(Map<String, Object> map) {
-		return orderInfoDao.getOrderInfoPage(map);
+	public List<OrderListDto> getOrderInfoPage(OrderInfoVo orderInfoVo) {
+		return orderInfoDao.getOrderInfoPage(orderInfoVo);
 	}
 
 	/**
@@ -589,9 +589,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	 * @param map
 	 * @return
 	 */
-	public BigDecimal getOrderTotalAmount(Map<String, Object> map) {
+	public BigDecimal getOrderTotalAmount(OrderInfoVo orderInfoVo) {
 		// TODO Auto-generated method stub
-		return orderInfoDao.getOrderTotalAmount(map);
+		return orderInfoDao.getOrderTotalAmount(orderInfoVo);
 	}
 
 	@Override
@@ -610,7 +610,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		orderInfoVo.setPayStatus("10");
 		List<OrderInfoVo> list = orderInfoDao.getOrderInfoList(orderInfoVo);
 		for (OrderInfoVo bean : list) {
-			Date time = DateTimeUtils.addDateTime(bean.getCreateTime(), TimeUnit.MINUTE, 20);
+			Date time = DateTimeUtils.addDateTime(bean.getCreateTime(), TimeUnit.MINUTE, 10);
 			if (new Date().after(time)) {
 				try {
 					this.payService.closeOrderPay(bean.getOrderId());

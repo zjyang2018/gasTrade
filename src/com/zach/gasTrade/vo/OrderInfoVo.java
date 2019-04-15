@@ -104,6 +104,37 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 	 */
 	private java.util.Date updateTime;
 
+	/**
+	 * 客户名称
+	 */
+	private String customerName;
+
+	/**
+	 * 客户手机号
+	 */
+	private String customerPhoneNumber;
+
+	/**
+	 * 派送员名称
+	 */
+	private String deliveryName;
+
+	/**
+	 * 派送员手机号
+	 */
+	private String deliveryPhoneNumber;
+
+	/**
+	 * 查询条件
+	 */
+	private String selectCustomerParam;
+
+	private String selectDeliveryParam;
+
+	private String startCreateTime;
+
+	private String endCreateTime;
+
 	// getter setter方法
 
 	public java.lang.String getOrderId() {
@@ -280,6 +311,70 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 
 	public void setRealPayAmount(BigDecimal realPayAmount) {
 		this.realPayAmount = realPayAmount;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
+	public String getCustomerPhoneNumber() {
+		return customerPhoneNumber;
+	}
+
+	public void setCustomerPhoneNumber(String customerPhoneNumber) {
+		this.customerPhoneNumber = customerPhoneNumber;
+	}
+
+	public String getDeliveryName() {
+		return deliveryName;
+	}
+
+	public void setDeliveryName(String deliveryName) {
+		this.deliveryName = deliveryName;
+	}
+
+	public String getDeliveryPhoneNumber() {
+		return deliveryPhoneNumber;
+	}
+
+	public void setDeliveryPhoneNumber(String deliveryPhoneNumber) {
+		this.deliveryPhoneNumber = deliveryPhoneNumber;
+	}
+
+	public String getSelectCustomerParam() {
+		return selectCustomerParam;
+	}
+
+	public void setSelectCustomerParam(String selectCustomerParam) {
+		this.selectCustomerParam = selectCustomerParam;
+	}
+
+	public String getSelectDeliveryParam() {
+		return selectDeliveryParam;
+	}
+
+	public void setSelectDeliveryParam(String selectDeliveryParam) {
+		this.selectDeliveryParam = selectDeliveryParam;
+	}
+
+	public String getStartCreateTime() {
+		return startCreateTime;
+	}
+
+	public void setStartCreateTime(String startCreateTime) {
+		this.startCreateTime = startCreateTime;
+	}
+
+	public String getEndCreateTime() {
+		return endCreateTime;
+	}
+
+	public void setEndCreateTime(String endCreateTime) {
+		this.endCreateTime = endCreateTime;
 	}
 
 }

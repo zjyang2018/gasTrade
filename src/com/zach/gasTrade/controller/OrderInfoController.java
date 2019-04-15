@@ -6,8 +6,10 @@
 
 package com.zach.gasTrade.controller;
 
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +19,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,37 +32,27 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.common.utils.DateTimeUtils;
 import com.common.utils.StringUtil;
-import com.common.wx.TokenUtil;
-import com.common.wx.WeiXinUtils;
-import com.common.wx.bean.AccessToken;
-import com.common.wx.bean.TemplateData;
-import com.common.wx.bean.TemplateMessage;
 import com.zach.gasTrade.common.Constants;
 import com.zach.gasTrade.common.DataResult;
+import com.zach.gasTrade.common.ExcelUtils;
 import com.zach.gasTrade.common.PageResult;
 import com.zach.gasTrade.common.Result;
 import com.zach.gasTrade.dto.CustomerOrderInfoDto;
-import com.zach.gasTrade.dto.DeliveryDetailDto;
 import com.zach.gasTrade.dto.DeliveryMonitorDto;
-import com.zach.gasTrade.dto.DeliveryOrderDetailDto;
 import com.zach.gasTrade.dto.DeliveryOrderInfoDto;
-import com.zach.gasTrade.dto.OrderDetailDto;
 import com.zach.gasTrade.dto.OrderInfoDetailDto;
 import com.zach.gasTrade.dto.OrderInfoDto;
 import com.zach.gasTrade.dto.OrderListDto;
 import com.zach.gasTrade.dto.UserDto;
 import com.zach.gasTrade.netpay.UnoinPayUtil;
-import com.zach.gasTrade.service.AdminUserService;
 import com.zach.gasTrade.service.CustomerUserService;
 import com.zach.gasTrade.service.DeliveryUserService;
 import com.zach.gasTrade.service.OrderInfoService;
-import com.zach.gasTrade.service.ProductService;
-import com.zach.gasTrade.vo.AdminUserVo;
 import com.zach.gasTrade.vo.CustomerUserVo;
 import com.zach.gasTrade.vo.DeliveryUserVo;
 import com.zach.gasTrade.vo.OrderInfoVo;
-import com.zach.gasTrade.vo.ProductVo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -76,11 +73,11 @@ public class OrderInfoController extends CommonController {
 	@Autowired
 	private DeliveryUserService deliveryUserService;
 
-	@Autowired
-	private ProductService productService;
-
-	@Autowired
-	private AdminUserService adminUserService;
+	// @Autowired
+	// private ProductService productService;
+	//
+	// @Autowired
+	// private AdminUserService adminUserService;
 
 	/**
 	 * 分页列表 + 搜索 + 高级搜索
@@ -106,60 +103,57 @@ public class OrderInfoController extends CommonController {
 		String searchDeliveryParam = param.get("searchDeliveryParam");
 		String allotStatus = param.get("allotStatus");
 		String orderStatus = param.get("orderStatus");
-		String payTime = param.get("payTime");
+		// String payTime = param.get("payTime");
+		String startCreateTime = param.get("startCreateTime");
+		String endCreateTime = param.get("endCreateTime");
 
-		Map<String, Object> map = new HashMap<String, Object>();
+		OrderInfoVo queryParam = new OrderInfoVo();
 
 		if (StringUtil.isNotNullAndNotEmpty(orderId)) {
-			String id = orderId.trim();
-			map.put("orderId", id);
+			queryParam.setOrderId(orderId.trim());
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(payStatus)) {
-			map.put("payStatus", payStatus);
+			queryParam.setPayStatus(payStatus);
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(searchCustomerParam)) {
-			String selectCustomerParam = searchCustomerParam.trim();
-			// selectCustomerParam以"1"开头则按手机号搜索
-			if (selectCustomerParam.startsWith("1")) {
-				map.put("customerPhoneNumber", selectCustomerParam);
-			} else {
-				map.put("customerName", selectCustomerParam);
-			}
+			queryParam.setSelectCustomerParam(searchCustomerParam.trim());
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(searchDeliveryParam)) {
-			String selectDeliveryParam = searchDeliveryParam.trim();
-			// selectDeliveryParam以"1"开头则按手机号搜索
-			if (selectDeliveryParam.startsWith("1")) {
-				map.put("deliveryPhoneNumber", selectDeliveryParam);
-			} else {
-				map.put("deliveryName", selectDeliveryParam);
-			}
+			queryParam.setSelectDeliveryParam(searchDeliveryParam.trim());
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(allotStatus)) {
-			map.put("allotStatus", allotStatus);
+			queryParam.setAllotStatus(allotStatus);
 		}
 
 		if (StringUtil.isNotNullAndNotEmpty(orderStatus)) {
-			map.put("orderStatus", orderStatus);
+			queryParam.setOrderStatus(orderStatus);
 		}
 
-		if (StringUtil.isNotNullAndNotEmpty(payTime)) {
+		if (StringUtil.isNotNullAndNotEmpty(startCreateTime)) {
 			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
-			payTime = payTime.substring(0, 10);
-			map.put("payTime", payTime);
+			startCreateTime = startCreateTime.substring(0, 10);
+			queryParam.setStartCreateTime(startCreateTime);
 		}
 
-		int startIndex = (pageNum - 1) * pageSize;
-		map.put("startIndex", startIndex);
-		map.put("pageSize", pageSize);
+		if (StringUtil.isNotNullAndNotEmpty(endCreateTime)) {
+			// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+			endCreateTime = endCreateTime.substring(0, 10);
+			queryParam.setEndCreateTime(endCreateTime);
+		}
+
+		// int startIndex = (pageNum - 1) * pageSize;
+		// map.put("startIndex", startIndex);
+		// map.put("pageSize", pageSize);
+		queryParam.setPageSize(pageSize);
+		queryParam.setPage(pageNum);
 		try {
-			int total = orderInfoService.getOrderInfoCount(map);
-			List<OrderListDto> list = orderInfoService.getOrderInfoPage(map);
-			BigDecimal orderTotalAmount = orderInfoService.getOrderTotalAmount(map);
+			int total = orderInfoService.getOrderInfoCount(queryParam);
+			List<OrderListDto> list = orderInfoService.getOrderInfoPage(queryParam);
+			BigDecimal orderTotalAmount = orderInfoService.getOrderTotalAmount(queryParam);
 			if (orderTotalAmount == null) {
 				orderTotalAmount = BigDecimal.ZERO.setScale(2);
 			}
@@ -181,6 +175,131 @@ public class OrderInfoController extends CommonController {
 			logger.error("系统异常,请稍后重试", e);
 		}
 		return result;
+	}
+
+	@RequestMapping(value = "/orderInfo/exportOrderList", method = RequestMethod.GET)
+	public void exportOrderList(HttpServletRequest request, HttpServletResponse response, OrderInfoVo filterMask) {
+		PageResult result = PageResult.initResult();
+
+		String orderId = request.getParameter("orderId");
+		String payStatus = request.getParameter("payStatus");
+		String searchCustomerParam = request.getParameter("searchCustomerParam");
+		String searchDeliveryParam = request.getParameter("searchDeliveryParam");
+		String allotStatus = request.getParameter("allotStatus");
+		String orderStatus = request.getParameter("orderStatus");
+		String startCreateTime = request.getParameter("startCreateTime");
+		String endCreateTime = request.getParameter("endCreateTime");
+		try {
+			if (StringUtil.isNotNullAndNotEmpty(orderId)) {
+				filterMask.setOrderId(orderId.trim());
+			}
+
+			if (StringUtil.isNotNullAndNotEmpty(payStatus)) {
+				filterMask.setPayStatus(payStatus);
+			}
+
+			if (StringUtil.isNotNullAndNotEmpty(searchCustomerParam)) {
+				filterMask.setSelectCustomerParam(searchCustomerParam.trim());
+			}
+
+			if (StringUtil.isNotNullAndNotEmpty(searchDeliveryParam)) {
+				filterMask.setSelectDeliveryParam(searchDeliveryParam.trim());
+			}
+
+			if (StringUtil.isNotNullAndNotEmpty(allotStatus)) {
+				filterMask.setAllotStatus(allotStatus);
+			}
+
+			if (StringUtil.isNotNullAndNotEmpty(orderStatus)) {
+				filterMask.setOrderStatus(orderStatus);
+			}
+
+			if (StringUtil.isNotNullAndNotEmpty(startCreateTime)) {
+				// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+				startCreateTime = startCreateTime.substring(0, 10);
+				filterMask.setStartCreateTime(startCreateTime);
+			}
+
+			if (StringUtil.isNotNullAndNotEmpty(endCreateTime)) {
+				// 将字符串转换为日期格式的Date类型(yyyy-MM-dd)
+				endCreateTime = endCreateTime.substring(0, 10);
+				filterMask.setEndCreateTime(endCreateTime);
+			}
+			List<OrderInfoVo> list = orderInfoService.getOrderInfoList(filterMask);
+			// 声明一个工作薄
+			HSSFWorkbook wb = new HSSFWorkbook();
+			HSSFCellStyle style = wb.createCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+
+			HSSFRow row = ExcelUtils.constructOrderListHeader(wb);
+			HSSFSheet sheet = wb.getSheet("订单列表");
+			int index = 0;
+			for (OrderInfoVo bean : list) {
+				// 构造导出列表数据
+				row = sheet.createRow(index + 1);
+				row.createCell(0).setCellValue(index + 1);
+				row.createCell(1).setCellValue(new HSSFRichTextString(bean.getOrderId()));
+				if (bean.getAmount() != null) {
+					row.createCell(2).setCellValue(new HSSFRichTextString(
+							bean.getAmount().setScale(2, BigDecimal.ROUND_CEILING).toPlainString()));
+				} else {
+					row.createCell(2).setCellValue(new HSSFRichTextString("0.00"));
+				}
+				if ("10".equals(bean.getOrderStatus())) {
+					row.createCell(3).setCellValue(new HSSFRichTextString(String.valueOf("未支付")));
+				} else if ("20".equals(bean.getOrderStatus())) {
+					row.createCell(3).setCellValue(new HSSFRichTextString("已支付"));
+				} else if ("30".equals(bean.getOrderStatus())) {
+					row.createCell(3).setCellValue(new HSSFRichTextString("已分配"));
+				} else if ("50".equals(bean.getOrderStatus())) {
+					row.createCell(3).setCellValue(new HSSFRichTextString("派送中"));
+				} else if ("60".equals(bean.getOrderStatus())) {
+					row.createCell(3).setCellValue(new HSSFRichTextString("派送完成"));
+				} else if ("70".equals(bean.getOrderStatus())) {
+					row.createCell(3).setCellValue(new HSSFRichTextString("已关闭"));
+				}
+				row.createCell(4).setCellValue(new HSSFRichTextString(bean.getCustomerName()));
+				row.createCell(5).setCellValue(new HSSFRichTextString(bean.getCustomerPhoneNumber()));
+				if ("10".equals(bean.getAllotStatus())) {
+					row.createCell(6).setCellValue(new HSSFRichTextString("未分配"));
+				} else if ("20".equals(bean.getAllotStatus())) {
+					row.createCell(6).setCellValue(new HSSFRichTextString("已分配"));
+				} else {
+					row.createCell(6).setCellValue(new HSSFRichTextString(""));
+				}
+				row.createCell(7).setCellValue(new HSSFRichTextString(bean.getDeliveryName()));
+				row.createCell(8).setCellValue(new HSSFRichTextString(bean.getDeliveryPhoneNumber()));
+				if ("50".equals(bean.getOrderStatus())) {
+					row.createCell(9).setCellValue(new HSSFRichTextString("派送中"));
+				} else if ("60".equals(bean.getOrderStatus())) {
+					row.createCell(9).setCellValue(new HSSFRichTextString("派送完成"));
+				} else {
+					row.createCell(9).setCellValue(new HSSFRichTextString("--"));
+				}
+				row.createCell(10).setCellValue(new HSSFRichTextString(
+						DateTimeUtils.dateToString(bean.getCreateTime(), "yyyy-MM-dd mm:hh:ss")));
+
+				index++;
+			}
+
+			OutputStream output = response.getOutputStream();
+			String titleName = "订单列表";
+			String excelName = URLEncoder.encode(titleName, "utf-8");
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-disposition", "attachment; filename=" + excelName + ".xls");
+			response.flushBuffer();
+			wb.write(output);
+			output.close();
+
+		} catch (RuntimeException e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg(e.getMessage());
+			logger.error("系统异常," + e.getMessage(), e);
+		} catch (Exception e) {
+			result.setCode(Constants.FAILURE);
+			result.setMsg("系统异常,请稍后重试");
+			logger.error("系统异常,请稍后重试", e);
+		}
 	}
 
 	/**
@@ -319,7 +438,7 @@ public class OrderInfoController extends CommonController {
 	}
 
 	/**
-	 * 接收通知的方法
+	 * 根据订单号退款
 	 *
 	 * @param request
 	 * @param response
@@ -351,7 +470,7 @@ public class OrderInfoController extends CommonController {
 	}
 
 	/**
-	 * 修改
+	 * 变更派送员
 	 * 
 	 * @param request
 	 * @param filterMask
@@ -473,52 +592,55 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/weixin/orderInfo/receiveInfo", method = RequestMethod.GET)
-	@ResponseBody
-	public DataResult receiveInfo(HttpServletRequest request, OrderInfoVo filterMask) {
-		DataResult result = DataResult.initResult();
-		String orderId = request.getParameter("orderId");
-		if (StringUtil.isNullOrEmpty(orderId)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("订单编号不能为空");
-			return result;
-		}
-
-		try {
-			filterMask.setOrderId(orderId);
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
-			if (orderInfo == null) {
-				throw new RuntimeException("该订单不存在," + filterMask.getOrderId());
-			}
-
-			CustomerOrderInfoDto customerOrderInfoDto = new CustomerOrderInfoDto();
-			customerOrderInfoDto.setOrderId(orderInfo.getOrderId());
-			customerOrderInfoDto.setProductName(orderInfo.getProductName());
-			customerOrderInfoDto.setProductAmount(orderInfo.getAmount());
-
-			CustomerUserVo customerUserVo = new CustomerUserVo();
-			customerUserVo.setId(orderInfo.getCustomerUserId());
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-			if (customerUser != null) {
-				customerOrderInfoDto.setCustomerName(customerUser.getName());
-			}
-
-			customerOrderInfoDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
-			customerOrderInfoDto.setRemark(orderInfo.getRemark());
-
-			result.setData(customerOrderInfoDto);
-
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
+	// @RequestMapping(value = "/weixin/orderInfo/receiveInfo", method =
+	// RequestMethod.GET)
+	// @ResponseBody
+	// public DataResult receiveInfo(HttpServletRequest request, OrderInfoVo
+	// filterMask) {
+	// DataResult result = DataResult.initResult();
+	// String orderId = request.getParameter("orderId");
+	// if (StringUtil.isNullOrEmpty(orderId)) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("订单编号不能为空");
+	// return result;
+	// }
+	//
+	// try {
+	// filterMask.setOrderId(orderId);
+	// OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+	// if (orderInfo == null) {
+	// throw new RuntimeException("该订单不存在," + filterMask.getOrderId());
+	// }
+	//
+	// CustomerOrderInfoDto customerOrderInfoDto = new CustomerOrderInfoDto();
+	// customerOrderInfoDto.setOrderId(orderInfo.getOrderId());
+	// customerOrderInfoDto.setProductName(orderInfo.getProductName());
+	// customerOrderInfoDto.setProductAmount(orderInfo.getAmount());
+	//
+	// CustomerUserVo customerUserVo = new CustomerUserVo();
+	// customerUserVo.setId(orderInfo.getCustomerUserId());
+	// CustomerUserVo customerUser =
+	// customerUserService.getCustomerUserBySelective(customerUserVo);
+	// if (customerUser != null) {
+	// customerOrderInfoDto.setCustomerName(customerUser.getName());
+	// }
+	//
+	// customerOrderInfoDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
+	// customerOrderInfoDto.setRemark(orderInfo.getRemark());
+	//
+	// result.setData(customerOrderInfoDto);
+	//
+	// } catch (RuntimeException e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg(e.getMessage());
+	// logger.error("系统异常," + e.getMessage(), e);
+	// } catch (Exception e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("系统异常,请稍后重试");
+	// logger.error("系统异常,请稍后重试", e);
+	// }
+	// return result;
+	// }
 
 	/**
 	 * 公众号——客户端——订单详情
@@ -527,52 +649,53 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/weixin/orderInfo/orderDetail", method = RequestMethod.GET)
-	@ResponseBody
-	public DataResult orderDetail(HttpServletRequest request) {
-		DataResult result = DataResult.initResult();
-		String orderId = request.getParameter("orderId");
-		if (StringUtil.isNullOrEmpty(orderId)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("订单编号不能为空");
-			return result;
-		}
-
-		try {
-			OrderInfoVo filterMask = new OrderInfoVo();
-			filterMask.setOrderId(orderId);
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
-			if (orderInfo == null) {
-				throw new RuntimeException("该订单不存在," + orderId);
-			}
-			ProductVo productVo = new ProductVo();
-			productVo.setProductId(orderInfo.getProductId());
-			ProductVo product = productService.getProductBySelective(productVo);
-			if (product == null) {
-				throw new RuntimeException("该订单产品已过期或不存在," + orderInfo.getProductId());
-			}
-
-			OrderDetailDto orderDetailDto = new OrderDetailDto();
-			orderDetailDto.setOrderId(orderInfo.getOrderId());
-			orderDetailDto.setProductName(orderInfo.getProductName());
-			orderDetailDto.setAmount(orderInfo.getAmount());
-			orderDetailDto.setSpec(product.getProductDesc());
-			orderDetailDto.setPayAmount(orderInfo.getAmount());
-			orderDetailDto.setPayTime(orderInfo.getPayTime());
-
-			result.setData(orderDetailDto);
-
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
+	// @RequestMapping(value = "/weixin/orderInfo/orderDetail", method =
+	// RequestMethod.GET)
+	// @ResponseBody
+	// public DataResult orderDetail(HttpServletRequest request) {
+	// DataResult result = DataResult.initResult();
+	// String orderId = request.getParameter("orderId");
+	// if (StringUtil.isNullOrEmpty(orderId)) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("订单编号不能为空");
+	// return result;
+	// }
+	//
+	// try {
+	// OrderInfoVo filterMask = new OrderInfoVo();
+	// filterMask.setOrderId(orderId);
+	// OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+	// if (orderInfo == null) {
+	// throw new RuntimeException("该订单不存在," + orderId);
+	// }
+	// ProductVo productVo = new ProductVo();
+	// productVo.setProductId(orderInfo.getProductId());
+	// ProductVo product = productService.getProductBySelective(productVo);
+	// if (product == null) {
+	// throw new RuntimeException("该订单产品已过期或不存在," + orderInfo.getProductId());
+	// }
+	//
+	// OrderDetailDto orderDetailDto = new OrderDetailDto();
+	// orderDetailDto.setOrderId(orderInfo.getOrderId());
+	// orderDetailDto.setProductName(orderInfo.getProductName());
+	// orderDetailDto.setAmount(orderInfo.getAmount());
+	// orderDetailDto.setSpec(product.getProductDesc());
+	// orderDetailDto.setPayAmount(orderInfo.getAmount());
+	// orderDetailDto.setPayTime(orderInfo.getPayTime());
+	//
+	// result.setData(orderDetailDto);
+	//
+	// } catch (RuntimeException e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg(e.getMessage());
+	// logger.error("系统异常," + e.getMessage(), e);
+	// } catch (Exception e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("系统异常,请稍后重试");
+	// logger.error("系统异常,请稍后重试", e);
+	// }
+	// return result;
+	// }
 
 	/**
 	 * 公众号——客户端——派送详情
@@ -581,68 +704,73 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/weixin/orderInfo/deliveryDetail", method = RequestMethod.GET)
-	@ResponseBody
-	public DataResult deliveryDetail(HttpServletRequest request, OrderInfoVo filterMask) {
-		DataResult result = DataResult.initResult();
-		String orderId = request.getParameter("orderId");
-		if (StringUtil.isNullOrEmpty(orderId)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("订单编号不能为空");
-			return result;
-		}
-
-		try {
-			filterMask.setOrderId(orderId);
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
-			ProductVo productVo = new ProductVo();
-			productVo.setProductId(orderInfo.getProductId());
-			ProductVo product = productService.getProductBySelective(productVo);
-			if (product == null) {
-				throw new RuntimeException("该产品不存在," + filterMask.getOrderId());
-			}
-
-			DeliveryDetailDto deliveryDetailDto = new DeliveryDetailDto();
-			deliveryDetailDto.setOrderId(orderInfo.getOrderId());
-			deliveryDetailDto.setProductName(orderInfo.getProductName());
-			deliveryDetailDto.setAmount(orderInfo.getAmount());
-			deliveryDetailDto.setPayTime(orderInfo.getPayTime());
-			deliveryDetailDto.setDeliveryOrderTime(orderInfo.getDeliveryOrderTime());
-
-			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
-			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
-			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
-			if (deliveryUser != null) {
-				deliveryDetailDto.setDeliveryName(deliveryUser.getName());
-				deliveryDetailDto.setDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
-			}
-
-			AdminUserVo adminUserVo = new AdminUserVo();
-			adminUserVo.setId(product.getCreateUserId());
-			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-			if (adminUser != null) {
-				deliveryDetailDto.setProductAddress(adminUser.getAddress());
-			}
-			CustomerUserVo customerUserVo = new CustomerUserVo();
-			customerUserVo.setId(orderInfo.getCustomerUserId());
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-			if (customerUser != null) {
-				deliveryDetailDto.setCustomerAddress(customerUser.getAddress());
-			}
-
-			result.setData(deliveryDetailDto);
-
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
+	// @RequestMapping(value = "/weixin/orderInfo/deliveryDetail", method =
+	// RequestMethod.GET)
+	// @ResponseBody
+	// public DataResult deliveryDetail(HttpServletRequest request, OrderInfoVo
+	// filterMask) {
+	// DataResult result = DataResult.initResult();
+	// String orderId = request.getParameter("orderId");
+	// if (StringUtil.isNullOrEmpty(orderId)) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("订单编号不能为空");
+	// return result;
+	// }
+	//
+	// try {
+	// filterMask.setOrderId(orderId);
+	// OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+	// ProductVo productVo = new ProductVo();
+	// productVo.setProductId(orderInfo.getProductId());
+	// ProductVo product = productService.getProductBySelective(productVo);
+	// if (product == null) {
+	// throw new RuntimeException("该产品不存在," + filterMask.getOrderId());
+	// }
+	//
+	// DeliveryDetailDto deliveryDetailDto = new DeliveryDetailDto();
+	// deliveryDetailDto.setOrderId(orderInfo.getOrderId());
+	// deliveryDetailDto.setProductName(orderInfo.getProductName());
+	// deliveryDetailDto.setAmount(orderInfo.getAmount());
+	// deliveryDetailDto.setPayTime(orderInfo.getPayTime());
+	// deliveryDetailDto.setDeliveryOrderTime(orderInfo.getDeliveryOrderTime());
+	//
+	// DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+	// deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
+	// DeliveryUserVo deliveryUser =
+	// deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+	// if (deliveryUser != null) {
+	// deliveryDetailDto.setDeliveryName(deliveryUser.getName());
+	// deliveryDetailDto.setDeliveryPhoneNumber(deliveryUser.getPhoneNumber());
+	// }
+	//
+	// AdminUserVo adminUserVo = new AdminUserVo();
+	// adminUserVo.setId(product.getCreateUserId());
+	// AdminUserVo adminUser =
+	// adminUserService.getAdminUserBySelective(adminUserVo);
+	// if (adminUser != null) {
+	// deliveryDetailDto.setProductAddress(adminUser.getAddress());
+	// }
+	// CustomerUserVo customerUserVo = new CustomerUserVo();
+	// customerUserVo.setId(orderInfo.getCustomerUserId());
+	// CustomerUserVo customerUser =
+	// customerUserService.getCustomerUserBySelective(customerUserVo);
+	// if (customerUser != null) {
+	// deliveryDetailDto.setCustomerAddress(customerUser.getAddress());
+	// }
+	//
+	// result.setData(deliveryDetailDto);
+	//
+	// } catch (RuntimeException e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg(e.getMessage());
+	// logger.error("系统异常," + e.getMessage(), e);
+	// } catch (Exception e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("系统异常,请稍后重试");
+	// logger.error("系统异常,请稍后重试", e);
+	// }
+	// return result;
+	// }
 
 	/**
 	 * 测试微信消息推送
@@ -651,42 +779,44 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/orderInfo/wxMsgSend", method = RequestMethod.POST)
-	@ResponseBody
-	public Result wxMsgSend(HttpServletRequest request, @RequestBody Map<String, String> param) {
-		Result result = Result.initResult();
-
-		try {
-			AccessToken access = TokenUtil.getWXToken();
-			TemplateMessage templateMessage = TemplateMessage.New();
-			templateMessage.setOpenId("oBD9n6PMmJ9znS2AX6AsP-pR_Tzo");
-			templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");
-			templateMessage.setUrl("");
-			templateMessage.setTopcolor("#696969");
-
-			Map<String, TemplateData> msgData = new HashMap<String, TemplateData>();
-			msgData.put("first", new TemplateData("尊敬的客户，您好，您的订单已支付完成。", "#696969"));
-			msgData.put("keyword1", new TemplateData("3194TK201903041213026613246939", "#696969"));
-			msgData.put("keyword2", new TemplateData("2019/03/12", "#696969"));
-			msgData.put("keyword3", new TemplateData("微信支付", "#696969"));
-			msgData.put("keyword4", new TemplateData("100.00", "#696969"));
-			msgData.put("remark", new TemplateData("查看详情", "#696969"));
-
-			templateMessage.setTemplateData(msgData);
-			// 推送消息
-			WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
-
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
+	// @RequestMapping(value = "/orderInfo/wxMsgSend", method = RequestMethod.POST)
+	// @ResponseBody
+	// public Result wxMsgSend(HttpServletRequest request, @RequestBody Map<String,
+	// String> param) {
+	// Result result = Result.initResult();
+	//
+	// try {
+	// AccessToken access = TokenUtil.getWXToken();
+	// TemplateMessage templateMessage = TemplateMessage.New();
+	// templateMessage.setOpenId("oBD9n6PMmJ9znS2AX6AsP-pR_Tzo");
+	// templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");
+	// templateMessage.setUrl("");
+	// templateMessage.setTopcolor("#696969");
+	//
+	// Map<String, TemplateData> msgData = new HashMap<String, TemplateData>();
+	// msgData.put("first", new TemplateData("尊敬的客户，您好，您的订单已支付完成。", "#696969"));
+	// msgData.put("keyword1", new TemplateData("3194TK201903041213026613246939",
+	// "#696969"));
+	// msgData.put("keyword2", new TemplateData("2019/03/12", "#696969"));
+	// msgData.put("keyword3", new TemplateData("微信支付", "#696969"));
+	// msgData.put("keyword4", new TemplateData("100.00", "#696969"));
+	// msgData.put("remark", new TemplateData("查看详情", "#696969"));
+	//
+	// templateMessage.setTemplateData(msgData);
+	// // 推送消息
+	// WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
+	//
+	// } catch (RuntimeException e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg(e.getMessage());
+	// logger.error("系统异常," + e.getMessage(), e);
+	// } catch (Exception e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("系统异常,请稍后重试");
+	// logger.error("系统异常,请稍后重试", e);
+	// }
+	// return result;
+	// }
 
 	/**
 	 * 公众号——客户端——我的订单
@@ -697,7 +827,7 @@ public class OrderInfoController extends CommonController {
 	 */
 	@RequestMapping(value = "/weixin/customerOrderInfo", method = RequestMethod.POST)
 	@ResponseBody
-	public DataResult customerOrderInfo(HttpServletRequest request, @RequestBody Map<String, String> param,
+	public DataResult customerOrderInfoList(HttpServletRequest request, @RequestBody Map<String, String> param,
 			OrderInfoVo filterMask) {
 		PageResult result = PageResult.initResult();
 		logger.info("公众号——客户端——我的订单,请求参数为:" + JSON.toJSONString(param));
@@ -806,7 +936,7 @@ public class OrderInfoController extends CommonController {
 	 */
 	@RequestMapping(value = "/weixin/deliveryOrderInfo", method = RequestMethod.POST)
 	@ResponseBody
-	public DataResult deliveryOrderInfo(HttpServletRequest request, @RequestBody Map<String, String> param,
+	public DataResult deliveryOrderInfoList(HttpServletRequest request, @RequestBody Map<String, String> param,
 			OrderInfoVo filterMask) {
 		PageResult result = PageResult.initResult();
 		UserDto user = this.getCurrentUser(request);
@@ -868,67 +998,70 @@ public class OrderInfoController extends CommonController {
 	 * @param filterMask
 	 * @return Result
 	 */
-	@RequestMapping(value = "/weixin/orderInfo/deliveryOrderDetail", method = RequestMethod.GET)
-	@ResponseBody
-	public DataResult deliveryOrderDetail(HttpServletRequest request) {
-		DataResult result = DataResult.initResult();
-
-		String orderId = request.getParameter("orderId");
-
-		if (StringUtil.isNullOrEmpty(orderId)) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("订单编号不能为空");
-			return result;
-		}
-
-		OrderInfoVo filterMask = new OrderInfoVo();
-		filterMask.setOrderId(orderId);
-		try {
-			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
-			if (orderInfo == null) {
-				throw new RuntimeException("该订单不存在," + orderId);
-			}
-			ProductVo productVo = new ProductVo();
-			productVo.setProductId(orderInfo.getProductId());
-			ProductVo product = productService.getProductBySelective(productVo);
-
-			DeliveryOrderDetailDto deliveryOrderDetailDto = new DeliveryOrderDetailDto();
-
-			CustomerUserVo customerUserVo = new CustomerUserVo();
-			customerUserVo.setId(orderInfo.getCustomerUserId());
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-			if (customerUser != null) {
-				deliveryOrderDetailDto.setCustomerName(customerUser.getName());
-				deliveryOrderDetailDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
-				deliveryOrderDetailDto.setCustomerAddress(customerUser.getAddress());
-			}
-
-			deliveryOrderDetailDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
-			deliveryOrderDetailDto.setOrderId(orderInfo.getOrderId());
-			deliveryOrderDetailDto.setProductName(orderInfo.getProductName());
-			deliveryOrderDetailDto.setStockQty(product.getStockQty());
-			deliveryOrderDetailDto.setRemark(orderInfo.getRemark());
-
-			AdminUserVo adminUserVo = new AdminUserVo();
-			adminUserVo.setId(product.getCreateUserId());
-			AdminUserVo adminUser = adminUserService.getAdminUserBySelective(adminUserVo);
-			if (adminUser != null) {
-				deliveryOrderDetailDto.setProductAddress(adminUser.getAddress());
-			}
-
-			result.setData(deliveryOrderDetailDto);
-
-		} catch (RuntimeException e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg(e.getMessage());
-			logger.error("系统异常," + e.getMessage(), e);
-		} catch (Exception e) {
-			result.setCode(Constants.FAILURE);
-			result.setMsg("系统异常,请稍后重试");
-			logger.error("系统异常,请稍后重试", e);
-		}
-		return result;
-	}
+	// @RequestMapping(value = "/weixin/orderInfo/deliveryOrderDetail", method =
+	// RequestMethod.GET)
+	// @ResponseBody
+	// public DataResult deliveryOrderDetail(HttpServletRequest request) {
+	// DataResult result = DataResult.initResult();
+	//
+	// String orderId = request.getParameter("orderId");
+	//
+	// if (StringUtil.isNullOrEmpty(orderId)) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("订单编号不能为空");
+	// return result;
+	// }
+	//
+	// OrderInfoVo filterMask = new OrderInfoVo();
+	// filterMask.setOrderId(orderId);
+	// try {
+	// OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(filterMask);
+	// if (orderInfo == null) {
+	// throw new RuntimeException("该订单不存在," + orderId);
+	// }
+	// ProductVo productVo = new ProductVo();
+	// productVo.setProductId(orderInfo.getProductId());
+	// ProductVo product = productService.getProductBySelective(productVo);
+	//
+	// DeliveryOrderDetailDto deliveryOrderDetailDto = new DeliveryOrderDetailDto();
+	//
+	// CustomerUserVo customerUserVo = new CustomerUserVo();
+	// customerUserVo.setId(orderInfo.getCustomerUserId());
+	// CustomerUserVo customerUser =
+	// customerUserService.getCustomerUserBySelective(customerUserVo);
+	// if (customerUser != null) {
+	// deliveryOrderDetailDto.setCustomerName(customerUser.getName());
+	// deliveryOrderDetailDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
+	// deliveryOrderDetailDto.setCustomerAddress(customerUser.getAddress());
+	// }
+	//
+	// deliveryOrderDetailDto.setDeliveryCompleteTime(orderInfo.getDeliveryCompleteTime());
+	// deliveryOrderDetailDto.setOrderId(orderInfo.getOrderId());
+	// deliveryOrderDetailDto.setProductName(orderInfo.getProductName());
+	// deliveryOrderDetailDto.setStockQty(product.getStockQty());
+	// deliveryOrderDetailDto.setRemark(orderInfo.getRemark());
+	//
+	// AdminUserVo adminUserVo = new AdminUserVo();
+	// adminUserVo.setId(product.getCreateUserId());
+	// AdminUserVo adminUser =
+	// adminUserService.getAdminUserBySelective(adminUserVo);
+	// if (adminUser != null) {
+	// deliveryOrderDetailDto.setProductAddress(adminUser.getAddress());
+	// }
+	//
+	// result.setData(deliveryOrderDetailDto);
+	//
+	// } catch (RuntimeException e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg(e.getMessage());
+	// logger.error("系统异常," + e.getMessage(), e);
+	// } catch (Exception e) {
+	// result.setCode(Constants.FAILURE);
+	// result.setMsg("系统异常,请稍后重试");
+	// logger.error("系统异常,请稍后重试", e);
+	// }
+	// return result;
+	// }
 
 	/**
 	 * 公众号——派送端——去接单

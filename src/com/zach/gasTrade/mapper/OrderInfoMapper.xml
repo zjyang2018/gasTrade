@@ -49,6 +49,10 @@
          <result property="editReason" column="edit_reason"/>
          <result property="createTime" column="create_time"/>
          <result property="updateTime" column="update_time"/>
+         <result property="customerName" column="customer_name"/>
+         <result property="customerPhoneNumber" column="customer_phone_number"/>
+         <result property="deliveryName" column="delivery_name"/>
+         <result property="deliveryPhoneNumber" column="delivery_phone_number"/>
      </resultMap>
      
 	  <!-- 自定义查询sql结果与java model映射-->
@@ -133,46 +137,6 @@
 	    order_id ,product_id ,product_name ,amount ,pay_status ,pay_no ,real_pay_amount,pay_time ,allot_status ,allot_time ,allot_delivery_id ,delivery_order_time ,delivery_complete_time ,customer_user_id ,customer_address ,longitude ,latitude ,order_status ,remark ,edit_reason ,create_time ,update_time 
 	</sql>
 
-
-	<!--查询记录数 -->
-	<select id="getOrderInfoCount" parameterType="java.util.Map"
-		resultType="java.lang.Integer">                                             
-     	<![CDATA[
-	    select count(1)
-	    from order_info AS o
-        left join customer_user AS c on o.customer_user_id=c.id
-        left join delivery_user AS d on o.allot_delivery_id=d.id
-	    ]]>
-		<where>
-			<if test="orderId !=null ">
-				and o.order_id like concat(concat(#{orderId},"%"))
-			</if>
-			<if test="payStatus !=null ">
-				and o.pay_status = #{payStatus}
-			</if>
-			<if test="payTime !=null ">
-			    and DATE_FORMAT(o.pay_time,'%Y-%m-%d') = #{payTime}
-			</if>
-			<if test="allotStatus !=null ">
-				and o.allot_status = #{allotStatus}
-			</if>
-			<if test="customerName !=null ">
-				and c.name like concat(concat(#{customerName},"%"))
-			</if>
-			<if test="customerPhoneNumber !=null ">
-				and c.phone_number like concat(concat(#{customerPhoneNumber},"%"))
-			</if>
-			<if test="deliveryName !=null ">
-				and d.name like concat()
-			</if>
-			<if test="deliveryPhoneNumber !=null ">
-				and d.phone_number like concat(concat(#{deliveryPhoneNumber},"%"))
-			</if>
-			<if test="orderStatus !=null ">
-				and o.order_status = #{orderStatus}
-			</if>
-		</where>
-	</select>
 
 	<!--公众号——派送员端或客户端——我的订单统计 -->
 	<select id="getOrderInfoNumber" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
@@ -359,122 +323,249 @@
 	<select id="getOrderInfoList" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
 		resultMap="OrderInfoResultMap">
 		select
-		<include refid="OrderInfoQuery" />
-		from order_info
-		<where>
-			<if test="orderId !=null ">
-				and order_id = #{orderId}
-			</if>
-			<if test="productId !=null ">
-				and product_id = #{productId}
-			</if>
-			<if test="productName !=null ">
-				and product_name = #{productName}
-			</if>
-			<if test="amount !=null ">
-				and amount = #{amount}
-			</if>
-			<if test="payStatus !=null ">
-				and pay_status = #{payStatus}
-			</if>
-			<if test="payNo !=null ">
-				and pay_no = #{payNo}
-			</if>
-			<if test="payTime !=null ">
-				and pay_time = #{payTime}
-			</if>
-			<if test="allotStatus !=null ">
-				and allot_status = #{allotStatus}
-			</if>
-			<if test="allotTime !=null ">
-				and allot_time = #{allotTime}
-			</if>
-			<if test="allotDeliveryId !=null ">
-				and allot_delivery_id = #{allotDeliveryId}
-			</if>
-			<if test="deliveryOrderTime !=null ">
-				and delivery_order_time = #{deliveryOrderTime}
-			</if>
-			<if test="deliveryCompleteTime !=null ">
-				and delivery_complete_time = #{deliveryCompleteTime}
-			</if>
-			<if test="customerUserId !=null ">
-				and customer_user_id = #{customerUserId}
-			</if>
-			<if test="customerAddress !=null ">
-				and customer_address = #{customerAddress}
-			</if>
-			<if test="longitude !=null ">
-				and longitude = #{longitude}
-			</if>
-			<if test="latitude !=null ">
-				and latitude = #{latitude}
-			</if>
-			<if test="orderStatus !=null ">
-				and order_status = #{orderStatus}
-			</if>
-			<if test="remark !=null ">
-				and remark = #{remark}
-			</if>
-			<if test="editReason !=null ">
-				and edit_reason = #{editReason}
-			</if>
-			<if test="createTime !=null ">
-				and create_time = #{createTime}
-			</if>
-			<if test="updateTime !=null ">
-				and update_time = #{updateTime}
-			</if>
-		</where>
-	</select>
-
-	<select id="getOrderInfoPage" parameterType="java.util.Map"
-		resultMap="OrderListDtoResultMap">
-		select
-			o.order_id AS order_id,
-			o.amount AS amount,
-			<!-- 
-			sum(o.amount) AS total_amount,
-			-->
-			o.pay_status AS pay_status,
+			o.*,
 			c.name AS customer_name,
 			c.phone_number AS customer_phone_number,
-			o.allot_status AS allot_status,
 			d.name AS delivery_name,
-			d.phone_number AS delivery_phone_number,
-			o.order_status AS order_status,
-			o.pay_time AS pay_time,
-			o.delivery_order_time AS delivery_order_time
+			d.phone_number AS delivery_phone_number
 		from order_info AS o
 		left join customer_user AS c on o.customer_user_id=c.id
 		left join delivery_user AS d on o.allot_delivery_id=d.id
 		<where>
 			<if test="orderId !=null ">
-				and o.order_id like concat(concat(#{orderId},"%"))
+				and o.order_id = #{orderId}
+			</if>
+			<if test="productId !=null ">
+				and o.product_id = #{productId}
+			</if>
+			<if test="productName !=null ">
+				and o.product_name = #{productName}
+			</if>
+			<if test="amount !=null ">
+				and o.amount = #{amount}
 			</if>
 			<if test="payStatus !=null ">
 				and o.pay_status = #{payStatus}
 			</if>
+			<if test="payNo !=null ">
+				and o.pay_no = #{payNo}
+			</if>
 			<if test="payTime !=null ">
-			    and DATE_FORMAT(o.pay_time,'%Y-%m-%d') = #{payTime}
+				and o.pay_time = #{payTime}
 			</if>
 			<if test="allotStatus !=null ">
 				and o.allot_status = #{allotStatus}
 			</if>
-			<if test="customerName !=null ">
-				and c.name like concat(concat(#{customerName},"%"))
+			<if test="allotTime !=null ">
+				and o.allot_time = #{allotTime}
 			</if>
-			<if test="customerPhoneNumber !=null ">
-				and c.phone_number like concat(concat(#{customerPhoneNumber},"%"))
+			<if test="allotDeliveryId !=null ">
+				and o.allot_delivery_id = #{allotDeliveryId}
 			</if>
-			<if test="deliveryName !=null ">
-				and d.name like concat(concat(#{deliveryName},"%"))
+			<if test="deliveryOrderTime !=null ">
+				and o.delivery_order_time = #{deliveryOrderTime}
 			</if>
-			<if test="deliveryPhoneNumber !=null ">
-				and d.phone_number like concat(concat(#{deliveryPhoneNumber},"%"))
+			<if test="deliveryCompleteTime !=null ">
+				and o.delivery_complete_time = #{deliveryCompleteTime}
+			</if>
+			<if test="customerUserId !=null ">
+				and o.customer_user_id = #{customerUserId}
+			</if>
+			<if test="customerAddress !=null ">
+				and o.customer_address = #{customerAddress}
 			</if>
 			<if test="orderStatus !=null ">
 				and o.order_status = #{orderStatus}
+			</if>
+			<if test="remark !=null ">
+				and o.remark = #{remark}
+			</if>
+			<if test="editReason !=null ">
+				and o.edit_reason = #{editReason}
+			</if>
+			<if test="createTime !=null ">
+				and o.create_time = #{createTime}
+			</if>
+			<if test="updateTime !=null ">
+				and o.update_time = #{updateTime}
+			</if>
+			<if test="startCreateTime !=null ">
+				and DATE_FORMAT(o.create_time,'%Y-%m-%d') &gt;= #{startCreateTime}
+			</if>
+			<if test="endCreateTime !=null ">
+				and DATE_FORMAT(o.create_time,'%Y-%m-%d') &lt;= #{endCreateTime}
+			</if>
+			<if test="selectCustomerParam !=null ">
+				and (c.name like concat("%",concat(#{selectCustomerParam},"%")) or c.phone_number like concat("%",concat(#{selectCustomerParam},"%"))) 
+			</if>
+			<if test="selectDeliveryParam !=null ">
+				and (d.name like concat(concat(#{selectDeliveryParam},"%")) or d.phone_number like concat(concat(#{selectDeliveryParam},"%")))
+			</if>
+		</where>
+	</select>
+	
+	<!--查询记录数 -->
+	<select id="getOrderInfoCount" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
+		resultType="java.lang.Integer">                                             
+     	<![CDATA[
+	    select count(1)
+	    from order_info AS o
+        left join customer_user AS c on o.customer_user_id=c.id
+        left join delivery_user AS d on o.allot_delivery_id=d.id
+	    ]]>
+		<where>
+			<if test="orderId !=null ">
+				and o.order_id = #{orderId}
+			</if>
+			<if test="productId !=null ">
+				and o.product_id = #{productId}
+			</if>
+			<if test="productName !=null ">
+				and o.product_name = #{productName}
+			</if>
+			<if test="amount !=null ">
+				and o.amount = #{amount}
+			</if>
+			<if test="payStatus !=null ">
+				and o.pay_status = #{payStatus}
+			</if>
+			<if test="payNo !=null ">
+				and o.pay_no = #{payNo}
+			</if>
+			<if test="payTime !=null ">
+				and o.pay_time = #{payTime}
+			</if>
+			<if test="allotStatus !=null ">
+				and o.allot_status = #{allotStatus}
+			</if>
+			<if test="allotTime !=null ">
+				and o.allot_time = #{allotTime}
+			</if>
+			<if test="allotDeliveryId !=null ">
+				and o.allot_delivery_id = #{allotDeliveryId}
+			</if>
+			<if test="deliveryOrderTime !=null ">
+				and o.delivery_order_time = #{deliveryOrderTime}
+			</if>
+			<if test="deliveryCompleteTime !=null ">
+				and o.delivery_complete_time = #{deliveryCompleteTime}
+			</if>
+			<if test="customerUserId !=null ">
+				and o.customer_user_id = #{customerUserId}
+			</if>
+			<if test="customerAddress !=null ">
+				and o.customer_address = #{customerAddress}
+			</if>
+			<if test="orderStatus !=null ">
+				and o.order_status = #{orderStatus}
+			</if>
+			<if test="remark !=null ">
+				and o.remark = #{remark}
+			</if>
+			<if test="editReason !=null ">
+				and o.edit_reason = #{editReason}
+			</if>
+			<if test="createTime !=null ">
+				and o.create_time = #{createTime}
+			</if>
+			<if test="updateTime !=null ">
+				and o.update_time = #{updateTime}
+			</if>
+			<if test="startCreateTime !=null ">
+				and DATE_FORMAT(o.create_time,'%Y-%m-%d') &gt;= #{startCreateTime}
+			</if>
+			<if test="endCreateTime !=null ">
+				and DATE_FORMAT(o.create_time,'%Y-%m-%d') &lt;= #{endCreateTime}
+			</if>
+			<if test="selectCustomerParam !=null ">
+				and (c.name like concat("%",concat(#{selectCustomerParam},"%")) or c.phone_number like concat("%",concat(#{selectCustomerParam},"%"))) 
+			</if>
+			<if test="selectDeliveryParam !=null ">
+				and (d.name like concat(concat(#{selectDeliveryParam},"%")) or d.phone_number like concat(concat(#{selectDeliveryParam},"%")))
+			</if>
+		</where>
+	</select>
+
+	<select id="getOrderInfoPage" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
+		resultMap="OrderInfoResultMap">
+		select
+			o.*,
+			c.name AS customer_name,
+			c.phone_number AS customer_phone_number,
+			d.name AS delivery_name,
+			d.phone_number AS delivery_phone_number
+		from order_info AS o
+		left join customer_user AS c on o.customer_user_id=c.id
+		left join delivery_user AS d on o.allot_delivery_id=d.id
+		<where>
+			<if test="orderId !=null ">
+				and o.order_id = #{orderId}
+			</if>
+			<if test="productId !=null ">
+				and o.product_id = #{productId}
+			</if>
+			<if test="productName !=null ">
+				and o.product_name = #{productName}
+			</if>
+			<if test="amount !=null ">
+				and o.amount = #{amount}
+			</if>
+			<if test="payStatus !=null ">
+				and o.pay_status = #{payStatus}
+			</if>
+			<if test="payNo !=null ">
+				and o.pay_no = #{payNo}
+			</if>
+			<if test="payTime !=null ">
+				and o.pay_time = #{payTime}
+			</if>
+			<if test="allotStatus !=null ">
+				and o.allot_status = #{allotStatus}
+			</if>
+			<if test="allotTime !=null ">
+				and o.allot_time = #{allotTime}
+			</if>
+			<if test="allotDeliveryId !=null ">
+				and o.allot_delivery_id = #{allotDeliveryId}
+			</if>
+			<if test="deliveryOrderTime !=null ">
+				and o.delivery_order_time = #{deliveryOrderTime}
+			</if>
+			<if test="deliveryCompleteTime !=null ">
+				and o.delivery_complete_time = #{deliveryCompleteTime}
+			</if>
+			<if test="customerUserId !=null ">
+				and o.customer_user_id = #{customerUserId}
+			</if>
+			<if test="customerAddress !=null ">
+				and o.customer_address = #{customerAddress}
+			</if>
+			<if test="orderStatus !=null ">
+				and o.order_status = #{orderStatus}
+			</if>
+			<if test="remark !=null ">
+				and o.remark = #{remark}
+			</if>
+			<if test="editReason !=null ">
+				and o.edit_reason = #{editReason}
+			</if>
+			<if test="createTime !=null ">
+				and o.create_time = #{createTime}
+			</if>
+			<if test="updateTime !=null ">
+				and o.update_time = #{updateTime}
+			</if>
+			<if test="startCreateTime !=null ">
+				and DATE_FORMAT(o.create_time,'%Y-%m-%d') &gt;= #{startCreateTime}
+			</if>
+			<if test="endCreateTime !=null ">
+				and DATE_FORMAT(o.create_time,'%Y-%m-%d') &lt;= #{endCreateTime}
+			</if>
+			<if test="selectCustomerParam !=null ">
+				and (c.name like concat("%",concat(#{selectCustomerParam},"%")) or c.phone_number like concat("%",concat(#{selectCustomerParam},"%"))) 
+			</if>
+			<if test="selectDeliveryParam !=null ">
+				and (d.name like concat(concat(#{selectDeliveryParam},"%")) or d.phone_number like concat(concat(#{selectDeliveryParam},"%")))
 			</if>
 		</where>
 		order by o.update_time desc
@@ -482,7 +573,7 @@
 	</select>
 	
 	<!-- 订单金额汇总 -->
-	<select id="getOrderTotalAmount" parameterType="java.util.Map"
+	<select id="getOrderTotalAmount" parameterType="com.zach.gasTrade.vo.OrderInfoVo"
 		resultType="java.math.BigDecimal">
 		select sum(o.amount) AS total_amount	
 		from order_info AS o
@@ -490,28 +581,25 @@
 		left join delivery_user AS d on o.allot_delivery_id=d.id
 		<where>
 			<if test="orderId !=null ">
-				and o.order_id like concat(concat(#{orderId},"%"))
+				and o.order_id = #{orderId}
 			</if>
 			<if test="payStatus !=null ">
 				and o.pay_status = #{payStatus}
 			</if>
-			<if test="payTime !=null ">
-			    and DATE_FORMAT(o.pay_time,'%Y-%m-%d') = #{payTime}
+			<if test="startCreateTime !=null ">
+				and DATE_FORMAT(o.create_time,'%Y-%m-%d') &gt;= #{startCreateTime}
+			</if>
+			<if test="endCreateTime !=null ">
+				and DATE_FORMAT(o.create_time,'%Y-%m-%d') &lt;= #{endCreateTime}
 			</if>
 			<if test="allotStatus !=null ">
 				and o.allot_status = #{allotStatus}
 			</if>
-			<if test="customerName !=null ">
-				and c.name like concat(concat(#{customerName},"%"))
+			<if test="selectCustomerParam !=null ">
+				and (c.name like concat("%",concat(#{selectCustomerParam},"%")) or c.phone_number like concat("%",concat(#{selectCustomerParam},"%"))) 
 			</if>
-			<if test="customerPhoneNumber !=null ">
-				and c.phone_number like concat(concat(#{customerPhoneNumber},"%"))
-			</if>
-			<if test="deliveryName !=null ">
-				and d.name like concat(concat(#{deliveryName},"%"))
-			</if>
-			<if test="deliveryPhoneNumber !=null ">
-				and d.phone_number like concat(concat(#{deliveryPhoneNumber},"%"))
+			<if test="selectDeliveryParam !=null ">
+				and (d.name like concat(concat(#{selectDeliveryParam},"%")) or d.phone_number like concat(concat(#{selectDeliveryParam},"%")))
 			</if>
 			<if test="orderStatus !=null ">
 				and o.order_status = #{orderStatus}

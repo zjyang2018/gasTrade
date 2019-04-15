@@ -26,7 +26,7 @@ public interface OrderInfoService {
 	 * @param map
 	 * @return
 	 */
-	public int getOrderInfoCount(Map<String, Object> map);
+	public int getOrderInfoCount(OrderInfoVo orderInfoVo);
 
 	/**
 	 * 分页列表
@@ -34,7 +34,7 @@ public interface OrderInfoService {
 	 * @param map
 	 * @return
 	 */
-	public List<OrderListDto> getOrderInfoPage(Map<String, Object> map);
+	public List<OrderListDto> getOrderInfoPage(OrderInfoVo orderInfoVo);
 
 	/**
 	 * 列表
@@ -140,7 +140,7 @@ public interface OrderInfoService {
 	 * @param map
 	 * @return
 	 */
-	public BigDecimal getOrderTotalAmount(Map<String, Object> map);
+	public BigDecimal getOrderTotalAmount(OrderInfoVo orderInfoVo);
 
 	/**
 	 * 公众号订单详情

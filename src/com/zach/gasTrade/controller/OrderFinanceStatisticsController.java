@@ -153,6 +153,7 @@ public class OrderFinanceStatisticsController extends CommonController {
 				} else {
 					row.createCell(7).setCellValue(new HSSFRichTextString("0.00"));
 				}
+				index++;
 			}
 
 			OutputStream output = response.getOutputStream();

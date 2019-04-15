@@ -143,6 +143,8 @@ public class OrderDeliveryRecordController extends CommonController {
 
 				row.createCell(5)
 						.setCellValue(new HSSFRichTextString(String.valueOf(bean.getAccumulatedCompleteTime())));
+
+				index++;
 			}
 
 			OutputStream output = response.getOutputStream();

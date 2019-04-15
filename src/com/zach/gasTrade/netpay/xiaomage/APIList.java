@@ -515,7 +515,8 @@ public class APIList {// 本部分是所有开放web api的具体实现逻辑
 		urlmap.put("DockingDeviceID", DockingDeviceID);
 		urlmap.put("NonceStr", NonceStr);
 		urlmap.put("TimeStamp", TimeStamp);
-		urlmap.put("OrderID", OrderID);
+		// urlmap.put("OrderID", OrderID);
+		urlmap.put("DockingOrderID", OrderID);
 		urlmap.put("SiteUserID", String.valueOf(SiteUserID));
 
 		try {

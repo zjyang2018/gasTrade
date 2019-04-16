@@ -533,7 +533,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	}
 
 	public void pushWeiXinMessge(String messgeType, OrderInfoVo orderInfoVo) {
-		// messgeType:10-订单分配,20-派送员接单,30-签收
+		// messgeType:10-订单分配,20-派送员接单,30-签收,40-支付
 
 		// 推送微信消息-派送通知(客户)
 		TemplateMessage templateMessage = TemplateMessage.New();
@@ -543,12 +543,6 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			customerUserVo = this.customerUserDao.getCustomerUserBySelective(customerUserVo);
 			if (customerUserVo == null) {
 				throw new RuntimeException("客户信息查询不到," + orderInfoVo.getCustomerUserId());
-			}
-			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
-			deliveryUserVo.setId(orderInfoVo.getAllotDeliveryId());
-			deliveryUserVo = this.deliveryUserDao.getDeliveryUserBySelective(deliveryUserVo);
-			if (deliveryUserVo == null) {
-				throw new RuntimeException("派送员信息查询不到," + orderInfoVo.getAllotDeliveryId());
 			}
 
 			AccessToken access = TokenUtil.getCacheWXToken();
@@ -570,6 +564,13 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 				// 推送消息
 				WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
 			} else if ("20".equals(messgeType)) {
+				DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+				deliveryUserVo.setId(orderInfoVo.getAllotDeliveryId());
+				deliveryUserVo = this.deliveryUserDao.getDeliveryUserBySelective(deliveryUserVo);
+				if (deliveryUserVo == null) {
+					throw new RuntimeException("派送员信息查询不到," + orderInfoVo.getAllotDeliveryId());
+				}
+
 				templateMessage.setOpenId(customerUserVo.getWxOpenId());
 				templateMessage.setTemplateId("pw_w0okvI2znoKOz6Zb2Hqo6AJNfokU0k8mlXyPa2Y8");
 				templateMessage.setUrl("");

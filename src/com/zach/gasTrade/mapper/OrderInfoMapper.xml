@@ -221,6 +221,9 @@
 			<if test="orderId !=null ">
 				and order_id like concat(concat(#{orderId},"%"))
 			</if>
+			<if test="allotStatus !=null ">
+				and allot_status = #{allotStatus}
+			</if>
 			<if test="startTime !=null ">
 			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
 			</if>
@@ -247,11 +250,14 @@
 			<if test="orderId !=null ">
 				and o.order_id like concat(concat(#{orderId},"%"))
 			</if>
+			<if test="allotStatus !=null ">
+				and o.allot_status = #{allotStatus}
+			</if>
 			<if test="startTime !=null ">
-			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
+			    and DATE_FORMAT(o.delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
 			</if>
 			<if test="endTime !=null ">
-			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &lt;= #{endTime}
+			    and DATE_FORMAT(o.delivery_order_time,'%Y-%m-%d') &lt;= #{endTime}
 			</if>
 		</where>
 		order by o.update_time desc

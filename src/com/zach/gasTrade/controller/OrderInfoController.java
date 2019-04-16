@@ -342,6 +342,8 @@ public class OrderInfoController extends CommonController {
 			map.put("endDate", endTime);
 		}
 
+		map.put("allotStatus", "20");
+
 		int startIndex = (pageNum - 1) * pageSize;
 		map.put("startIndex", startIndex);
 		map.put("pageSize", pageSize);

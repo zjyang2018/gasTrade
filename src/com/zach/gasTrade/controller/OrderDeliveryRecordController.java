@@ -288,6 +288,10 @@ public class OrderDeliveryRecordController extends CommonController {
 			}
 			// 订单派送中
 			if ("50".equals(order_status)) {
+				String acceptTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getAcceptTime());
+				String msg2 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已接单 " + acceptTime;
+				orderDeliveryProgress.add(msg2);
+
 				String deliveryTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getDeliveryTime());
 				String msg3 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已取货物, 正在派送  "
 						+ deliveryTime;
@@ -295,6 +299,15 @@ public class OrderDeliveryRecordController extends CommonController {
 			}
 			// 订单派送完成
 			if ("60".equals(order_status)) {
+				String acceptTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getAcceptTime());
+				String msg2 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已接单 " + acceptTime;
+				orderDeliveryProgress.add(msg2);
+
+				String deliveryTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getDeliveryTime());
+				String msg3 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已取货物, 正在派送  "
+						+ deliveryTime;
+				orderDeliveryProgress.add(msg3);
+
 				String completeTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getCompleteTime());
 				String msg4 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已到达目的地, 且客户签收！  "
 						+ completeTime;

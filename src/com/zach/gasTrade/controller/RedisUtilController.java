@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.common.cache.CacheService;
+import com.common.wx.TokenUtil;
 import com.zach.gasTrade.common.DataResult;
 
 import io.swagger.annotations.Api;
@@ -57,6 +58,15 @@ public class RedisUtilController {
 		if (cacheService.get(key) != null) {
 			result.setData(cacheService.get(key));
 		}
+		return result;
+	}
+
+	@ApiOperation(value = "获取token", notes = "")
+	@RequestMapping(value = "/redis/getToken", method = RequestMethod.GET)
+	@ResponseBody
+	public DataResult getToken(HttpServletRequest request) {
+		DataResult result = DataResult.initResult();
+		TokenUtil.getCacheWXToken();
 		return result;
 	}
 

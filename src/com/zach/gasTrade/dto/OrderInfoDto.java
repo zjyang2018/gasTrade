@@ -67,6 +67,11 @@ public class OrderInfoDto extends PaginatedHelper implements java.io.Serializabl
 	 * 客户地址
 	 */
 	private java.lang.String customerAddress;
+
+	/**
+	 * 客户电话
+	 */
+	private String customerPhoneNumber;
 	/**
 	 * 订单状态:10-未支付,20-已支付,30-已分配,40-已接单,50-派送中,60-派送完成
 	 */
@@ -214,6 +219,14 @@ public class OrderInfoDto extends PaginatedHelper implements java.io.Serializabl
 
 	public void setUpdateTime(java.util.Date updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public String getCustomerPhoneNumber() {
+		return customerPhoneNumber;
+	}
+
+	public void setCustomerPhoneNumber(String customerPhoneNumber) {
+		this.customerPhoneNumber = customerPhoneNumber;
 	}
 
 }

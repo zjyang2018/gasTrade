@@ -562,12 +562,15 @@ public class OrderInfoController extends CommonController {
 				}
 			}
 
-			CustomerUserVo customerUserVo = new CustomerUserVo();
-			customerUserVo.setId(orderInfo.getCustomerUserId());
-			CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
-			if (customerUser != null) {
-				orderInfoDto.setCustomerUserName(customerUser.getName());
-				orderInfoDto.setCustomerAddress(customerUser.getAddress());
+			if (StringUtil.isNotNullAndNotEmpty(orderInfo.getCustomerUserId())) {
+				CustomerUserVo customerUserVo = new CustomerUserVo();
+				customerUserVo.setId(orderInfo.getCustomerUserId());
+				CustomerUserVo customerUser = customerUserService.getCustomerUserBySelective(customerUserVo);
+				if (customerUser != null) {
+					orderInfoDto.setCustomerUserName(customerUser.getName());
+					orderInfoDto.setCustomerAddress(customerUser.getAddress());
+					orderInfoDto.setCustomerPhoneNumber(customerUser.getPhoneNumber());
+				}
 			}
 
 			orderInfoDto.setOrderStatus(orderInfo.getOrderStatus());

@@ -268,7 +268,7 @@ public class OrderDeliveryRecordController extends CommonController {
 			OrderInfoVo orderInfoVo = new OrderInfoVo();
 			orderInfoVo.setOrderId(filterMask.getOrderId());
 			OrderInfoVo orderInfo = orderInfoService.getOrderInfoBySelective(orderInfoVo);
-			String order_status = orderInfo.getOrderStatus();
+			// String order_status = orderInfo.getOrderStatus();
 			// 获取派送员信息
 			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
 			deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
@@ -281,13 +281,13 @@ public class OrderDeliveryRecordController extends CommonController {
 			orderDeliveryProgress.add(msg1);
 
 			// 判断派送员是否接单
-			if ("40".equals(order_status)) {
+			if ("40".equals(orderInfo.getOrderStatus())) {
 				String acceptTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getAcceptTime());
 				String msg2 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已接单 " + acceptTime;
 				orderDeliveryProgress.add(msg2);
-			}
+			} else
 			// 订单派送中
-			if ("50".equals(order_status)) {
+			if ("50".equals(orderInfo.getOrderStatus())) {
 				String acceptTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getAcceptTime());
 				String msg2 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已接单 " + acceptTime;
 				orderDeliveryProgress.add(msg2);
@@ -296,9 +296,9 @@ public class OrderDeliveryRecordController extends CommonController {
 				String msg3 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已取货物, 正在派送  "
 						+ deliveryTime;
 				orderDeliveryProgress.add(msg3);
-			}
+			} else
 			// 订单派送完成
-			if ("60".equals(order_status)) {
+			if ("60".equals(orderInfo.getOrderStatus())) {
 				String acceptTime = CalendarUtils.formatDateTime(orderDeliveryRecord.getAcceptTime());
 				String msg2 = "派送员 (" + deliveryUserName + ": " + deliveryUserPhoneNumber + ") 已接单 " + acceptTime;
 				orderDeliveryProgress.add(msg2);

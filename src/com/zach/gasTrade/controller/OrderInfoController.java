@@ -552,7 +552,7 @@ public class OrderInfoController extends CommonController {
 			orderInfoDto.setAllotStatus(orderInfo.getAllotStatus());
 			orderInfoDto.setAllotTime(orderInfo.getAllotTime());
 
-			if (orderInfo.getAllotDeliveryId() == null || orderInfo.getAllotDeliveryId().isEmpty()) {
+			if (StringUtil.isNotNullAndNotEmpty(orderInfo.getAllotDeliveryId())) {
 				DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
 				deliveryUserVo.setId(orderInfo.getAllotDeliveryId());
 				DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);

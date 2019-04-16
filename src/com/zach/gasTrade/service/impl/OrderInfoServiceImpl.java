@@ -551,7 +551,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 				throw new RuntimeException("派送员信息查询不到," + orderInfoVo.getAllotDeliveryId());
 			}
 
-			AccessToken access = TokenUtil.getWXToken();
+			AccessToken access = TokenUtil.getCacheWXToken();
 			if ("40".equals(messgeType)) {
 				templateMessage.setOpenId(customerUserVo.getWxOpenId());
 				templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");

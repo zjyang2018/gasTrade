@@ -62,7 +62,7 @@ public class TemplateMsgUtil {
 	 */
 	public static String deleteWXTemplateMsgById(String templateId) {
 		String tmpurl = "https://api.weixin.qq.com/cgi-bin/template/del_private_template?access_token="
-				+ TokenUtil.getWXToken().getAccessToken();
+				+ TokenUtil.getCacheWXToken().getAccessToken();
 		JSONObject json = new JSONObject();
 		json.put("template_id", templateId);
 		try {
@@ -97,7 +97,7 @@ public class TemplateMsgUtil {
 	public static String sendWechatMsgToUser(String touser, String templatId, String clickurl, String topcolor,
 			JSONObject data) {
 		String tmpurl = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token="
-				+ TokenUtil.getWXToken().getAccessToken();
+				+ TokenUtil.getCacheWXToken().getAccessToken();
 		JSONObject json = new JSONObject();
 		json.put("touser", touser);
 		json.put("template_id", templatId);

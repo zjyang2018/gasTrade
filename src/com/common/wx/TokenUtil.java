@@ -1,8 +1,5 @@
 package com.common.wx;
 
-import java.security.MessageDigest;
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,29 +21,34 @@ public class TokenUtil {
 	 * （此处我是把token存在Redis里面了）
 	 */
 
-	public static AccessToken getWXToken() {
+	public static AccessToken getCacheWXToken() {
 		// redis获取access_token
 		CacheService cacheService = SpringContextHolder.getBean("redisCacheService");
 		AccessToken accessToken = cacheService.get(WeiXinConstant.accessTokenKey);
 		log.info("redis获取到accessToken==>" + JSON.toJSONString(accessToken));
 		if (accessToken == null) {
-			String tokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="
-					+ WeiXinConstant.appId + "&secret=" + WeiXinConstant.appSecret;
-			JSONObject jsonObject = HttpsUtil.httpsRequest(tokenUrl, "GET", null);
-			log.info("获取微信token参数==>jsonObject:" + jsonObject);
-			accessToken = new AccessToken();
-			if (null != jsonObject) {
-				try {
-					accessToken.setAccessToken(jsonObject.getString("access_token"));
-					accessToken.setExpiresin(jsonObject.getInteger("expires_in"));
-					// 保存access_token
-					cacheService.add(WeiXinConstant.accessTokenKey, accessToken, accessToken.getExpiresin());
-				} catch (Exception e) {
-					accessToken = null;
-					// 获取token失败
-					log.error("获取token失败 errcode:{} errmsg:{}", jsonObject.getInteger("errcode"),
-							jsonObject.getString("errmsg"));
-				}
+			accessToken = TokenUtil.getWXToken();
+			cacheService.add(WeiXinConstant.accessTokenKey, accessToken, accessToken.getExpiresin());
+		}
+		return accessToken;
+	}
+
+	public static AccessToken getWXToken() {
+		String tokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="
+				+ WeiXinConstant.appId + "&secret=" + WeiXinConstant.appSecret;
+		JSONObject jsonObject = HttpsUtil.httpsRequest(tokenUrl, "GET", null);
+		log.info("获取微信token参数==>jsonObject:" + jsonObject);
+		AccessToken accessToken = new AccessToken();
+		if (null != jsonObject) {
+			try {
+				accessToken.setAccessToken(jsonObject.getString("access_token"));
+				accessToken.setExpiresin(jsonObject.getInteger("expires_in"));
+				// 保存access_token
+			} catch (Exception e) {
+				accessToken = null;
+				// 获取token失败
+				log.error("获取token失败 errcode:{} errmsg:{}", jsonObject.getInteger("errcode"),
+						jsonObject.getString("errmsg"));
 			}
 		}
 		return accessToken;
@@ -65,7 +67,7 @@ public class TokenUtil {
 		String ticket = cacheService.get(WeiXinConstant.ticket);
 		log.info("redis获取到ticket==>" + ticket);
 		if (StringUtil.isNull(ticket)) {
-			AccessToken accessToken = TokenUtil.getWXToken();
+			AccessToken accessToken = TokenUtil.getCacheWXToken();
 			String acess_token = accessToken.getAccessToken();
 			String urlStr = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + acess_token
 					+ "&type=jsapi";
@@ -75,7 +77,7 @@ public class TokenUtil {
 				try {
 					ticket = jsonObject.getString("ticket");
 					int expiresin = jsonObject.getInteger("expires_in");
-					if(StringUtil.isNotNullAndNotEmpty(ticket)) {
+					if (StringUtil.isNotNullAndNotEmpty(ticket)) {
 						// 保存ticket
 						cacheService.add(WeiXinConstant.ticket, ticket, expiresin);
 					}

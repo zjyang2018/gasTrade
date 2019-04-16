@@ -25,7 +25,7 @@ public class WeiXinUtils {
 	 */
 	public static Integer getSubscribeStateByOpenId(String openId) {
 		String tmpurl = "https://api.weixin.qq.com/cgi-bin/user/info?access_token="
-				+ TokenUtil.getWXToken().getAccessToken() + "&openid=" + openId;
+				+ TokenUtil.getCacheWXToken().getAccessToken() + "&openid=" + openId;
 
 		JSONObject result = HttpsUtil.httpsRequest(tmpurl, "GET", null);
 		JSONObject resultJson = new JSONObject(result);
@@ -65,7 +65,7 @@ public class WeiXinUtils {
 	}
 
 	public static void main(String[] args) {
-		AccessToken access = TokenUtil.getWXToken();
+		AccessToken access = TokenUtil.getCacheWXToken();
 		TemplateMessage templateMessage = TemplateMessage.New();
 		templateMessage.setOpenId("oBD9n6PMmJ9znS2AX6AsP-pR_Tzo");
 		templateMessage.setTemplateId("ykujHmHTnJTSEK0iJWVQKNq_TooXRdcaOKBsYQMAZLo");

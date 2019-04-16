@@ -27,7 +27,7 @@ public class DeliveryMonitorDto extends PaginatedHelper implements java.io.Seria
 	 */
 	private java.lang.String deliveryPhoneNumber;
 	/**
-	 * 派单时间
+	 * 派送时间
 	 */
 	private java.util.Date deliveryOrderTime;
 

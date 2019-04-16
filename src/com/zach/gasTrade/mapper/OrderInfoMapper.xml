@@ -241,7 +241,7 @@
 			c.phone_number AS customer_phone_number,
 			d. NAME AS delivery_name,
 			d.phone_number AS delivery_phone_number,
-			o.delivery_order_time AS delivery_order_time
+			ifnull(o.delivery_order_time, o.allot_time) AS delivery_order_time
 		FROM
 			order_info AS o
 		LEFT JOIN customer_user AS c ON o.customer_user_id = c.id

@@ -620,7 +620,11 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 			Date time = DateTimeUtils.addDateTime(bean.getCreateTime(), TimeUnit.MINUTE, 10);
 			if (new Date().after(time)) {
 				try {
-					this.payService.closeOrderPay(bean.getOrderId());
+					JSONObject json = this.payService.closeOrderPay(bean.getOrderId());
+
+					if (1 != json.getIntValue("success") && -10100 != json.getIntValue("success")) {
+						throw new RuntimeException(json.getString("msg"));
+					}
 
 					bean.setOrderStatus("70");
 					bean.setUpdateTime(new Date());

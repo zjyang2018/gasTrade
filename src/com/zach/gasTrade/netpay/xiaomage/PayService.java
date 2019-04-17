@@ -68,14 +68,11 @@ public class PayService {
 		return JSON.parseObject(result);
 	}
 
-	public void closeOrderPay(String orderId) {
+	public JSONObject closeOrderPay(String orderId) {
 		// 调用订单关闭接口
 		String result = apiInstance.CloseOrder(DeviceID, devicesecret, DockingDeviceID, DataUtil.GetNonceStr(), orderId,
 				SiteUserID, DataUtil.GetTimestamp(), DockingSecret);
-		JSONObject json = JSON.parseObject(result);
-		if (1 != json.getIntValue("success")) {
-			throw new RuntimeException(json.getString("msg"));
-		}
+		return JSON.parseObject(result);
 	}
 
 	public boolean checkSign(Map<String, String> params) {

@@ -258,7 +258,7 @@ public class DeliveryLocationHistoryController extends CommonController {
 					calendar.setTime(now);
 					int second = calendar.get(Calendar.SECOND);
 					// 一分钟内处理一次
-					if (second > 5) {
+					if (second > 10) {
 						return "success";
 					}
 					// 地理位置经度

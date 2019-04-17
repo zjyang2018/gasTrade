@@ -6,6 +6,8 @@
 
 package com.zach.gasTrade.controller;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.common.utils.MapHelper;
 import com.common.utils.XmlUtilCommon;
 import com.common.wx.WeiXinSignUtil;
 import com.zach.gasTrade.common.Constants;
@@ -242,10 +245,23 @@ public class DeliveryLocationHistoryController extends CommonController {
 					if (deliveryUser == null) {
 						return "success";
 					}
+					Date now = new Date();
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(now);
+					int second = calendar.get(Calendar.SECOND);
+					// 一分钟内处理一次
+					if (second > 5) {
+						return "success";
+					}
 					// 地理位置经度
 					String longitude = xmlMap.get("longitude");
 					// 地理位置纬度
 					String latitude = xmlMap.get("latitude");
+					// 腾讯坐标转换百度坐标
+					double[] map_bd = MapHelper.map_tx2bd(Double.valueOf(latitude), Double.valueOf(longitude));
+					longitude = String.valueOf(map_bd[1]);
+					latitude = String.valueOf(map_bd[0]);
+
 					DeliveryLocationHistoryVo filterMask = new DeliveryLocationHistoryVo();
 					filterMask.setDeliveryUserId(deliveryUser.getId());
 					filterMask.setLongitude(longitude);
@@ -275,4 +291,5 @@ public class DeliveryLocationHistoryController extends CommonController {
 		}
 		return "success";
 	}
+
 }

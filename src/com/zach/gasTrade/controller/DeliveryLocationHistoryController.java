@@ -232,8 +232,18 @@ public class DeliveryLocationHistoryController extends CommonController {
 				ServletInputStream in = request.getInputStream();
 				String xmlStr = XmlUtilCommon.getXmlString(in);
 
+				String signature = request.getParameter("signature");
+				// 时间戳
+				String timestamp = request.getParameter("timestamp");
+				// 随机数
+				String nonce = request.getParameter("nonce");
+				// 随机字符串
+				String echostr = request.getParameter("echostr");
+
 				try {
-					HttpsUtil.httpsRequest("https://we7.yourtk.com/api.php?id=8", "POST", xmlStr);
+					String url = "https://we7.yourtk.com/api.php?id=8&signature=" + signature + "&timestamp="
+							+ timestamp + "&nonce=" + nonce + "&echostr=" + echostr;
+					HttpsUtil.httpsRequest(url, "POST", xmlStr);
 				} catch (Exception e) {
 					logger.info("推送微信数据到微擎==>" + xmlStr, e);
 				}

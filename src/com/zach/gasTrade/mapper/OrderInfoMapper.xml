@@ -78,6 +78,7 @@
          <result property="deliveryName" column="delivery_name"/>
          <result property="deliveryPhoneNumber" column="delivery_phone_number"/>
          <result property="deliveryOrderTime" column="delivery_order_time"/>
+         <result property="remark" column="remark"/>
      </resultMap>
      
 	 <!-- 查询sql结果与java model映射-->
@@ -241,7 +242,8 @@
 			c.phone_number AS customer_phone_number,
 			d. NAME AS delivery_name,
 			d.phone_number AS delivery_phone_number,
-			o.create_time AS delivery_order_time
+			o.create_time AS delivery_order_time,
+			o.remark
 		FROM
 			order_info AS o
 		LEFT JOIN customer_user AS c ON o.customer_user_id = c.id

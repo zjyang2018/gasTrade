@@ -27,9 +27,14 @@ public class DeliveryMonitorDto extends PaginatedHelper implements java.io.Seria
 	 */
 	private java.lang.String deliveryPhoneNumber;
 	/**
-	 * 派送时间
+	 * 下单时间
 	 */
 	private java.util.Date deliveryOrderTime;
+
+	/**
+	 * 订单备注
+	 */
+	private String remark;
 
 	// getter setter方法
 
@@ -79,6 +84,14 @@ public class DeliveryMonitorDto extends PaginatedHelper implements java.io.Seria
 
 	public void setDeliveryOrderTime(java.util.Date deliveryOrderTime) {
 		this.deliveryOrderTime = deliveryOrderTime;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 
 }

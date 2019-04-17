@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.common.http.HttpsUtil;
 import com.common.utils.MapHelper;
 import com.common.utils.XmlUtilCommon;
 import com.common.wx.WeiXinSignUtil;
@@ -230,6 +231,13 @@ public class DeliveryLocationHistoryController extends CommonController {
 			if ("POST".equals(request.getMethod().toUpperCase())) {
 				ServletInputStream in = request.getInputStream();
 				String xmlStr = XmlUtilCommon.getXmlString(in);
+
+				try {
+					HttpsUtil.httpsRequest("https://we7.yourtk.com/api.php?id=8", "POST", xmlStr);
+				} catch (Exception e) {
+					logger.info("推送微信数据到微擎==>" + xmlStr, e);
+				}
+
 				logger.info("接收微信参数==>" + xmlStr);
 				Map<String, String> xmlMap = XmlUtilCommon.toMap(xmlStr.getBytes(), "utf-8");
 				logger.info("获取微信推送参数==>" + JSON.toJSONString(xmlMap));

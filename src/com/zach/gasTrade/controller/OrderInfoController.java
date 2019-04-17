@@ -322,8 +322,8 @@ public class OrderInfoController extends CommonController {
 		int pageNum = Integer.valueOf(param.get(Constants.PAGE_NUM));
 		int pageSize = Integer.valueOf(param.get(Constants.PAGE_SIZE));
 		String id = param.get("orderId");
-		String startTime = param.get("startTime");
-		String endTime = param.get("endTime");
+		String startTime = param.get("searchStartDate");
+		String endTime = param.get("searchEndDate");
 
 		if (StringUtil.isNotNullAndNotEmpty(id)) {
 			String orderId = id.trim();

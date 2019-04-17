@@ -224,11 +224,11 @@
 			<if test="allotStatus !=null ">
 				and allot_status = #{allotStatus}
 			</if>
-			<if test="startTime !=null ">
-			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
+			<if test="startDate !=null ">
+			    and DATE_FORMAT(create_time,'%Y-%m-%d') &gt;= #{startDate}
 			</if>
-			<if test="endTime !=null ">
-			    and DATE_FORMAT(delivery_order_time,'%Y-%m-%d') &lt;= #{endTime}
+			<if test="endDate !=null ">
+			    and DATE_FORMAT(create_time,'%Y-%m-%d') &lt;= #{endDate}
 			</if>
 		</where>
 	</select>
@@ -241,7 +241,7 @@
 			c.phone_number AS customer_phone_number,
 			d. NAME AS delivery_name,
 			d.phone_number AS delivery_phone_number,
-			ifnull(o.delivery_order_time, o.allot_time) AS delivery_order_time
+			o.create_time AS delivery_order_time
 		FROM
 			order_info AS o
 		LEFT JOIN customer_user AS c ON o.customer_user_id = c.id
@@ -253,11 +253,11 @@
 			<if test="allotStatus !=null ">
 				and o.allot_status = #{allotStatus}
 			</if>
-			<if test="startTime !=null ">
-			    and DATE_FORMAT(o.delivery_order_time,'%Y-%m-%d') &gt;= #{startTime}
+			<if test="startDate !=null ">
+			    and DATE_FORMAT(o.create_time,'%Y-%m-%d') &gt;= #{startDate}
 			</if>
-			<if test="endTime !=null ">
-			    and DATE_FORMAT(o.delivery_order_time,'%Y-%m-%d') &lt;= #{endTime}
+			<if test="endDate !=null ">
+			    and DATE_FORMAT(o.create_time,'%Y-%m-%d') &lt;= #{endDate}
 			</if>
 		</where>
 		order by o.update_time desc

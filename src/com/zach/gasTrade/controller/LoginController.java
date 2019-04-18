@@ -294,7 +294,7 @@ public class LoginController extends CommonController {
 		String loginName = param.get("loginName");
 		String password = param.get("password");
 
-		filterMask.setLoginName(loginName);
+		filterMask.setPhoneNumber(loginName);
 
 		String wxOpenId = this.getWxOpenId(request);
 

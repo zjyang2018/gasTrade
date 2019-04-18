@@ -309,6 +309,8 @@ public class LoginController extends CommonController {
 				result.setMsg("密码不正确");
 				return result;
 			}
+			deliveryUserVo.setWxOpenId(wxOpenId);
+			deliveryUserService.update(deliveryUserVo);
 			if (user == null) {
 				user = new UserDto();
 				user.setUserType("2");

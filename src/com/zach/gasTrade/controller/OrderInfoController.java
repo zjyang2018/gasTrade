@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.common.enums.TimeUnit;
 import com.common.utils.DateTimeUtils;
 import com.common.utils.StringUtil;
 import com.zach.gasTrade.common.Constants;
@@ -924,6 +925,17 @@ public class OrderInfoController extends CommonController {
 
 			orderInfoService.update(orderInfoVo);
 
+			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+			deliveryUserVo.setId(orderInfoVo.getAllotDeliveryId());
+			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);
+			if (deliveryUser == null) {
+				throw new RuntimeException("派送库存修改失败");
+			}
+			int stockQty = deliveryUser.getStockQty() == null ? 0 : deliveryUser.getStockQty();
+			deliveryUser.setStockQty(stockQty - 1);
+			deliveryUser.setUpdateTime(nowTime);
+			deliveryUserService.update(deliveryUser);
+
 		} catch (RuntimeException e) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg(e.getMessage());
@@ -1146,6 +1158,18 @@ public class OrderInfoController extends CommonController {
 			if (orderInfoVo == null) {
 				throw new RuntimeException("该订单不存在," + orderId);
 			}
+			// 接单时间不超过2小时，派送员不能确认签收
+			Date deliveryTime = DateTimeUtils.addDateTime(orderInfoVo.getDeliveryOrderTime(), TimeUnit.HOUR, 2);
+			if (nowTime.before(deliveryTime)) {
+				new RuntimeException("接单时间不超过2小时，派送员不能确认签收");
+			}
+
+			orderInfoVo.setDeliveryCompleteTime(nowTime);
+			orderInfoVo.setOrderStatus("60");
+			orderInfoVo.setUpdateTime(nowTime);
+
+			orderInfoService.update(orderInfoVo);
+
 			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
 			deliveryUserVo.setId(orderInfoVo.getAllotDeliveryId());
 			DeliveryUserVo deliveryUser = deliveryUserService.getDeliveryUserBySelective(deliveryUserVo);

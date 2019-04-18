@@ -1161,7 +1161,7 @@ public class OrderInfoController extends CommonController {
 			// 接单时间不超过2小时，派送员不能确认签收
 			Date deliveryTime = DateTimeUtils.addDateTime(orderInfoVo.getDeliveryOrderTime(), TimeUnit.HOUR, 2);
 			if (nowTime.before(deliveryTime)) {
-				new RuntimeException("接单时间不超过2小时，派送员不能确认签收");
+				throw new RuntimeException("接单时间不超过2小时，派送员不能确认签收");
 			}
 
 			orderInfoVo.setDeliveryCompleteTime(nowTime);

@@ -359,7 +359,7 @@ public class DeliveryUserController extends CommonController {
 				throw new RuntimeException("该用户非派送员," + this.getWxOpenId(request));
 			}
 			filterMask.setId(user.getDeliveryUser().getId());
-			filterMask.setStockQty(Integer.getInteger(stockQty));
+			filterMask.setStockQty(Integer.valueOf(stockQty));
 			deliveryUserService.update(filterMask);
 
 		} catch (RuntimeException e) {

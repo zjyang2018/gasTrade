@@ -182,7 +182,7 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 		if (customerUser != null && deliveryUser != null) {
 			user.setUserType("4");
 		} else if (customerUser == null && deliveryUser == null) {
-			return null;
+			user.setUserType("3");
 		}
 		return user;
 	}

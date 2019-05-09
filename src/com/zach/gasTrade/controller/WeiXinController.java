@@ -89,6 +89,7 @@ public class WeiXinController extends CommonController {
 				returnData.put("openId", wxOpenId);
 				returnData.put("userType", user.getUserType());
 				result.setData(returnData);
+				logger.info("获取到微信授权wxOpenId:" + wxOpenId + "然后结果为:" + JSON.toJSONString(returnData));
 				return result;
 			}
 

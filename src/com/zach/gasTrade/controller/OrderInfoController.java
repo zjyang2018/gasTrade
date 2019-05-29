@@ -854,6 +854,11 @@ public class OrderInfoController extends CommonController {
 		String customerUserId = user.getCustomerUser().getId();
 
 		String status = param.get("status");
+		// 微信公众号缓存问题
+		String type = param.get("type");
+		if (StringUtil.isNotNullAndNotEmpty(type)) {
+			status = type;
+		}
 		if (StringUtil.isNullOrEmpty(customerUserId)) {
 			result.setCode(Constants.FAILURE);
 			result.setMsg("客户编号不能为空");

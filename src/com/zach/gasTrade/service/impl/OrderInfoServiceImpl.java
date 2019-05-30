@@ -200,8 +200,8 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 		orderInfoVo.setPayStatus("10");
 		// 订单状态:10-未支付,20-已支付,30-已分配,40-已接单,50-派送中,60-派送完成
 		orderInfoVo.setOrderStatus("10");
-		orderInfoVo.setLatitude(customerUser.getLongitude());
-		orderInfoVo.setLongitude(customerUser.getLatitude());
+		orderInfoVo.setLatitude(customerUser.getLatitude());
+		orderInfoVo.setLongitude(customerUser.getLongitude());
 		orderInfoVo.setCustomerAddress(customerUser.getAddress());
 		Date now = new Date();
 		orderInfoVo.setCreateTime(now);
@@ -332,61 +332,66 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	public int update(OrderInfoVo orderInfoVo) {
 		Date nowTime = new Date();
 		orderInfoVo.setUpdateTime(nowTime);
-		orderInfoDao.update(orderInfoVo);
-		if ("50".equals(orderInfoVo.getOrderStatus()) || "60".equals(orderInfoVo.getOrderStatus())) {
-			OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
-			orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
-			OrderDeliveryRecordVo recordVo = orderDeliveryRecordDao
-					.getOrderDeliveryRecordBySelective(orderDeliveryRecordVo);
-			if (recordVo != null) {
-				if ("50".equals(orderInfoVo.getOrderStatus())) {
-					recordVo.setAcceptTime(orderInfoVo.getDeliveryOrderTime());
-					recordVo.setDeliveryTime(orderInfoVo.getDeliveryOrderTime());
+		try {
+			orderInfoDao.update(orderInfoVo);
+			if ("50".equals(orderInfoVo.getOrderStatus()) || "60".equals(orderInfoVo.getOrderStatus())) {
+				OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
+				orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
+				OrderDeliveryRecordVo recordVo = orderDeliveryRecordDao
+						.getOrderDeliveryRecordBySelective(orderDeliveryRecordVo);
+				if (recordVo != null) {
+					if ("50".equals(orderInfoVo.getOrderStatus())) {
+						recordVo.setAcceptTime(orderInfoVo.getDeliveryOrderTime());
+						recordVo.setDeliveryTime(orderInfoVo.getDeliveryOrderTime());
 
-					// 推送微信消息-派送通知(客户)
-					this.pushWeiXinMessge("20", orderInfoVo);
-				} else if ("60".equals(orderInfoVo.getOrderStatus())) {
-					recordVo.setCompleteTime(orderInfoVo.getDeliveryCompleteTime());
+						// 推送微信消息-派送通知(客户)
+						this.pushWeiXinMessge("20", orderInfoVo);
+					} else if ("60".equals(orderInfoVo.getOrderStatus())) {
+						recordVo.setCompleteTime(orderInfoVo.getDeliveryCompleteTime());
 
-					// 推送微信消息-派送通知(客户)
-					this.pushWeiXinMessge("30", orderInfoVo);
+						// 推送微信消息-派送通知(客户)
+						this.pushWeiXinMessge("30", orderInfoVo);
+					}
+					orderDeliveryRecordDao.update(recordVo);
 				}
-				orderDeliveryRecordDao.update(recordVo);
-			}
-		} else if ("30".equals(orderInfoVo.getOrderStatus())) {
-			OrderDeliveryRecordVo param = new OrderDeliveryRecordVo();
-			param.setOrderId(orderInfoVo.getOrderId());
-			OrderDeliveryRecordVo recordVo = orderDeliveryRecordDao.getOrderDeliveryRecordBySelective(param);
-			if (recordVo != null) {
-				return 1;
-			}
-			// 添加订单派送记录
-			OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
-			orderDeliveryRecordVo.setId(SerialGenerator.getUUID());
-			orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
-			orderDeliveryRecordVo.setAllotTime(nowTime);
-			String endLocation = orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude();
-			orderDeliveryRecordVo.setEndLocation(endLocation);
-			// orderDeliveryRecordVo.setMoveLocation(moveLocation);
-
-			ProductVo productVo = new ProductVo();
-			productVo.setProductId(orderInfoVo.getProductId());
-			ProductVo product = productDao.getProductBySelective(productVo);
-			String startLocationAddress = product.getBusinessAddress();
-			if (StringUtil.isNull(startLocationAddress)) {
-				JSONObject jSONObject = MapHelper.addressToLocation(startLocationAddress);
-				if (jSONObject != null) {
-					String lng = jSONObject.getString("lng");
-					String lat = jSONObject.getString("lat");
-					orderDeliveryRecordVo.setStartLocation(lat + "," + lng);
+			} else if ("30".equals(orderInfoVo.getOrderStatus())) {
+				OrderDeliveryRecordVo param = new OrderDeliveryRecordVo();
+				param.setOrderId(orderInfoVo.getOrderId());
+				OrderDeliveryRecordVo recordVo = orderDeliveryRecordDao.getOrderDeliveryRecordBySelective(param);
+				if (recordVo != null) {
+					return 1;
 				}
+				// 添加订单派送记录
+				OrderDeliveryRecordVo orderDeliveryRecordVo = new OrderDeliveryRecordVo();
+				orderDeliveryRecordVo.setId(SerialGenerator.getUUID());
+				orderDeliveryRecordVo.setOrderId(orderInfoVo.getOrderId());
+				orderDeliveryRecordVo.setAllotTime(nowTime);
+				String endLocation = orderInfoVo.getLatitude() + "," + orderInfoVo.getLongitude();
+				orderDeliveryRecordVo.setEndLocation(endLocation);
+				// orderDeliveryRecordVo.setMoveLocation(moveLocation);
+
+				ProductVo productVo = new ProductVo();
+				productVo.setProductId(orderInfoVo.getProductId());
+				ProductVo product = productDao.getProductBySelective(productVo);
+				String startLocationAddress = product.getBusinessAddress();
+				if (StringUtil.isNull(startLocationAddress)) {
+					JSONObject jSONObject = MapHelper.addressToLocation(startLocationAddress);
+					if (jSONObject != null) {
+						String lng = jSONObject.getString("lng");
+						String lat = jSONObject.getString("lat");
+						orderDeliveryRecordVo.setStartLocation(lat + "," + lng);
+					}
+				}
+
+				orderDeliveryRecordVo.setCreateTime(nowTime);
+				orderDeliveryRecordDao.save(orderDeliveryRecordVo);
+
+				// 推送微信消息-派送通知(客户)
+				this.pushWeiXinMessge("10", orderInfoVo);
 			}
-
-			orderDeliveryRecordVo.setCreateTime(nowTime);
-			orderDeliveryRecordDao.save(orderDeliveryRecordVo);
-
-			// 推送微信消息-派送通知(客户)
-			this.pushWeiXinMessge("10", orderInfoVo);
+		} catch (Exception e) {
+			logger.error("订单信息修改失败," + JSON.toJSONString(orderInfoVo), e);
+			throw new RuntimeException("订单信息修改失败");
 		}
 
 		return 1;

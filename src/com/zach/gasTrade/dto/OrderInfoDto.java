@@ -26,8 +26,8 @@ public class OrderInfoDto extends PaginatedHelper implements java.io.Serializabl
 	/**
 	 * 支付时间
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private java.util.Date payTime;
 	/**
 	 * 分配状态:10-未分配，20-已分配
@@ -36,8 +36,8 @@ public class OrderInfoDto extends PaginatedHelper implements java.io.Serializabl
 	/**
 	 * 分配时间
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private java.util.Date allotTime;
 	/**
 	 * 派送员姓名
@@ -50,14 +50,14 @@ public class OrderInfoDto extends PaginatedHelper implements java.io.Serializabl
 	/**
 	 * 接单派送时间
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private java.util.Date deliveryOrderTime;
 	/**
 	 * 派送完成时间
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private java.util.Date deliveryCompleteTime;
 	/**
 	 * 客户姓名
@@ -87,8 +87,8 @@ public class OrderInfoDto extends PaginatedHelper implements java.io.Serializabl
 	/**
 	 * updateTime
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private java.util.Date updateTime;
 
 	// getter setter方法

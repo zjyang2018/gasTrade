@@ -284,7 +284,7 @@ public class DeliveryLocationHistoryController extends CommonController {
 					filterMask.setDeliveryUserId(deliveryUser.getId());
 					filterMask.setLongitude(longitude);
 					filterMask.setLatitude(latitude);
-					filterMask.setLocation(longitude + "," + latitude);
+					filterMask.setLocation(latitude + "," + longitude);
 					deliveryLocationHistoryService.save(filterMask);
 				}
 			} else if ("GET".equals(request.getMethod().toUpperCase())) {

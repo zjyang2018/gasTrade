@@ -52,6 +52,7 @@ import com.zach.gasTrade.vo.DeliveryUserVo;
 import com.zach.gasTrade.vo.OrderDeliveryRecordVo;
 import com.zach.gasTrade.vo.OrderInfoVo;
 import com.zach.gasTrade.vo.ProductVo;
+import com.zach.safety.service.MsgService;
 
 @Service("orderInfoService")
 public class OrderInfoServiceImpl implements OrderInfoService {
@@ -80,6 +81,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 
 	@Autowired
 	private OrderDeliveryRecordDao orderDeliveryRecordDao;
+
+	@Autowired
+	private MsgService msgService;
 
 	/**
 	 * 总数
@@ -589,6 +593,15 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 				templateMessage.setTemplateData(msgData);
 				// 推送消息
 				WeiXinUtils.pushWeiXinMsg(access.getAccessToken(), templateMessage);
+			} else if ("10".equals(messgeType)) {
+				DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
+				deliveryUserVo.setId(orderInfoVo.getAllotDeliveryId());
+				deliveryUserVo = this.deliveryUserDao.getDeliveryUserBySelective(deliveryUserVo);
+				if (deliveryUserVo == null) {
+					throw new RuntimeException("派送员信息查询不到," + orderInfoVo.getAllotDeliveryId());
+				}
+				String text = "您有新的待派送订单需要处理，如不能接单派送请联系平台管理人员另作安排，谢谢！";
+				msgService.sendMsg(deliveryUserVo.getPhoneNumber(), text);
 			}
 		} catch (RuntimeException e) {
 			logger.error("微信支付成功通知推送失败,推送参数:" + JSON.toJSONString(templateMessage), e);

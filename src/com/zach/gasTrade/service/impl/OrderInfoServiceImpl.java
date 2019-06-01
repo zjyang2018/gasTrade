@@ -601,7 +601,7 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 					throw new RuntimeException("派送员信息查询不到," + orderInfoVo.getAllotDeliveryId());
 				}
 				String text = "您有新的待派送订单需要处理，如不能接单派送请联系平台管理人员另作安排，谢谢！";
-				msgService.sendMsg(deliveryUserVo.getPhoneNumber(), text);
+				msgService.sendMsgText(deliveryUserVo.getPhoneNumber(), text);
 			}
 		} catch (RuntimeException e) {
 			logger.error("微信支付成功通知推送失败,推送参数:" + JSON.toJSONString(templateMessage), e);

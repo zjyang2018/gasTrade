@@ -198,6 +198,12 @@
 			<if test="orderStatus !=null ">
 				and order_status = #{orderStatus}
 			</if>
+			<if test="orderStatusList !=null ">
+			    and order_status in 
+			    <foreach collection="orderStatusList" index="index" item="item" open="(" separator="," close=")">
+			        #{item}
+				</foreach>
+			</if>
 			<if test="remark !=null ">
 				and remark = #{remark}
 			</if>
@@ -322,7 +328,12 @@
 			<if test="orderStatus !=null ">
 				and order_status = #{orderStatus}
 			</if>
-
+			<if test="orderStatusList !=null ">
+			    and order_status in 
+			    <foreach collection="orderStatusList" index="index" item="item" open="(" separator="," close=")">
+			        #{item}
+				</foreach>
+			</if>
 		</where>
 		order by o.update_time desc
 		limit #{startIndex},#{pageSize}

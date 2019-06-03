@@ -7,6 +7,7 @@
 package com.zach.gasTrade.vo;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -49,8 +50,8 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 	/**
 	 * 支付时间
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private java.util.Date payTime;
 	/**
 	 * 分配状态:10-未分配，20-已分配
@@ -59,8 +60,8 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 	/**
 	 * 分配时间
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private java.util.Date allotTime;
 	/**
 	 * 派送员ID
@@ -105,14 +106,14 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 	/**
 	 * createTime
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private java.util.Date createTime;
 	/**
 	 * updateTime
 	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private java.util.Date updateTime;
 
 	/**
@@ -145,6 +146,8 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 	private String startCreateTime;
 
 	private String endCreateTime;
+
+	private List<String> orderStatusList;
 
 	// getter setter方法
 
@@ -386,6 +389,14 @@ public class OrderInfoVo extends PaginatedHelper implements java.io.Serializable
 
 	public void setEndCreateTime(String endCreateTime) {
 		this.endCreateTime = endCreateTime;
+	}
+
+	public List<String> getOrderStatusList() {
+		return orderStatusList;
+	}
+
+	public void setOrderStatusList(List<String> orderStatusList) {
+		this.orderStatusList = orderStatusList;
 	}
 
 }

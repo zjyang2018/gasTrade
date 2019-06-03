@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -879,6 +880,12 @@ public class OrderInfoController extends CommonController {
 			} else if ("3".equals(status)) {
 				// 已完成
 				filterMask.setOrderStatus("60");
+			} else if ("4".equals(status)) {
+				// 已支付，未派送
+				List<String> orderStatusList = new ArrayList<String>();
+				orderStatusList.add("20");
+				orderStatusList.add("30");
+				filterMask.setOrderStatusList(orderStatusList);
 			}
 			logger.info("公众号——客户端——我的订单,处理参数为:" + JSON.toJSONString(filterMask));
 			total = orderInfoService.getOrderInfoNumber(filterMask);

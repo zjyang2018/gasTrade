@@ -289,7 +289,7 @@ public class DeliveryLocationHistoryController extends CommonController {
 				} else if ("subscribe".equalsIgnoreCase(xmlMap.get("event"))) {
 					String toUserName = xmlMap.get("tousername");
 					String fromWXOpenId = xmlMap.get("fromusername");
-					String content = "感谢您关注我们,我们将为您提供最贴心的服务!";
+					String content = "优惠活动请点击云池生活-->云池.优惠券";
 
 					Map<String, String> param = new HashMap<String, String>();
 					param.put("FromUserName", toUserName);

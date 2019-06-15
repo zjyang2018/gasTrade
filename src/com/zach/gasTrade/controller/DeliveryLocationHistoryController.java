@@ -286,7 +286,7 @@ public class DeliveryLocationHistoryController extends CommonController {
 					filterMask.setLatitude(latitude);
 					filterMask.setLocation(latitude + "," + longitude);
 					deliveryLocationHistoryService.save(filterMask);
-				} else if ("subscribe".equalsIgnoreCase(xmlMap.get("msgtype"))) {
+				} else if ("subscribe".equalsIgnoreCase(xmlMap.get("event"))) {
 					String toUserName = xmlMap.get("tousername");
 					String fromWXOpenId = xmlMap.get("fromusername");
 					String content = "感谢您关注我们,我们将为您提供最贴心的服务!";

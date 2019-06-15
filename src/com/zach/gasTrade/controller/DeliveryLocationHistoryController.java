@@ -299,6 +299,8 @@ public class DeliveryLocationHistoryController extends CommonController {
 					param.put("Content", content);
 					String responseStr = XmlUtilCommon.toXml(param);
 
+					logger.info("微信关注返回消息:" + responseStr);
+
 					return responseStr;
 				}
 			} else if ("GET".equals(request.getMethod().toUpperCase())) {

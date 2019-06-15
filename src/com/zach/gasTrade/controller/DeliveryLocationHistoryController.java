@@ -6,6 +6,7 @@
 
 package com.zach.gasTrade.controller;
 
+import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -234,7 +235,10 @@ public class DeliveryLocationHistoryController extends CommonController {
 		// 随机字符串
 		String echostr = request.getParameter("echostr");
 
+		PrintWriter out = null;
 		try {
+			out = response.getWriter();
+
 			if ("POST".equals(request.getMethod().toUpperCase())) {
 				ServletInputStream in = request.getInputStream();
 				String xmlStr = XmlUtilCommon.getXmlString(in);
@@ -286,6 +290,22 @@ public class DeliveryLocationHistoryController extends CommonController {
 					filterMask.setLatitude(latitude);
 					filterMask.setLocation(latitude + "," + longitude);
 					deliveryLocationHistoryService.save(filterMask);
+				} else if ("subscribe".equalsIgnoreCase(xmlMap.get("msgtype"))) {
+					String toUserName = xmlMap.get("tousername");
+					String fromWXOpenId = xmlMap.get("fromusername");
+					String content = "感谢您关注我们,我们将为您提供最贴心的服务!";
+
+					Map<String, String> param = new HashMap<String, String>();
+					param.put("FromUserName", toUserName);
+					param.put("ToUserName", fromWXOpenId);
+					param.put("MsgType", "text");
+					param.put("CreateTime", String.valueOf(new Date().getTime()));
+					param.put("Content", content);
+					String responseStr = XmlUtilCommon.toXml(param);
+
+					out.print(responseStr);
+
+					return null;
 				}
 			} else if ("GET".equals(request.getMethod().toUpperCase())) {
 				// 微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp，nonce参数
@@ -299,6 +319,10 @@ public class DeliveryLocationHistoryController extends CommonController {
 			logger.error("系统异常," + e.getMessage(), e);
 		} catch (Exception e) {
 			logger.error("系统异常,请稍后重试", e);
+		} finally {
+			if (out != null) {
+				out.close();
+			}
 		}
 		return "success";
 	}

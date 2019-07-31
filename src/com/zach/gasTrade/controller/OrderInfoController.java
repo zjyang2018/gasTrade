@@ -496,9 +496,13 @@ public class OrderInfoController extends CommonController {
 		String deliveryName = param.get("deliveryName");
 		String editReason = param.get("editReason");
 		try {
+			OrderInfoVo order = new OrderInfoVo();
+			order.setOrderId(orderId);
+			OrderInfoVo orderInfoVo = orderInfoService.getOrderInfoBySelective(order);
+			if (orderInfoVo == null) {
+				throw new RuntimeException("该订单不存在," + orderId);
+			}
 
-			OrderInfoVo orderInfoVo = new OrderInfoVo();
-			orderInfoVo.setOrderId(orderId);
 			orderInfoVo.setEditReason(editReason);
 
 			DeliveryUserVo deliveryUserVo = new DeliveryUserVo();
@@ -509,6 +513,14 @@ public class OrderInfoController extends CommonController {
 			}
 			orderInfoVo.setAllotDeliveryId(deliveryUser.getId());
 			orderInfoVo.setAllotTime(new Date());
+			if ("20".equals(orderInfoVo.getOrderStatus())) {
+				orderInfoVo.setAllotStatus("20");
+				orderInfoVo.setOrderStatus("30");
+			} else if ("50".equals(orderInfoVo.getOrderStatus())) {
+				throw new RuntimeException("该订单已派送中");
+			} else if ("60".equals(orderInfoVo.getOrderStatus())) {
+				throw new RuntimeException("该订单已完成");
+			}
 
 			orderInfoService.update(orderInfoVo);
 

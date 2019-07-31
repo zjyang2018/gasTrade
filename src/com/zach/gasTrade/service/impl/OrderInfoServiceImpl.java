@@ -278,6 +278,10 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 					deliveryUserId = bean.getDeliveryUserId();
 					moveLocation = bean.getLatitude() + "," + bean.getLongitude();
 				}
+				if (distance == 0.0) {
+					deliveryUserId = bean.getDeliveryUserId();
+					moveLocation = bean.getLatitude() + "," + bean.getLongitude();
+				}
 			}
 			if (deliveryUserId.isEmpty()) {
 				return;
